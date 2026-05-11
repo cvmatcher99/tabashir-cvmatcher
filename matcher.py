@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from database import Candidate, JobDescription, Skill
 from schemas import MatchResult, JobMatchResult, CandidateOut, JobOut, SkillOut
+from ai_service import explain_match
 
 logger = logging.getLogger(__name__)
 
@@ -206,8 +207,19 @@ def recommend_jobs(candidate: Candidate, db: Session) -> List[JobMatchResult]:
             100.0,
         ), 2)
 
-        exp_ok = candidate.years_experience >= (job.min_experience or 0)
-        edu_ok = _edu_rank(candidate.education_level) >= _edu_rank(job.education_required)
+        why = explain_match(
+            candidate_name=candidate.full_name,
+            candidate_skills=cand_skill_names,
+            candidate_exp=candidate.years_experience,
+            candidate_edu=candidate.education_level,
+            job_title=job.title,
+            required_skills=req_skill_names,
+            min_exp=job.min_experience or 0,
+            edu_required=job.education_required,
+            matched=matched,
+            missing=missing,
+            score=total,
+        )
 
         results.append(
             JobMatchResult(
@@ -226,7 +238,7 @@ def recommend_jobs(candidate: Candidate, db: Session) -> List[JobMatchResult]:
                 education_score=round(raw_edu, 2),
                 matched_skills=matched,
                 missing_skills=missing,
-                why=_build_why(total, matched, missing, exp_ok, edu_ok),
+                why=why,
             )
         )
 

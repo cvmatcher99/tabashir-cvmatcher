@@ -75,6 +75,38 @@ def root():
     return HTMLResponse("<h1>CV Matcher API</h1><p>Visit <a href='/docs'>/docs</a></p>")
 
 
+@app.get("/admin", response_class=HTMLResponse, include_in_schema=False)
+def admin_panel():
+    html_path = STATIC_DIR / "admin.html"
+    if html_path.exists():
+        return HTMLResponse(content=html_path.read_text(encoding="utf-8"))
+    return HTMLResponse("<h1>Admin panel not found.</h1>", status_code=404)
+
+
+# ── Admin Auth & Seed ─────────────────────────────────────────────────────────
+from pydantic import BaseModel as _BaseModel
+
+class _PasswordIn(_BaseModel):
+    password: str
+
+
+@app.post("/admin/verify", tags=["Admin"], summary="Verify admin password")
+def admin_verify(payload: _PasswordIn):
+    expected = os.getenv("ADMIN_PASSWORD", "admin1234")
+    if payload.password != expected:
+        raise HTTPException(status_code=401, detail="Incorrect password.")
+    return {"ok": True}
+
+
+@app.post("/admin/seed-jobs", tags=["Admin"], summary="Load 8 sample job descriptions")
+def admin_seed_jobs(db: Session = Depends(get_db)):
+    from seed_jobs import seed
+    created = seed(db_session=db)
+    msg = f"{created} sample job(s) added." if created else "All sample jobs already exist."
+    logger.info("Seed jobs: %s", msg)
+    return {"created": created, "message": msg}
+
+
 # ── Helpers ────────────────────────────────────────────────────────────────────
 def _get_or_create_skill(db: Session, name: str) -> Skill:
     name = name.lower().strip()

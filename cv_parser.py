@@ -189,6 +189,11 @@ def _regex_parse(text: str) -> Dict[str, Any]:
     }
 
 
+def _claude_parse(text: str) -> Optional[Dict[str, Any]]:
+    from ai_service import parse_cv_claude
+    return parse_cv_claude(text)
+
+
 def _openai_parse(text: str) -> Optional[Dict[str, Any]]:
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
@@ -239,7 +244,7 @@ def parse_cv(content: bytes, filename: str) -> Dict[str, Any]:
             "skills": [], "years_experience": 0.0,
             "education_level": None, "education_field": None, "raw_text": "",
         }
-    parsed = _openai_parse(raw_text) or _regex_parse(raw_text)
+    parsed = _claude_parse(raw_text) or _openai_parse(raw_text) or _regex_parse(raw_text)
     parsed["raw_text"] = raw_text
     logger.info(
         "Parsed '%s': name=%s skills=%d exp=%.1f yrs",
