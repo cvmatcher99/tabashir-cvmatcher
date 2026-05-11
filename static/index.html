@@ -7,696 +7,861 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-  :root { --sidebar: #1e1b4b; --accent: #6366f1; }
-  body { font-family: 'Inter', system-ui, sans-serif; }
-  .sidebar-item { @apply flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-200 hover:bg-white/10 hover:text-white cursor-pointer transition-all; }
-  .sidebar-item.active { @apply bg-white/15 text-white font-semibold; }
-  .stat-card { @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex items-center gap-4; }
-  .badge { @apply inline-flex items-center bg-indigo-50 text-indigo-700 text-xs font-medium px-2.5 py-1 rounded-full mr-1 mb-1; }
-  .badge-green { @apply inline-flex items-center bg-emerald-50 text-emerald-700 text-xs font-medium px-2.5 py-1 rounded-full mr-1 mb-1; }
-  .badge-red   { @apply inline-flex items-center bg-red-50 text-red-600 text-xs font-medium px-2.5 py-1 rounded-full mr-1 mb-1; }
-  .btn-primary { @apply bg-indigo-600 text-white px-4 py-2.5 rounded-xl font-semibold hover:bg-indigo-700 transition disabled:opacity-40 disabled:cursor-not-allowed; }
-  .btn-ghost   { @apply text-indigo-600 border border-indigo-200 px-4 py-2 rounded-xl text-sm font-medium hover:bg-indigo-50 transition; }
-  .card { @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4; }
-  .input { @apply border border-gray-200 rounded-xl px-3 py-2.5 text-sm w-full focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 outline-none transition; }
-  .score-bar { transition: width 0.8s cubic-bezier(.4,0,.2,1); }
-  .avatar { @apply w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0; }
-  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-  .fade-in { animation: fadeIn .25s ease; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:#f0f2f7;color:#0f172a;min-height:100vh;display:flex}
+
+/* ── Sidebar ─────────────────────── */
+.sidebar{width:240px;min-height:100vh;background:linear-gradient(160deg,#1e1b4b 0%,#312e81 100%);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh}
+.sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.logo-title{color:#fff;font-size:17px;font-weight:700;letter-spacing:-.3px}
+.logo-sub{color:#a5b4fc;font-size:11px;margin-top:1px}
+.sidebar-nav{flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:2px}
+.nav-item{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;color:#a5b4fc;cursor:pointer;font-size:13.5px;font-weight:500;transition:all .18s;position:relative;user-select:none}
+.nav-item:hover{background:rgba(255,255,255,.08);color:#e0e7ff}
+.nav-item.active{background:rgba(99,102,241,.25);color:#fff;font-weight:600}
+.nav-item.active::before{content:'';position:absolute;left:0;top:22%;bottom:22%;width:3px;background:#818cf8;border-radius:0 3px 3px 0}
+.nav-item svg{width:17px;height:17px;flex-shrink:0;stroke-width:1.8}
+.nav-badge{margin-left:auto;background:#4f46e5;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;line-height:1.6}
+.sidebar-footer{padding:14px 16px;border-top:1px solid rgba(255,255,255,.08)}
+.sidebar-footer a{display:flex;align-items:center;gap:8px;color:#a5b4fc;font-size:12.5px;text-decoration:none;transition:color .18s}
+.sidebar-footer a:hover{color:#e0e7ff}
+
+/* ── Main ────────────────────────── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:#fff;border-bottom:1px solid #e8ecf0;padding:16px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;box-shadow:0 1px 0 #e8ecf0}
+.topbar-title{font-size:18px;font-weight:700;color:#0f172a}
+.topbar-sub{font-size:12px;color:#94a3b8;margin-top:2px}
+.refresh-btn{width:34px;height:34px;border-radius:8px;border:1.5px solid #e2e8f0;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#64748b;transition:all .18s}
+.refresh-btn:hover{border-color:#818cf8;color:#4f46e5;background:#eef2ff}
+.content{padding:28px 32px;flex:1;overflow-y:auto}
+
+/* ── Panes ───────────────────────── */
+.pane{display:none}
+.pane.active{display:block;animation:fadeUp .22s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Cards ───────────────────────── */
+.card{background:#fff;border-radius:16px;border:1px solid #e8ecf0;box-shadow:0 1px 4px rgba(15,23,42,.04);padding:22px;margin-bottom:16px;transition:box-shadow .2s}
+.card:hover{box-shadow:0 4px 16px rgba(15,23,42,.08)}
+.card-title{font-size:14px;font-weight:600;color:#374151;margin-bottom:16px}
+
+/* ── Stat cards ──────────────────── */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:#fff;border-radius:16px;border:1px solid #e8ecf0;padding:20px;display:flex;align-items:center;gap:14px;box-shadow:0 1px 4px rgba(15,23,42,.04);transition:box-shadow .2s}
+.stat-card:hover{box-shadow:0 4px 16px rgba(15,23,42,.08)}
+.stat-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stat-icon svg{width:22px;height:22px}
+.stat-num{font-size:26px;font-weight:800;line-height:1;color:#0f172a}
+.stat-label{font-size:12px;color:#94a3b8;margin-top:3px;font-weight:500}
+
+/* ── Tags / badges ───────────────── */
+.tag{display:inline-flex;align-items:center;background:#eef2ff;color:#4338ca;font-size:11px;font-weight:500;padding:4px 10px;border-radius:20px;margin:2px 3px;white-space:nowrap;letter-spacing:.1px}
+.tag-green{background:#ecfdf5;color:#065f46}
+.tag-red{background:#fef2f2;color:#b91c1c}
+.tag-gray{background:#f1f5f9;color:#475569}
+
+/* ── Inputs ──────────────────────── */
+.inp{width:100%;padding:9px 13px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:13.5px;outline:none;transition:border-color .18s,box-shadow .18s;background:#fafafa;color:#0f172a}
+.inp:focus{border-color:#818cf8;box-shadow:0 0 0 3px rgba(129,140,248,.15);background:#fff}
+.inp::placeholder{color:#94a3b8}
+
+/* ── Buttons ─────────────────────── */
+.btn{padding:9px 18px;border-radius:10px;font-size:13.5px;font-weight:600;cursor:pointer;border:none;transition:all .18s;display:inline-flex;align-items:center;gap:7px;line-height:1}
+.btn-primary{background:#4f46e5;color:#fff}
+.btn-primary:hover{background:#4338ca;transform:translateY(-1px);box-shadow:0 4px 14px rgba(79,70,229,.35)}
+.btn-primary:active{transform:translateY(0);box-shadow:none}
+.btn-primary:disabled{background:#a5b4fc;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-success{background:#059669;color:#fff}
+.btn-success:hover{background:#047857;transform:translateY(-1px);box-shadow:0 4px 14px rgba(5,150,105,.3)}
+.btn-ghost{background:#fff;color:#475569;border:1.5px solid #e2e8f0}
+.btn-ghost:hover{border-color:#818cf8;color:#4f46e5;background:#f5f3ff}
+.btn-danger{background:#fff;color:#dc2626;border:1.5px solid #fecaca;font-size:12px}
+.btn-danger:hover{background:#fef2f2;border-color:#fca5a5}
+
+/* ── Avatar ──────────────────────── */
+.avatar{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0;letter-spacing:-.5px}
+
+/* ── Score bars ──────────────────── */
+.score-track{background:#f1f5f9;border-radius:99px;height:6px;overflow:hidden;margin-top:4px}
+.score-fill{height:100%;border-radius:99px;transition:width .9s cubic-bezier(.4,0,.2,1);width:0}
+
+/* ── Drop zone ───────────────────── */
+.drop-zone{border:2px dashed #c7d2fe;border-radius:16px;padding:48px 24px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;background:#fafbff;text-align:center}
+.drop-zone:hover,.drop-zone.over{border-color:#6366f1;background:#eef2ff}
+
+/* ── Modal ───────────────────────── */
+.modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:50;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)}
+.modal-bg.open{display:flex;animation:fadeUp .2s ease}
+.modal-box{background:#fff;border-radius:20px;box-shadow:0 24px 60px rgba(15,23,42,.2);max-width:500px;width:100%;max-height:90vh;overflow-y:auto;padding:28px;animation:fadeUp .2s ease}
+
+/* ── Toast ───────────────────────── */
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(15,23,42,.15);transform:translateY(12px);opacity:0;transition:all .25s cubic-bezier(.4,0,.2,1);z-index:100;pointer-events:none;max-width:320px}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* ── Misc ────────────────────────── */
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:99px}::-webkit-scrollbar-thumb:hover{background:#cbd5e1}
+.divider{height:1px;background:#f1f5f9;margin:16px 0}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.label{font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
 </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex">
+<body>
 
-<!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
-<aside class="w-64 min-h-screen flex-shrink-0 flex flex-col" style="background:var(--sidebar)">
-  <div class="px-5 py-6 border-b border-white/10">
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 bg-indigo-500 rounded-xl flex items-center justify-center text-xl">📄</div>
+<!-- ── SVG icon defs (hidden) ─────────────────────────────────────────────── -->
+<svg style="display:none">
+  <symbol id="ic-dashboard" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="ic-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></symbol>
+  <symbol id="ic-users" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></symbol>
+  <symbol id="ic-briefcase" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="12"/></symbol>
+  <symbol id="ic-target" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="ic-docs" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></symbol>
+  <symbol id="ic-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></symbol>
+  <symbol id="ic-download" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+  <symbol id="ic-search" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+  <symbol id="ic-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></symbol>
+  <symbol id="ic-link" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></symbol>
+  <symbol id="ic-star" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
+  <symbol id="ic-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></symbol>
+  <symbol id="ic-close" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+  <symbol id="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></symbol>
+  <symbol id="ic-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></symbol>
+  <symbol id="ic-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.82a19.79 19.79 0 01-3.07-8.67A2 2 0 012 1h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 8.91a16 16 0 006.36 6.36l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></symbol>
+  <symbol id="ic-map" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+  <symbol id="ic-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+  <symbol id="ic-graduation" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></symbol>
+</svg>
+
+<!-- ── Sidebar ──────────────────────────────────────────────────────────────── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div style="display:flex;align-items:center;gap:11px">
+      <div class="logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </div>
       <div>
-        <div class="text-white font-bold text-lg leading-tight">CV Matcher</div>
-        <div class="text-indigo-300 text-xs">v2.0</div>
+        <div class="logo-title">CV Matcher</div>
+        <div class="logo-sub">v2.0</div>
       </div>
     </div>
   </div>
 
-  <nav class="flex-1 p-3 space-y-1 mt-2">
-    <div class="sidebar-item active" onclick="showPane('dashboard')" id="nav-dashboard">
-      <span class="text-lg">📊</span><span>Dashboard</span>
+  <nav class="sidebar-nav">
+    <div class="nav-item active" id="nav-dashboard" onclick="showPane('dashboard')">
+      <svg><use href="#ic-dashboard"/></svg> Dashboard
     </div>
-    <div class="sidebar-item" onclick="showPane('upload')" id="nav-upload">
-      <span class="text-lg">⬆️</span><span>Upload CV</span>
+    <div class="nav-item" id="nav-upload" onclick="showPane('upload')">
+      <svg><use href="#ic-upload"/></svg> Upload CV
     </div>
-    <div class="sidebar-item" onclick="showPane('candidates')" id="nav-candidates">
-      <span class="text-lg">👥</span><span>Candidates</span>
-      <span id="badge-candidates" class="ml-auto bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full hidden"></span>
+    <div class="nav-item" id="nav-candidates" onclick="showPane('candidates')">
+      <svg><use href="#ic-users"/></svg> Candidates
+      <span class="nav-badge" id="badge-c" style="display:none"></span>
     </div>
-    <div class="sidebar-item" onclick="showPane('jobs')" id="nav-jobs">
-      <span class="text-lg">💼</span><span>Jobs</span>
-      <span id="badge-jobs" class="ml-auto bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full hidden"></span>
+    <div class="nav-item" id="nav-jobs" onclick="showPane('jobs')">
+      <svg><use href="#ic-briefcase"/></svg> Jobs
+      <span class="nav-badge" id="badge-j" style="display:none"></span>
     </div>
-    <div class="sidebar-item" onclick="showPane('match')" id="nav-match">
-      <span class="text-lg">🎯</span><span>Match</span>
+    <div class="nav-item" id="nav-match" onclick="showPane('match')">
+      <svg><use href="#ic-target"/></svg> Match
     </div>
   </nav>
 
-  <div class="p-4 border-t border-white/10">
-    <a href="/docs" target="_blank" class="flex items-center gap-2 text-indigo-300 hover:text-white text-sm transition">
-      <span>📖</span><span>API Docs</span>
+  <div class="sidebar-footer">
+    <a href="/docs" target="_blank">
+      <svg width="14" height="14"><use href="#ic-docs"/></svg> API Documentation
     </a>
   </div>
 </aside>
 
-<!-- ── Main ──────────────────────────────────────────────────────────────── -->
-<main class="flex-1 overflow-auto">
-
-<!-- Top Bar -->
-<header class="bg-white border-b border-gray-100 px-8 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
-  <div>
-    <h1 id="page-title" class="text-xl font-bold text-gray-800">Dashboard</h1>
-    <p id="page-sub" class="text-xs text-gray-400 mt-0.5">Overview of your recruitment pipeline</p>
-  </div>
-  <button onclick="refreshCurrent()" class="text-gray-400 hover:text-indigo-600 transition text-xl" title="Refresh">↻</button>
-</header>
-
-<div class="p-8">
-
-<!-- ══ DASHBOARD ══════════════════════════════════════════════════════════ -->
-<section id="pane-dashboard" class="fade-in">
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-    <div class="stat-card">
-      <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center text-2xl">👥</div>
-      <div><div class="text-2xl font-bold text-gray-800" id="stat-candidates">—</div><div class="text-sm text-gray-500">Candidates</div></div>
-    </div>
-    <div class="stat-card">
-      <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-2xl">💼</div>
-      <div><div class="text-2xl font-bold text-gray-800" id="stat-jobs">—</div><div class="text-sm text-gray-500">Jobs</div></div>
-    </div>
-    <div class="stat-card">
-      <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center text-2xl">⭐</div>
-      <div><div class="text-2xl font-bold text-gray-800" id="stat-exp">—</div><div class="text-sm text-gray-500">Avg Experience</div></div>
-    </div>
-    <div class="stat-card">
-      <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center text-2xl">🏷️</div>
-      <div><div class="text-2xl font-bold text-gray-800" id="stat-skills">—</div><div class="text-sm text-gray-500">Unique Skills</div></div>
-    </div>
-  </div>
-
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <div class="card">
-      <h3 class="font-bold text-gray-700 mb-4">Top Skills</h3>
-      <div id="skills-chart-container" class="relative h-64">
-        <canvas id="skills-chart"></canvas>
-        <p id="skills-chart-empty" class="text-gray-400 text-sm text-center pt-20 hidden">No data yet</p>
-      </div>
-    </div>
-    <div class="card">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="font-bold text-gray-700">Recent Uploads</h3>
-        <button onclick="showPane('candidates')" class="text-xs text-indigo-600 hover:underline">View all →</button>
-      </div>
-      <div id="recent-list"><p class="text-gray-400 text-sm">No candidates yet.</p></div>
-    </div>
-  </div>
-</section>
-
-<!-- ══ UPLOAD ══════════════════════════════════════════════════════════════ -->
-<section id="pane-upload" class="hidden fade-in max-w-2xl">
-  <div class="card">
-    <h2 class="font-bold text-gray-700 mb-4">Upload CV</h2>
-    <div id="drop-zone"
-         class="flex flex-col items-center justify-center border-2 border-dashed border-indigo-200 rounded-2xl p-12 cursor-pointer hover:border-indigo-500 hover:bg-indigo-50 transition bg-gray-50"
-         ondragover="event.preventDefault()" ondrop="handleDrop(event)"
-         onclick="document.getElementById('cv-file').click()">
-      <div class="text-5xl mb-3">📎</div>
-      <p class="font-semibold text-gray-600">Drag & drop or <span class="text-indigo-600">click to browse</span></p>
-      <p class="text-sm text-gray-400 mt-1">PDF or DOCX — max 10 MB</p>
-      <p id="file-name" class="mt-3 text-sm font-medium text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full hidden"></p>
-    </div>
-    <input id="cv-file" type="file" accept=".pdf,.docx,.doc" class="hidden" onchange="onFileSelect(event)"/>
-
-    <div id="upload-progress" class="mt-4 hidden">
-      <div class="flex items-center gap-3 mb-2">
-        <div class="animate-spin w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full"></div>
-        <span class="text-sm text-gray-600">Parsing CV…</span>
-      </div>
-      <div class="w-full bg-gray-100 rounded-full h-1.5">
-        <div class="bg-indigo-600 h-1.5 rounded-full animate-pulse" style="width:70%"></div>
-      </div>
-    </div>
-
-    <button onclick="uploadCV()" id="upload-btn" disabled
-            class="btn-primary mt-4 w-full text-center">
-      Upload & Parse
-    </button>
-    <div id="upload-msg" class="mt-3 text-sm"></div>
-  </div>
-
-  <div id="parsed-card" class="card hidden">
-    <div class="flex items-center gap-2 mb-4">
-      <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600">✓</div>
-      <h3 class="font-bold text-gray-700">Parsed Successfully</h3>
-    </div>
-    <div id="parsed-content"></div>
-  </div>
-</section>
-
-<!-- ══ CANDIDATES ══════════════════════════════════════════════════════════ -->
-<section id="pane-candidates" class="hidden fade-in">
-  <!-- Search & Filters -->
-  <div class="card mb-4">
-    <div class="flex flex-wrap gap-3">
-      <input id="search-q" class="input flex-1 min-w-48" placeholder="🔍  Search by name or email…" oninput="debounceSearch()"/>
-      <input id="search-skill" class="input w-44" placeholder="Filter by skill…" oninput="debounceSearch()"/>
-      <input id="search-exp" type="number" min="0" step="1" class="input w-36" placeholder="Min exp (yrs)" oninput="debounceSearch()"/>
-      <select id="search-edu" class="input w-40" onchange="loadCandidates()">
-        <option value="">Any education</option>
-        <option>Bachelor</option><option>Master</option>
-        <option>PhD</option><option>Associate</option>
-      </select>
-      <button onclick="loadCandidates()" class="btn-ghost">↻ Refresh</button>
-    </div>
-  </div>
-  <div id="candidates-count" class="text-sm text-gray-400 mb-3"></div>
-  <div id="candidates-list"><p class="text-gray-400">Loading…</p></div>
-</section>
-
-<!-- ══ JOBS ════════════════════════════════════════════════════════════════ -->
-<section id="pane-jobs" class="hidden fade-in">
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<!-- ── Main ─────────────────────────────────────────────────────────────────── -->
+<div class="main">
+  <header class="topbar">
     <div>
-      <div class="card">
-        <h3 class="font-bold text-gray-700 mb-4">Add New Job</h3>
-        <div class="space-y-3">
-          <input id="job-title" class="input" placeholder="Job title e.g. Senior Python Developer"/>
-          <textarea id="job-desc" rows="6" class="input resize-none" placeholder="Paste the full job description here…" oninput="previewSkills()"></textarea>
-          <div class="flex gap-3">
-            <input id="job-exp" type="number" min="0" step="0.5" class="input" placeholder="Min experience (years)"/>
-            <select id="job-edu" class="input">
-              <option value="">Any education</option>
-              <option>High School</option><option>Associate</option>
-              <option>Bachelor</option><option>Master</option><option>PhD</option>
-            </select>
-          </div>
-          <div id="skill-preview" class="hidden">
-            <p class="text-xs text-gray-500 mb-1">Skills detected from description:</p>
-            <div id="skill-preview-tags"></div>
-          </div>
-          <button onclick="createJob()" class="btn-primary w-full">Create Job</button>
-          <div id="job-msg" class="text-sm"></div>
+      <div class="topbar-title" id="pg-title">Dashboard</div>
+      <div class="topbar-sub" id="pg-sub">Overview of your recruitment pipeline</div>
+    </div>
+    <button class="refresh-btn" onclick="refreshCurrent()" title="Refresh">
+      <svg width="15" height="15"><use href="#ic-refresh"/></svg>
+    </button>
+  </header>
+
+  <div class="content">
+
+  <!-- ══ DASHBOARD ════════════════════════════════════════════════════════ -->
+  <div class="pane active" id="pane-dashboard">
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#eef2ff">
+          <svg style="stroke:#4f46e5"><use href="#ic-users"/></svg>
+        </div>
+        <div>
+          <div class="stat-num" id="s-candidates">—</div>
+          <div class="stat-label">Candidates</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#f5f3ff">
+          <svg style="stroke:#7c3aed"><use href="#ic-briefcase"/></svg>
+        </div>
+        <div>
+          <div class="stat-num" id="s-jobs">—</div>
+          <div class="stat-label">Jobs</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#ecfdf5">
+          <svg style="stroke:#059669"><use href="#ic-clock"/></svg>
+        </div>
+        <div>
+          <div class="stat-num" id="s-exp">—</div>
+          <div class="stat-label">Avg Experience</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fffbeb">
+          <svg style="stroke:#d97706"><use href="#ic-tag"/></svg>
+        </div>
+        <div>
+          <div class="stat-num" id="s-skills">—</div>
+          <div class="stat-label">Unique Skills</div>
         </div>
       </div>
     </div>
-    <div>
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="font-bold text-gray-700">Existing Jobs</h3>
-        <button onclick="loadJobs()" class="text-xs text-indigo-600 hover:underline">↻ Refresh</button>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div class="card">
+        <div class="card-title">Top Skills by Candidate Count</div>
+        <div style="position:relative;height:240px">
+          <canvas id="skills-chart"></canvas>
+          <p id="chart-empty" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:13px;display:none">No skills data yet</p>
+        </div>
       </div>
-      <div id="jobs-list"><p class="text-gray-400">Loading…</p></div>
+      <div class="card">
+        <div class="section-header">
+          <div class="card-title" style="margin:0">Recent Uploads</div>
+          <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px" onclick="showPane('candidates')">View all</button>
+        </div>
+        <div id="recent-list" style="margin-top:4px"></div>
+      </div>
     </div>
   </div>
-</section>
 
-<!-- ══ MATCH ═══════════════════════════════════════════════════════════════ -->
-<section id="pane-match" class="hidden fade-in">
-  <div class="card max-w-2xl mb-6">
-    <h3 class="font-bold text-gray-700 mb-3">Select Job to Match Against</h3>
-    <div class="flex gap-3">
-      <select id="match-job-select" class="input flex-1">
-        <option value="">— choose a job —</option>
-      </select>
-      <button onclick="runMatch()" class="bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-emerald-700 transition">
-        Find Matches
+  <!-- ══ UPLOAD ════════════════════════════════════════════════════════════ -->
+  <div class="pane" id="pane-upload" style="max-width:640px">
+    <div class="card">
+      <div class="card-title">Upload Candidate CV</div>
+      <div class="drop-zone" id="drop-zone"
+           ondragover="event.preventDefault();this.classList.add('over')"
+           ondragleave="this.classList.remove('over')"
+           ondrop="handleDrop(event)"
+           onclick="document.getElementById('cv-file').click()">
+        <div style="width:52px;height:52px;background:#eef2ff;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:14px">
+          <svg width="24" height="24" style="stroke:#4f46e5"><use href="#ic-upload"/></svg>
+        </div>
+        <p style="font-weight:600;color:#374151;font-size:14px">Drop your file here, or <span style="color:#4f46e5">browse</span></p>
+        <p style="color:#94a3b8;font-size:12px;margin-top:6px">PDF or DOCX — maximum 10 MB</p>
+        <div id="file-chip" style="display:none;margin-top:12px;background:#eef2ff;color:#4338ca;font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px"></div>
+      </div>
+      <input id="cv-file" type="file" accept=".pdf,.docx,.doc" style="display:none" onchange="onFileSelect(event)"/>
+
+      <div id="upload-progress" style="display:none;margin-top:16px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <div style="width:16px;height:16px;border:2px solid #4f46e5;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite"></div>
+          <span style="font-size:13px;color:#64748b">Parsing CV, please wait…</span>
+        </div>
+        <div style="height:3px;background:#e2e8f0;border-radius:99px;overflow:hidden">
+          <div style="height:100%;background:linear-gradient(90deg,#6366f1,#8b5cf6);border-radius:99px;animation:progress 1.5s ease infinite"></div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button id="upload-btn" class="btn btn-primary" style="flex:1;justify-content:center" disabled onclick="uploadCV()">
+          <svg width="15" height="15"><use href="#ic-upload"/></svg> Upload &amp; Parse
+        </button>
+      </div>
+      <div id="upload-msg" style="margin-top:10px;font-size:13px"></div>
+    </div>
+
+    <div class="card" id="parsed-card" style="display:none">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px">
+        <div style="width:30px;height:30px;background:#ecfdf5;border-radius:8px;display:flex;align-items:center;justify-content:center">
+          <svg width="15" height="15" style="stroke:#059669"><use href="#ic-check"/></svg>
+        </div>
+        <span style="font-weight:700;color:#065f46;font-size:14px">Parsed Successfully</span>
+      </div>
+      <div id="parsed-content"></div>
+    </div>
+  </div>
+
+  <!-- ══ CANDIDATES ════════════════════════════════════════════════════════ -->
+  <div class="pane" id="pane-candidates">
+    <div class="card" style="padding:16px">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <div style="position:relative;flex:1;min-width:200px">
+          <svg width="14" height="14" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);stroke:#94a3b8"><use href="#ic-search"/></svg>
+          <input id="q-name" class="inp" style="padding-left:34px" placeholder="Search by name or email…" oninput="debounce()"/>
+        </div>
+        <input id="q-skill" class="inp" style="width:160px" placeholder="Filter by skill…" oninput="debounce()"/>
+        <input id="q-exp"   class="inp" style="width:130px" type="number" min="0" step="1" placeholder="Min exp (yrs)" oninput="debounce()"/>
+        <select id="q-edu" class="inp" style="width:150px" onchange="loadCandidates()">
+          <option value="">Any education</option>
+          <option>Bachelor</option><option>Master</option>
+          <option>PhD</option><option>Associate</option>
+        </select>
+        <button class="btn btn-ghost" onclick="loadCandidates()">
+          <svg width="13" height="13"><use href="#ic-refresh"/></svg> Refresh
+        </button>
+      </div>
+    </div>
+    <div id="c-count" style="font-size:12px;color:#94a3b8;margin-bottom:12px;margin-left:2px"></div>
+    <div id="c-list"></div>
+  </div>
+
+  <!-- ══ JOBS ══════════════════════════════════════════════════════════════ -->
+  <div class="pane" id="pane-jobs">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+      <div>
+        <div class="card">
+          <div class="card-title">Add New Job</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div>
+              <div class="label">Job Title</div>
+              <input id="j-title" class="inp" placeholder="e.g. Senior Python Developer"/>
+            </div>
+            <div>
+              <div class="label">Description</div>
+              <textarea id="j-desc" class="inp" rows="6" style="resize:none" placeholder="Paste the full job description here…" oninput="previewJobSkills()"></textarea>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div>
+                <div class="label">Min Experience</div>
+                <input id="j-exp" class="inp" type="number" min="0" step="0.5" placeholder="Years"/>
+              </div>
+              <div>
+                <div class="label">Education Required</div>
+                <select id="j-edu" class="inp">
+                  <option value="">Any</option>
+                  <option>High School</option><option>Associate</option>
+                  <option>Bachelor</option><option>Master</option><option>PhD</option>
+                </select>
+              </div>
+            </div>
+            <div id="job-skill-preview" style="display:none">
+              <div class="label">Detected Skills</div>
+              <div id="job-skill-tags"></div>
+            </div>
+            <button class="btn btn-primary" style="justify-content:center" onclick="createJob()">
+              Create Job
+            </button>
+            <div id="j-msg" style="font-size:13px"></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-header">
+          <span style="font-size:14px;font-weight:600;color:#374151">Existing Jobs</span>
+          <button class="btn btn-ghost" onclick="loadJobs()" style="padding:6px 12px;font-size:12px">
+            <svg width="12" height="12"><use href="#ic-refresh"/></svg> Refresh
+          </button>
+        </div>
+        <div id="j-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MATCH ═════════════════════════════════════════════════════════════ -->
+  <div class="pane" id="pane-match">
+    <div class="card" style="max-width:600px">
+      <div class="card-title">Match Candidates to Job</div>
+      <div style="display:flex;gap:10px">
+        <select id="m-job" class="inp" style="flex:1">
+          <option value="">Select a job description…</option>
+        </select>
+        <button class="btn btn-success" onclick="runMatch()">
+          <svg width="14" height="14"><use href="#ic-target"/></svg> Find Matches
+        </button>
+      </div>
+    </div>
+    <div id="m-results"></div>
+  </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ── Modal ─────────────────────────────────────────────────────────────────── -->
+<div class="modal-bg" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px">
+      <h2 style="font-size:18px;font-weight:700" id="modal-name"></h2>
+      <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;color:#94a3b8;padding:2px">
+        <svg width="18" height="18"><use href="#ic-close"/></svg>
       </button>
     </div>
-  </div>
-  <div id="match-results"></div>
-</section>
-
-</div><!-- /p-8 -->
-</main>
-
-<!-- ── Toast ──────────────────────────────────────────────────────────────── -->
-<div id="toast" class="fixed bottom-6 right-6 text-sm px-4 py-3 rounded-xl shadow-xl hidden transition-all max-w-xs"></div>
-
-<!-- ── Candidate Detail Modal ─────────────────────────────────────────────── -->
-<div id="modal" class="fixed inset-0 bg-black/40 z-50 hidden flex items-center justify-center p-4" onclick="closeModal(event)">
-  <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-auto p-6" onclick="event.stopPropagation()">
-    <div class="flex items-start justify-between mb-4">
-      <h2 class="text-xl font-bold text-gray-800" id="modal-name"></h2>
-      <button onclick="document.getElementById('modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
-    </div>
-    <div id="modal-content"></div>
+    <div id="modal-body"></div>
   </div>
 </div>
 
+<!-- ── Toast ──────────────────────────────────────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<style>
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes progress{0%{width:0;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0;margin-left:100%}}
+</style>
+
 <script>
 const API = '';
-let skillsChart = null;
+let chart = null;
 let searchTimer = null;
-let currentPane = 'dashboard';
+let activePane = 'dashboard';
 
-// ── Pane navigation ────────────────────────────────────────────────────────
-const pageMeta = {
-  dashboard:  { title: 'Dashboard',   sub: 'Overview of your recruitment pipeline' },
-  upload:     { title: 'Upload CV',   sub: 'Parse and store a new candidate CV' },
-  candidates: { title: 'Candidates',  sub: 'Browse and search all stored candidates' },
-  jobs:       { title: 'Jobs',        sub: 'Manage job descriptions' },
-  match:      { title: 'Match',       sub: 'Rank candidates against a job description' },
+const META = {
+  dashboard:  {title:'Dashboard',   sub:'Overview of your recruitment pipeline'},
+  upload:     {title:'Upload CV',   sub:'Parse and add a new candidate'},
+  candidates: {title:'Candidates',  sub:'Browse, search, and manage candidates'},
+  jobs:       {title:'Jobs',        sub:'Create and manage job descriptions'},
+  match:      {title:'Match',       sub:'Rank candidates against a job description'},
 };
 
+// ── Navigation ──────────────────────────────────────────────────────────────
 function showPane(name) {
-  ['dashboard','upload','candidates','jobs','match'].forEach(p => {
-    document.getElementById(`pane-${p}`).classList.add('hidden');
-    document.getElementById(`nav-${p}`).classList.remove('active');
-  });
-  const pane = document.getElementById(`pane-${name}`);
-  pane.classList.remove('hidden');
-  pane.classList.remove('fade-in');
-  void pane.offsetWidth;
-  pane.classList.add('fade-in');
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(`pane-${name}`).classList.add('active');
   document.getElementById(`nav-${name}`).classList.add('active');
-  document.getElementById('page-title').textContent = pageMeta[name].title;
-  document.getElementById('page-sub').textContent   = pageMeta[name].sub;
-  currentPane = name;
+  document.getElementById('pg-title').textContent = META[name].title;
+  document.getElementById('pg-sub').textContent   = META[name].sub;
+  activePane = name;
   if (name === 'dashboard')  loadDashboard();
   if (name === 'candidates') loadCandidates();
   if (name === 'jobs')       loadJobs();
-  if (name === 'match')      { loadJobs(); loadMatchJobs(); }
+  if (name === 'match')      { loadJobs(); populateJobSelect(); }
 }
+function refreshCurrent() { showPane(activePane); }
 
-function refreshCurrent() { showPane(currentPane); }
-
-// ── Toast ──────────────────────────────────────────────────────────────────
+// ── Toast ────────────────────────────────────────────────────────────────────
 function toast(msg, ok = true) {
   const el = document.getElementById('toast');
   el.textContent = msg;
-  el.className = `fixed bottom-6 right-6 text-sm px-4 py-3 rounded-xl shadow-xl transition-all max-w-xs ${ok ? 'bg-emerald-700' : 'bg-red-600'} text-white`;
-  el.classList.remove('hidden');
+  el.style.background = ok ? '#065f46' : '#991b1b';
+  el.style.color = '#fff';
+  el.classList.add('show');
   clearTimeout(el._t);
-  el._t = setTimeout(() => el.classList.add('hidden'), 3500);
+  el._t = setTimeout(() => el.classList.remove('show'), 3400);
 }
 
-// ── Avatar colour ──────────────────────────────────────────────────────────
-const COLOURS = ['bg-indigo-500','bg-purple-500','bg-emerald-500','bg-rose-500','bg-amber-500','bg-cyan-500'];
-function avatarColor(name) { return COLOURS[name.charCodeAt(0) % COLOURS.length]; }
-function initials(name) { return name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase(); }
+// ── Avatar ───────────────────────────────────────────────────────────────────
+const COLORS = ['#4f46e5','#7c3aed','#059669','#dc2626','#d97706','#0284c7','#db2777'];
+function avatarColor(name) { return COLORS[(name||'?').charCodeAt(0) % COLORS.length]; }
+function initials(name) { return (name||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase(); }
 
-// ── Dashboard ──────────────────────────────────────────────────────────────
+// ── Dashboard ────────────────────────────────────────────────────────────────
 async function loadDashboard() {
   try {
     const res = await fetch(`${API}/stats`);
+    if (!res.ok) throw new Error('stats failed');
     const d = await res.json();
 
-    document.getElementById('stat-candidates').textContent = d.total_candidates;
-    document.getElementById('stat-jobs').textContent       = d.total_jobs;
-    document.getElementById('stat-exp').textContent        = d.avg_experience + ' yrs';
-    document.getElementById('stat-skills').textContent     = d.total_skills;
+    animateCount('s-candidates', d.total_candidates ?? 0);
+    animateCount('s-jobs',       d.total_jobs ?? 0);
+    document.getElementById('s-exp').textContent    = ((d.avg_experience ?? 0)) + ' yrs';
+    animateCount('s-skills',     d.total_skills ?? 0);
 
-    document.getElementById(`badge-candidates`).textContent = d.total_candidates;
-    document.getElementById(`badge-candidates`).classList.toggle('hidden', d.total_candidates === 0);
-    document.getElementById(`badge-jobs`).textContent = d.total_jobs;
-    document.getElementById(`badge-jobs`).classList.toggle('hidden', d.total_jobs === 0);
+    const bc = document.getElementById('badge-c');
+    const bj = document.getElementById('badge-j');
+    if ((d.total_candidates ?? 0) > 0) { bc.textContent = d.total_candidates; bc.style.display = ''; }
+    if ((d.total_jobs ?? 0) > 0)       { bj.textContent = d.total_jobs;       bj.style.display = ''; }
 
     // Chart
-    if (d.top_skills.length) {
-      document.getElementById('skills-chart-empty').classList.add('hidden');
-      const labels = d.top_skills.map(s => s.name);
-      const data   = d.top_skills.map(s => s.count);
-      if (skillsChart) skillsChart.destroy();
-      skillsChart = new Chart(document.getElementById('skills-chart'), {
+    if ((d.top_skills || []).length) {
+      document.getElementById('chart-empty').style.display = 'none';
+      if (chart) chart.destroy();
+      chart = new Chart(document.getElementById('skills-chart'), {
         type: 'bar',
         data: {
-          labels,
+          labels: d.top_skills.map(s => s.name),
           datasets: [{
-            data, backgroundColor: '#6366f1', borderRadius: 6, borderSkipped: false,
+            data: d.top_skills.map(s => s.count),
+            backgroundColor: 'rgba(99,102,241,.15)',
+            borderColor: '#6366f1',
+            borderWidth: 2,
+            borderRadius: 6, borderSkipped: false,
           }]
         },
         options: {
           indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { x: { grid: { display: false }, ticks: { stepSize: 1 } }, y: { grid: { display: false } } }
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.raw} candidate${ctx.raw!==1?'s':''}` }}},
+          scales: {
+            x: { grid: { color: '#f1f5f9' }, ticks: { stepSize: 1, color: '#94a3b8', font: { size: 11 } } },
+            y: { grid: { display: false }, ticks: { color: '#374151', font: { size: 11 } } }
+          }
         }
       });
     } else {
-      document.getElementById('skills-chart-empty').classList.remove('hidden');
+      document.getElementById('chart-empty').style.display = 'flex';
     }
 
     // Recent
     const el = document.getElementById('recent-list');
-    if (!d.recent_candidates.length) {
-      el.innerHTML = '<p class="text-gray-400 text-sm">No candidates yet. <button onclick="showPane(\'upload\')" class="text-indigo-600 hover:underline">Upload one →</button></p>';
+    if (!(d.recent_candidates || []).length) {
+      el.innerHTML = `<p style="color:#94a3b8;font-size:13px">No candidates yet. <span style="color:#4f46e5;cursor:pointer;text-decoration:underline" onclick="showPane('upload')">Upload one</span></p>`;
     } else {
       el.innerHTML = d.recent_candidates.map(c => `
-        <div class="flex items-center gap-3 py-2.5 border-b border-gray-50 last:border-0 cursor-pointer hover:bg-gray-50 rounded-lg px-1 transition" onclick="openCandidateModal(${c.id})">
-          <div class="avatar ${avatarColor(c.name)}">${initials(c.name)}</div>
-          <div class="flex-1 min-w-0">
-            <p class="font-medium text-gray-800 text-sm truncate">${c.name}</p>
-            <p class="text-xs text-gray-400">${c.email || '—'}</p>
+        <div onclick="openModal(${c.id})" style="display:flex;align-items:center;gap:12px;padding:10px 8px;border-radius:10px;cursor:pointer;transition:background .15s" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+          <div class="avatar" style="background:${avatarColor(c.name)}">${initials(c.name)}</div>
+          <div style="flex:1;min-width:0">
+            <p style="font-weight:600;font-size:13px;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.name}</p>
+            <p style="font-size:11px;color:#94a3b8;margin-top:1px">${c.email || '—'}</p>
           </div>
-          <div class="text-right text-xs text-gray-400">
+          <div style="text-align:right;font-size:11px;color:#94a3b8;flex-shrink:0">
             <div>${c.skills} skills</div>
             <div>${c.exp} yrs</div>
           </div>
         </div>
       `).join('');
     }
-  } catch(e) { toast('Failed to load dashboard', false); }
-}
-
-// ── Upload ─────────────────────────────────────────────────────────────────
-let selectedFile = null;
-function onFileSelect(e) { setFile(e.target.files[0]); }
-function handleDrop(e) { e.preventDefault(); setFile(e.dataTransfer.files[0]); }
-function setFile(f) {
-  if (!f) return;
-  selectedFile = f;
-  const fn = document.getElementById('file-name');
-  fn.textContent = f.name;
-  fn.classList.remove('hidden');
-  document.getElementById('upload-btn').disabled = false;
-}
-
-async function uploadCV() {
-  if (!selectedFile) return;
-  const btn = document.getElementById('upload-btn');
-  const msg = document.getElementById('upload-msg');
-  btn.disabled = true;
-  btn.textContent = 'Parsing…';
-  msg.innerHTML = '';
-  document.getElementById('upload-progress').classList.remove('hidden');
-
-  const fd = new FormData();
-  fd.append('file', selectedFile);
-  try {
-    const res = await fetch(`${API}/candidates/upload`, { method: 'POST', body: fd });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Upload failed');
-    msg.innerHTML = `<span class="text-emerald-600 font-medium">✓ ${data.full_name} added successfully!</span>`;
-    renderParsedCard(data);
-    toast(`${data.full_name} added!`);
-    selectedFile = null;
-    document.getElementById('file-name').classList.add('hidden');
-  } catch(err) {
-    msg.innerHTML = `<span class="text-red-500">✗ ${err.message}</span>`;
-    toast(err.message, false);
-  } finally {
-    btn.disabled = true;
-    btn.textContent = 'Upload & Parse';
-    document.getElementById('upload-progress').classList.add('hidden');
+  } catch(e) {
+    document.getElementById('s-exp').textContent = '0 yrs';
+    ['s-candidates','s-jobs','s-skills'].forEach(id => document.getElementById(id).textContent = '0');
   }
 }
 
-function renderParsedCard(c) {
-  document.getElementById('parsed-card').classList.remove('hidden');
+function animateCount(id, target) {
+  const el = document.getElementById(id);
+  const dur = 600, fps = 60, steps = dur / (1000 / fps);
+  let i = 0;
+  const timer = setInterval(() => {
+    i++;
+    el.textContent = Math.round(target * Math.min(i / steps, 1));
+    if (i >= steps) clearInterval(timer);
+  }, 1000 / fps);
+}
+
+// ── Upload ───────────────────────────────────────────────────────────────────
+let selFile = null;
+function onFileSelect(e) { setFile(e.target.files[0]); }
+function handleDrop(e) { e.preventDefault(); document.getElementById('drop-zone').classList.remove('over'); setFile(e.dataTransfer.files[0]); }
+function setFile(f) {
+  if (!f) return; selFile = f;
+  const chip = document.getElementById('file-chip');
+  chip.textContent = f.name; chip.style.display = '';
+  document.getElementById('upload-btn').disabled = false;
+}
+async function uploadCV() {
+  if (!selFile) return;
+  const btn = document.getElementById('upload-btn');
+  const msg = document.getElementById('upload-msg');
+  btn.disabled = true; btn.textContent = 'Parsing…';
+  msg.innerHTML = '';
+  document.getElementById('upload-progress').style.display = '';
+  const fd = new FormData(); fd.append('file', selFile);
+  try {
+    const res  = await fetch(`${API}/candidates/upload`, { method:'POST', body:fd });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Upload failed');
+    msg.innerHTML = `<span style="color:#059669;font-weight:600">Candidate "${data.full_name}" added successfully.</span>`;
+    renderParsed(data);
+    toast(`${data.full_name} added!`);
+    selFile = null;
+    document.getElementById('file-chip').style.display = 'none';
+  } catch(err) {
+    msg.innerHTML = `<span style="color:#dc2626">${err.message}</span>`;
+    toast(err.message, false);
+  } finally {
+    btn.disabled = true; btn.innerHTML = '<svg width="15" height="15"><use href="#ic-upload"/></svg> Upload & Parse';
+    document.getElementById('upload-progress').style.display = 'none';
+  }
+}
+
+function renderParsed(c) {
+  document.getElementById('parsed-card').style.display = '';
   document.getElementById('parsed-content').innerHTML = `
-    <div class="flex items-center gap-3 mb-4">
-      <div class="avatar w-14 h-14 text-lg ${avatarColor(c.full_name)}">${initials(c.full_name)}</div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
+      <div class="avatar" style="width:52px;height:52px;border-radius:14px;font-size:16px;background:${avatarColor(c.full_name)}">${initials(c.full_name)}</div>
       <div>
-        <h3 class="font-bold text-gray-800 text-lg">${c.full_name}</h3>
-        <p class="text-sm text-gray-500">${c.email || '—'}</p>
+        <div style="font-size:17px;font-weight:700;color:#0f172a">${c.full_name}</div>
+        <div style="font-size:13px;color:#64748b;margin-top:2px">${c.email || '—'}</div>
       </div>
     </div>
-    <div class="grid grid-cols-2 gap-3 text-sm mb-4">
-      ${row('📞 Phone', c.phone)}
-      ${row('📍 Location', c.location)}
-      ${row('🎓 Education', [c.education_level, c.education_field].filter(Boolean).join(' · '))}
-      ${row('⏱ Experience', c.years_experience + ' years')}
-      ${c.linkedin ? row('🔗 LinkedIn', `<a href="https://${c.linkedin}" target="_blank" class="text-indigo-600 hover:underline">${c.linkedin}</a>`) : ''}
-      ${c.github   ? row('🐙 GitHub', `<a href="https://${c.github}" target="_blank" class="text-indigo-600 hover:underline">${c.github}</a>`) : ''}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      ${ic_row('ic-phone','Phone',c.phone)}
+      ${ic_row('ic-map','Location',c.location)}
+      ${ic_row('ic-graduation','Education',[c.education_level,c.education_field].filter(Boolean).join(' · '))}
+      ${ic_row('ic-clock','Experience',c.years_experience+' years')}
+      ${c.linkedin ? ic_row('ic-link','LinkedIn',`<a href="https://${c.linkedin}" target="_blank" style="color:#4f46e5">${c.linkedin}</a>`) : ''}
+      ${c.github   ? ic_row('ic-link','GitHub',`<a href="https://${c.github}"   target="_blank" style="color:#4f46e5">${c.github}</a>`) : ''}
     </div>
-    <p class="text-xs text-gray-500 mb-2">Skills detected (${(c.skills||[]).length}):</p>
-    <div>${(c.skills||[]).map(s=>`<span class="badge">${s.name}</span>`).join('') || '<span class="text-gray-400 text-xs">none</span>'}</div>
+    <div class="label">Detected Skills (${(c.skills||[]).length})</div>
+    <div style="margin-top:4px">${renderTags(c.skills||[],'name')}</div>
   `;
 }
-function row(label, val) {
+function ic_row(icon, label, val) {
   if (!val) return '';
-  return `<div class="bg-gray-50 rounded-lg p-2.5"><span class="text-gray-500 text-xs block">${label}</span><span class="font-medium text-gray-800">${val}</span></div>`;
+  return `<div style="background:#f8fafc;border-radius:10px;padding:10px 12px">
+    <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#64748b;margin-bottom:3px">
+      <svg width="11" height="11" style="stroke:#64748b"><use href="#${icon}"/></svg>${label}
+    </div>
+    <div style="font-size:13px;font-weight:500;color:#0f172a">${val}</div>
+  </div>`;
+}
+function renderTags(arr, key) {
+  if (!arr.length) return '<span style="color:#94a3b8;font-size:12px">none detected</span>';
+  return arr.map(s => `<span class="tag">${key ? s[key] : s}</span>`).join('');
 }
 
-// ── Candidates ─────────────────────────────────────────────────────────────
-function debounceSearch() {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(loadCandidates, 350);
-}
+// ── Candidates ───────────────────────────────────────────────────────────────
+function debounce() { clearTimeout(searchTimer); searchTimer = setTimeout(loadCandidates, 350); }
 
 async function loadCandidates() {
-  const el   = document.getElementById('candidates-list');
-  const cnt  = document.getElementById('candidates-count');
-  const q    = document.getElementById('search-q')?.value.trim() || '';
-  const skill= document.getElementById('search-skill')?.value.trim() || '';
-  const exp  = parseFloat(document.getElementById('search-exp')?.value) || 0;
-  const edu  = document.getElementById('search-edu')?.value || '';
-
-  const params = new URLSearchParams();
-  if (q)    params.set('q', q);
-  if (skill)params.set('skill', skill);
-  if (exp)  params.set('min_exp', exp);
-  if (edu)  params.set('education', edu);
-
-  el.innerHTML = '<p class="text-gray-400 text-sm">Loading…</p>';
+  const el  = document.getElementById('c-list');
+  const cnt = document.getElementById('c-count');
+  const p   = new URLSearchParams();
+  const q    = document.getElementById('q-name')?.value.trim();
+  const skill= document.getElementById('q-skill')?.value.trim();
+  const exp  = parseFloat(document.getElementById('q-exp')?.value)||0;
+  const edu  = document.getElementById('q-edu')?.value;
+  if (q)    p.set('q', q);
+  if (skill)p.set('skill', skill);
+  if (exp)  p.set('min_exp', exp);
+  if (edu)  p.set('education', edu);
+  el.innerHTML = '<p style="color:#94a3b8;font-size:13px">Loading…</p>';
   try {
-    const res  = await fetch(`${API}/candidates?${params}`);
+    const res  = await fetch(`${API}/candidates?${p}`);
     const data = await res.json();
     cnt.textContent = `${data.length} candidate${data.length !== 1 ? 's' : ''} found`;
-    if (!data.length) { el.innerHTML = '<p class="text-gray-400">No candidates found.</p>'; return; }
+    if (!data.length) { el.innerHTML = '<p style="color:#94a3b8;font-size:13px">No candidates match your filters.</p>'; return; }
     el.innerHTML = data.map(c => `
-      <div class="card hover:shadow-md transition cursor-pointer" onclick="openCandidateModal(${c.id})">
-        <div class="flex items-start gap-4">
-          <div class="avatar w-12 h-12 text-base ${avatarColor(c.full_name)}">${initials(c.full_name)}</div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-start justify-between gap-2 flex-wrap">
+      <div class="card" style="cursor:pointer" onclick="openModal(${c.id})">
+        <div style="display:flex;align-items:flex-start;gap:14px">
+          <div class="avatar" style="background:${avatarColor(c.full_name)}">${initials(c.full_name)}</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap">
               <div>
-                <h3 class="font-bold text-gray-800">${c.full_name}</h3>
-                <p class="text-sm text-gray-400">${[c.email, c.location].filter(Boolean).join(' · ')}</p>
+                <span style="font-weight:700;font-size:14px;color:#0f172a">${c.full_name}</span>
+                <p style="font-size:12px;color:#94a3b8;margin-top:2px">${[c.email,c.location].filter(Boolean).join('  ·  ')}</p>
               </div>
-              <div class="flex gap-2 text-right text-xs text-gray-500 flex-shrink-0">
-                <span class="bg-indigo-50 text-indigo-700 px-2 py-1 rounded-lg font-medium">${c.years_experience} yrs</span>
-                <span class="bg-purple-50 text-purple-700 px-2 py-1 rounded-lg font-medium">${c.education_level || '—'}</span>
+              <div style="display:flex;gap:6px;flex-shrink:0">
+                <span style="background:#eef2ff;color:#4338ca;font-size:11px;font-weight:600;padding:3px 10px;border-radius:8px">${c.years_experience} yrs</span>
+                <span style="background:#f5f3ff;color:#6d28d9;font-size:11px;font-weight:600;padding:3px 10px;border-radius:8px">${c.education_level||'—'}</span>
               </div>
             </div>
-            <div class="mt-2 flex flex-wrap">
-              ${(c.skills||[]).slice(0,8).map(s=>`<span class="badge">${s.name}</span>`).join('')}
-              ${(c.skills||[]).length > 8 ? `<span class="text-xs text-gray-400 mt-1">+${c.skills.length-8} more</span>` : ''}
-            </div>
+            <div style="margin-top:10px">${renderTags((c.skills||[]).slice(0,8),'name')}${c.skills.length>8?`<span style="font-size:11px;color:#94a3b8">+${c.skills.length-8} more</span>`:''}</div>
           </div>
         </div>
       </div>
     `).join('');
-  } catch(e) { el.innerHTML = `<p class="text-red-500">${e.message}</p>`; }
+  } catch(e) { el.innerHTML = `<p style="color:#dc2626;font-size:13px">${e.message}</p>`; }
 }
 
-async function openCandidateModal(id) {
-  const modal = document.getElementById('modal');
-  modal.classList.remove('hidden');
-  document.getElementById('modal-content').innerHTML = '<p class="text-gray-400">Loading…</p>';
+async function openModal(id) {
+  document.getElementById('modal').classList.add('open');
+  document.getElementById('modal-body').innerHTML = '<p style="color:#94a3b8;font-size:13px">Loading…</p>';
+  document.getElementById('modal-name').textContent = '';
   try {
     const res = await fetch(`${API}/candidates/${id}`);
     const c   = await res.json();
     document.getElementById('modal-name').textContent = c.full_name;
-    document.getElementById('modal-content').innerHTML = `
-      <div class="space-y-3 text-sm mb-4">
-        ${c.email    ? `<div class="flex items-center gap-2 text-gray-600"><span>📧</span>${c.email}</div>` : ''}
-        ${c.phone    ? `<div class="flex items-center gap-2 text-gray-600"><span>📞</span>${c.phone}</div>` : ''}
-        ${c.location ? `<div class="flex items-center gap-2 text-gray-600"><span>📍</span>${c.location}</div>` : ''}
-        ${c.linkedin ? `<div class="flex items-center gap-2"><span>🔗</span><a href="https://${c.linkedin}" target="_blank" class="text-indigo-600 hover:underline">${c.linkedin}</a></div>` : ''}
-        ${c.github   ? `<div class="flex items-center gap-2"><span>🐙</span><a href="https://${c.github}" target="_blank" class="text-indigo-600 hover:underline">${c.github}</a></div>` : ''}
+    document.getElementById('modal-body').innerHTML = `
+      <div style="display:flex;gap:12px;margin-bottom:20px">
+        <div style="flex:1;background:#f8fafc;border-radius:12px;padding:14px;text-align:center">
+          <div style="font-size:24px;font-weight:800;color:#4f46e5">${c.years_experience}</div>
+          <div style="font-size:11px;color:#64748b;margin-top:2px">Years Experience</div>
+        </div>
+        <div style="flex:1;background:#f8fafc;border-radius:12px;padding:14px;text-align:center">
+          <div style="font-size:24px;font-weight:800;color:#7c3aed">${c.skills.length}</div>
+          <div style="font-size:11px;color:#64748b;margin-top:2px">Skills</div>
+        </div>
       </div>
-      <div class="grid grid-cols-2 gap-3 mb-4">
-        <div class="bg-indigo-50 rounded-xl p-3 text-center"><div class="text-2xl font-bold text-indigo-700">${c.years_experience}</div><div class="text-xs text-indigo-500">Years Exp</div></div>
-        <div class="bg-purple-50 rounded-xl p-3 text-center"><div class="text-2xl font-bold text-purple-700">${c.skills.length}</div><div class="text-xs text-purple-500">Skills</div></div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px;font-size:13px">
+        ${c.email    ? `<div style="display:flex;align-items:center;gap:9px;color:#374151"><svg width="14" height="14" style="stroke:#64748b;flex-shrink:0"><use href="#ic-mail"/></svg>${c.email}</div>` : ''}
+        ${c.phone    ? `<div style="display:flex;align-items:center;gap:9px;color:#374151"><svg width="14" height="14" style="stroke:#64748b;flex-shrink:0"><use href="#ic-phone"/></svg>${c.phone}</div>` : ''}
+        ${c.location ? `<div style="display:flex;align-items:center;gap:9px;color:#374151"><svg width="14" height="14" style="stroke:#64748b;flex-shrink:0"><use href="#ic-map"/></svg>${c.location}</div>` : ''}
+        ${c.linkedin ? `<div style="display:flex;align-items:center;gap:9px"><svg width="14" height="14" style="stroke:#4f46e5;flex-shrink:0"><use href="#ic-link"/></svg><a href="https://${c.linkedin}" target="_blank" style="color:#4f46e5">${c.linkedin}</a></div>` : ''}
+        ${c.github   ? `<div style="display:flex;align-items:center;gap:9px"><svg width="14" height="14" style="stroke:#4f46e5;flex-shrink:0"><use href="#ic-link"/></svg><a href="https://${c.github}" target="_blank" style="color:#4f46e5">${c.github}</a></div>` : ''}
+        ${c.education_level ? `<div style="display:flex;align-items:center;gap:9px;color:#374151"><svg width="14" height="14" style="stroke:#64748b;flex-shrink:0"><use href="#ic-graduation"/></svg>${[c.education_level,c.education_field].filter(Boolean).join(' · ')}</div>` : ''}
       </div>
-      ${c.education_level ? `<div class="bg-gray-50 rounded-xl p-3 mb-4 text-sm"><span class="text-gray-500">Education: </span><strong>${[c.education_level,c.education_field].filter(Boolean).join(' · ')}</strong></div>` : ''}
-      <p class="text-xs text-gray-500 mb-2">All Skills:</p>
-      <div>${(c.skills||[]).map(s=>`<span class="badge">${s.name}</span>`).join('')}</div>
-      <div class="mt-4 pt-4 border-t flex justify-end">
-        <button onclick="deleteCandidate(${c.id})" class="text-sm text-red-500 hover:underline">Delete candidate</button>
+      <div class="divider"></div>
+      <div class="label" style="margin-bottom:8px">Skills</div>
+      <div>${renderTags(c.skills,'name')}</div>
+      <div class="divider"></div>
+      <div style="display:flex;justify-content:flex-end">
+        <button class="btn btn-danger" onclick="deleteCandidate(${c.id})">
+          <svg width="13" height="13"><use href="#ic-trash"/></svg> Delete Candidate
+        </button>
       </div>
     `;
-  } catch(e) { document.getElementById('modal-content').innerHTML = `<p class="text-red-500">${e.message}</p>`; }
+  } catch(e) { document.getElementById('modal-body').innerHTML = `<p style="color:#dc2626">${e.message}</p>`; }
 }
 
-function closeModal(e) {
-  if (e.target === document.getElementById('modal'))
-    document.getElementById('modal').classList.add('hidden');
-}
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
 
 async function deleteCandidate(id) {
-  if (!confirm('Delete this candidate?')) return;
+  if (!confirm('Delete this candidate? This cannot be undone.')) return;
   await fetch(`${API}/candidates/${id}`, {method:'DELETE'});
-  document.getElementById('modal').classList.add('hidden');
-  toast('Candidate deleted');
-  loadCandidates();
+  closeModal(); toast('Candidate deleted'); loadCandidates();
 }
 
-// ── Jobs ───────────────────────────────────────────────────────────────────
+// ── Jobs ─────────────────────────────────────────────────────────────────────
 let previewTimer = null;
-function previewSkills() {
+async function previewJobSkills() {
   clearTimeout(previewTimer);
   previewTimer = setTimeout(async () => {
-    const desc = document.getElementById('job-desc').value;
-    if (desc.length < 20) { document.getElementById('skill-preview').classList.add('hidden'); return; }
+    const desc = document.getElementById('j-desc').value;
+    if (desc.length < 20) { document.getElementById('job-skill-preview').style.display = 'none'; return; }
     try {
-      const res = await fetch(`${API}/skills`);
-      const all = await res.json();
-      const text = desc.toLowerCase();
-      const found = all.filter(s => new RegExp('\\b'+s.name.replace(/[+.]/g,'\\$&')+'\\b').test(text));
-      const tags  = document.getElementById('skill-preview-tags');
+      const res  = await fetch(`${API}/skills`);
+      const all  = await res.json();
+      const txt  = desc.toLowerCase();
+      const found = all.filter(s => new RegExp('\\b' + s.name.replace(/[+.]/g,'\\$&') + '\\b').test(txt));
       if (found.length) {
-        tags.innerHTML = found.map(s=>`<span class="badge">${s.name}</span>`).join('');
-        document.getElementById('skill-preview').classList.remove('hidden');
-      } else {
-        document.getElementById('skill-preview').classList.add('hidden');
-      }
+        document.getElementById('job-skill-tags').innerHTML = found.map(s=>`<span class="tag">${s.name}</span>`).join('');
+        document.getElementById('job-skill-preview').style.display = '';
+      } else { document.getElementById('job-skill-preview').style.display = 'none'; }
     } catch(e) {}
   }, 400);
 }
 
 async function loadJobs() {
-  const el = document.getElementById('jobs-list');
+  const el = document.getElementById('j-list');
   if (!el) return;
-  el.innerHTML = '<p class="text-gray-400 text-sm">Loading…</p>';
+  el.innerHTML = '<p style="color:#94a3b8;font-size:13px">Loading…</p>';
   try {
     const res  = await fetch(`${API}/jobs`);
     const data = await res.json();
-    if (!data.length) { el.innerHTML = '<p class="text-gray-400 text-sm">No jobs yet.</p>'; return; }
+    if (!data.length) { el.innerHTML = '<p style="color:#94a3b8;font-size:13px">No jobs yet.</p>'; return; }
     el.innerHTML = data.map(j => `
-      <div class="card hover:shadow-md transition">
-        <div class="flex items-start justify-between gap-2">
-          <div class="flex-1 min-w-0">
-            <h3 class="font-bold text-gray-800">${j.title}</h3>
-            <p class="text-xs text-gray-400 mt-0.5">ID ${j.id} · ${j.min_experience} yrs exp · ${j.education_required || 'any edu'}</p>
+      <div class="card">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+          <div style="flex:1;min-width:0">
+            <p style="font-weight:700;font-size:14px;color:#0f172a">${j.title}</p>
+            <p style="font-size:11px;color:#94a3b8;margin-top:3px">ID ${j.id} &nbsp;·&nbsp; ${j.min_experience} yrs exp &nbsp;·&nbsp; ${j.education_required||'any education'}</p>
           </div>
-          <button onclick="deleteJob(${j.id})" class="text-xs text-red-400 hover:text-red-600 flex-shrink-0">✕</button>
+          <button class="btn btn-danger" onclick="event.stopPropagation();deleteJob(${j.id})" style="flex-shrink:0">
+            <svg width="12" height="12"><use href="#ic-trash"/></svg>
+          </button>
         </div>
-        <p class="text-sm text-gray-500 mt-2 line-clamp-2">${j.description.substring(0,180)}…</p>
-        <div class="mt-2">${(j.required_skills||[]).map(s=>`<span class="badge">${s.name}</span>`).join('')}</div>
+        <p style="font-size:12px;color:#64748b;margin-top:8px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${j.description}</p>
+        <div style="margin-top:10px">${renderTags(j.required_skills||[],'name')}</div>
       </div>
     `).join('');
-  } catch(e) { el.innerHTML = `<p class="text-red-500">${e.message}</p>`; }
+  } catch(e) { el.innerHTML = `<p style="color:#dc2626;font-size:13px">${e.message}</p>`; }
 }
 
-async function loadMatchJobs() {
+async function populateJobSelect() {
   try {
     const res  = await fetch(`${API}/jobs`);
     const data = await res.json();
-    const sel  = document.getElementById('match-job-select');
-    sel.innerHTML = '<option value="">— choose a job —</option>' +
+    const sel  = document.getElementById('m-job');
+    sel.innerHTML = '<option value="">Select a job description…</option>' +
       data.map(j=>`<option value="${j.id}">${j.title} (ID ${j.id})</option>`).join('');
   } catch(e) {}
 }
 
 async function createJob() {
-  const title = document.getElementById('job-title').value.trim();
-  const desc  = document.getElementById('job-desc').value.trim();
-  const exp   = parseFloat(document.getElementById('job-exp').value) || 0;
-  const edu   = document.getElementById('job-edu').value;
-  const msg   = document.getElementById('job-msg');
-  if (!title || !desc) { msg.innerHTML='<span class="text-red-500">Title and description are required.</span>'; return; }
+  const title = document.getElementById('j-title').value.trim();
+  const desc  = document.getElementById('j-desc').value.trim();
+  const exp   = parseFloat(document.getElementById('j-exp').value)||0;
+  const edu   = document.getElementById('j-edu').value;
+  const msg   = document.getElementById('j-msg');
+  if (!title || !desc) { msg.innerHTML='<span style="color:#dc2626">Title and description are required.</span>'; return; }
   try {
     const res  = await fetch(`${API}/jobs`, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({title, description:desc, min_experience:exp, education_required:edu||null})
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Failed');
-    msg.innerHTML=`<span class="text-emerald-600">✓ Job "${data.title}" created — ${data.required_skills.length} skills extracted</span>`;
+    if (!res.ok) throw new Error(data.detail||'Failed');
+    msg.innerHTML=`<span style="color:#059669;font-weight:600">Job "${data.title}" created — ${data.required_skills.length} skills detected.</span>`;
     toast('Job created!');
-    document.getElementById('job-title').value = '';
-    document.getElementById('job-desc').value  = '';
-    document.getElementById('skill-preview').classList.add('hidden');
+    document.getElementById('j-title').value=''; document.getElementById('j-desc').value='';
+    document.getElementById('job-skill-preview').style.display='none';
     loadJobs();
-  } catch(e) { msg.innerHTML=`<span class="text-red-500">✗ ${e.message}</span>`; toast(e.message, false); }
+  } catch(e){ msg.innerHTML=`<span style="color:#dc2626">${e.message}</span>`; toast(e.message,false); }
 }
 
 async function deleteJob(id) {
   if (!confirm('Delete this job?')) return;
   await fetch(`${API}/jobs/${id}`, {method:'DELETE'});
-  toast('Job deleted');
-  loadJobs();
+  toast('Job deleted'); loadJobs();
 }
 
-// ── Matching ───────────────────────────────────────────────────────────────
+// ── Match ─────────────────────────────────────────────────────────────────────
 async function runMatch() {
-  const jobId = document.getElementById('match-job-select').value;
-  const el    = document.getElementById('match-results');
-  if (!jobId) { toast('Please select a job', false); return; }
-  el.innerHTML = '<p class="text-gray-400 mt-4">Matching…</p>';
+  const jobId = document.getElementById('m-job').value;
+  const el    = document.getElementById('m-results');
+  if (!jobId) { toast('Please select a job first', false); return; }
+  el.innerHTML = '<p style="color:#94a3b8;font-size:13px;margin-top:8px">Finding best matches…</p>';
   try {
     const res  = await fetch(`${API}/jobs/${jobId}/matches`);
     const data = await res.json();
-    if (!data.length) { el.innerHTML='<p class="text-gray-400 mt-4">No candidates to match.</p>'; return; }
+    if (!data.length) { el.innerHTML='<p style="color:#94a3b8;font-size:13px;margin-top:8px">No candidates to match yet.</p>'; return; }
 
-    const exportUrl = `${API}/jobs/${jobId}/matches/export`;
     el.innerHTML = `
-      <div class="flex items-center justify-between mb-4">
-        <p class="text-sm text-gray-500">${data.length} candidate(s) ranked</p>
-        <a href="${exportUrl}" class="btn-ghost flex items-center gap-2 text-sm">
-          <span>⬇️</span> Export CSV
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <p style="font-size:13px;color:#64748b">${data.length} candidate${data.length!==1?'s':''} ranked</p>
+        <a href="${API}/jobs/${jobId}/matches/export" class="btn btn-ghost" style="text-decoration:none;font-size:12px;padding:7px 14px">
+          <svg width="13" height="13"><use href="#ic-download"/></svg> Export CSV
         </a>
       </div>
     ` + data.map((r,i) => {
       const c = r.candidate;
+      const col = r.score>=75?'#059669':r.score>=50?'#d97706':'#dc2626';
+      const barCol = r.score>=75?'#059669':r.score>=50?'#f59e0b':'#ef4444';
       return `
-      <div class="card hover:shadow-md transition">
-        <div class="flex items-start gap-4">
-          <div class="text-3xl font-black text-gray-200 w-8 flex-shrink-0 pt-1">${i+1}</div>
-          <div class="avatar ${avatarColor(c.full_name)} flex-shrink-0">${initials(c.full_name)}</div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-start justify-between gap-2 flex-wrap mb-2">
-              <div>
-                <h3 class="font-bold text-gray-800 cursor-pointer hover:text-indigo-600" onclick="openCandidateModal(${c.id})">${c.full_name}</h3>
-                <p class="text-xs text-gray-400">${[c.email, c.location].filter(Boolean).join(' · ')} · ${c.years_experience} yrs · ${c.education_level||'—'}</p>
+        <div class="card" style="margin-bottom:14px">
+          <div style="display:flex;align-items:flex-start;gap:14px">
+            <div style="font-size:22px;font-weight:900;color:#e2e8f0;width:28px;flex-shrink:0;text-align:center;padding-top:2px">${i+1}</div>
+            <div class="avatar" style="background:${avatarColor(c.full_name)}">${initials(c.full_name)}</div>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+                <div>
+                  <span style="font-weight:700;font-size:15px;color:#0f172a;cursor:pointer" onclick="openModal(${c.id})">${c.full_name}</span>
+                  <p style="font-size:12px;color:#94a3b8;margin-top:2px">${[c.email,c.location].filter(Boolean).join('  ·  ')} &nbsp;·&nbsp; ${c.years_experience} yrs &nbsp;·&nbsp; ${c.education_level||'—'}</p>
+                </div>
+                <div style="font-size:30px;font-weight:900;color:${col};line-height:1;flex-shrink:0">${r.score.toFixed(0)}<span style="font-size:16px">%</span></div>
               </div>
-              <div class="text-3xl font-black ${scoreColor(r.score)}">${r.score.toFixed(0)}<span class="text-lg">%</span></div>
-            </div>
 
-            <!-- Score bar -->
-            <div class="w-full bg-gray-100 rounded-full h-2 mb-3">
-              <div class="score-bar h-2 rounded-full ${scoreBarColor(r.score)}" style="width:0%" data-width="${r.score}%"></div>
-            </div>
+              <div class="score-track" style="margin-bottom:12px">
+                <div class="score-fill" style="background:${barCol}" data-w="${r.score}%"></div>
+              </div>
 
-            <!-- Score breakdown -->
-            <div class="grid grid-cols-3 gap-2 mb-3">
-              ${miniBar('Skills', r.skill_score)}
-              ${miniBar('Experience', r.experience_score)}
-              ${miniBar('Education', r.education_score)}
-            </div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
+                ${mini('Skills', r.skill_score)}
+                ${mini('Experience', r.experience_score)}
+                ${mini('Education', r.education_score)}
+              </div>
 
-            <!-- Skill badges -->
-            <div>
-              ${r.matched_skills.map(s=>`<span class="badge-green">✓ ${s}</span>`).join('')}
-              ${r.missing_skills.map(s=>`<span class="badge-red">✗ ${s}</span>`).join('')}
+              <div>
+                ${r.matched_skills.map(s=>`<span class="tag tag-green">${s}</span>`).join('')}
+                ${r.missing_skills.map(s=>`<span class="tag tag-red">${s}</span>`).join('')}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    `}).join('');
+      `;
+    }).join('');
 
-    // Animate bars
-    requestAnimationFrame(() => {
-      document.querySelectorAll('.score-bar[data-width]').forEach(bar => {
-        bar.style.width = bar.dataset.width;
-      });
-    });
-  } catch(e) { el.innerHTML=`<p class="text-red-500 mt-4">${e.message}</p>`; toast(e.message,false); }
+    requestAnimationFrame(() => setTimeout(() => {
+      document.querySelectorAll('.score-fill[data-w]').forEach(b => { b.style.width = b.dataset.w; });
+    }, 50));
+  } catch(e) { el.innerHTML=`<p style="color:#dc2626;font-size:13px;margin-top:8px">${e.message}</p>`; toast(e.message,false); }
 }
 
-function miniBar(label, val) {
-  const color = val >= 75 ? 'bg-emerald-500' : val >= 50 ? 'bg-amber-400' : 'bg-red-400';
-  return `
-    <div class="bg-gray-50 rounded-lg p-2">
-      <div class="flex justify-between text-xs text-gray-500 mb-1"><span>${label}</span><span class="font-semibold text-gray-700">${val.toFixed(0)}%</span></div>
-      <div class="w-full bg-gray-200 rounded-full h-1">
-        <div class="${color} h-1 rounded-full" style="width:${val}%"></div>
-      </div>
-    </div>`;
+function mini(label, val) {
+  const col = val>=75?'#059669':val>=50?'#f59e0b':'#ef4444';
+  return `<div style="background:#f8fafc;border-radius:9px;padding:9px 11px">
+    <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px">
+      <span style="color:#64748b">${label}</span>
+      <span style="font-weight:700;color:#0f172a">${val.toFixed(0)}%</span>
+    </div>
+    <div class="score-track">
+      <div style="height:100%;border-radius:99px;background:${col};width:${val}%"></div>
+    </div>
+  </div>`;
 }
 
-function scoreColor(s)    { return s>=75?'text-emerald-600':s>=50?'text-amber-500':'text-red-500'; }
-function scoreBarColor(s) { return s>=75?'bg-emerald-500':s>=50?'bg-amber-400':'bg-red-400'; }
-
-// ── Init ───────────────────────────────────────────────────────────────────
-showPane('dashboard');
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadDashboard();
 </script>
 </body>
 </html>

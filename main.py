@@ -92,7 +92,8 @@ def get_stats(db: Session = Depends(get_db)):
     total_candidates = db.query(Candidate).count()
     total_jobs       = db.query(JobDescription).count()
     total_skills     = db.query(Skill).count()
-    avg_exp          = db.query(func.avg(Candidate.years_experience)).scalar() or 0.0
+    avg_exp_raw      = db.query(func.avg(Candidate.years_experience)).scalar()
+    avg_exp          = round(float(avg_exp_raw), 1) if avg_exp_raw is not None else 0.0
 
     top_skills = (
         db.query(Skill.name, func.count(cs_table.c.candidate_id).label("cnt"))
@@ -114,7 +115,7 @@ def get_stats(db: Session = Depends(get_db)):
         total_candidates=total_candidates,
         total_jobs=total_jobs,
         total_skills=total_skills,
-        avg_experience=round(float(avg_exp), 1),
+        avg_experience=avg_exp,
         top_skills=[{"name": s.name, "count": s.cnt} for s in top_skills],
         recent_candidates=[
             {"id": c.id, "name": c.full_name, "email": c.email or "",
