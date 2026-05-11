@@ -1,7 +1,6 @@
 """
-Claude AI integration — CV parsing + job match explanations.
-Uses claude-haiku-4-5 for speed and cost efficiency.
-Falls back gracefully when ANTHROPIC_API_KEY is not set.
+AI integration — CV parsing + job match explanations.
+Primary: Groq (free, fast LLaMA). Fallback: regex/template.
 """
 from __future__ import annotations
 
@@ -13,33 +12,46 @@ from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
+GROQ_MODEL = "llama-3.1-8b-instant"
 
-def _client():
-    key = os.getenv("ANTHROPIC_API_KEY")
+
+def _groq_client():
+    key = os.getenv("GROQ_API_KEY")
     if not key:
         return None
     try:
-        import anthropic
-        return anthropic.Anthropic(api_key=key)
+        from groq import Groq
+        return Groq(api_key=key)
     except ImportError:
-        logger.warning("anthropic package not installed")
+        logger.warning("groq package not installed. Run: pip install groq")
+        return None
+    except Exception as e:
+        logger.warning("Groq init failed: %s", e)
+        return None
+
+
+def _generate(prompt: str, max_tokens: int = 800) -> Optional[str]:
+    client = _groq_client()
+    if not client:
+        return None
+    try:
+        r = client.chat.completions.create(
+            model=GROQ_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=max_tokens,
+            temperature=0.1,
+        )
+        return r.choices[0].message.content.strip()
+    except Exception as e:
+        logger.warning("Groq generation failed: %s", e)
         return None
 
 
 # ── CV Parsing ─────────────────────────────────────────────────────────────────
 
 def parse_cv_claude(text: str) -> Optional[Dict[str, Any]]:
-    """Extract structured candidate data from raw CV text using Claude."""
-    client = _client()
-    if not client:
-        return None
-    try:
-        msg = client.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=1024,
-            messages=[{
-                "role": "user",
-                "content": f"""Extract structured information from this CV. Return ONLY valid JSON with these exact keys:
+    """Extract structured candidate data from raw CV text using AI."""
+    prompt = f"""Extract structured information from this CV. Return ONLY valid JSON with these exact keys:
 full_name, email, phone, linkedin (URL or null), github (URL or null),
 location (city/country or null), years_experience (number),
 education_level (one of: PhD, Master, Bachelor, Associate, High School, or null),
@@ -50,19 +62,25 @@ CV TEXT:
 {text[:5000]}
 \"\"\"
 
-JSON only, no explanation:""",
-            }],
-        )
-        raw = msg.content[0].text.strip()
+Return ONLY the JSON object, no explanation, no markdown:"""
+
+    raw = _generate(prompt, max_tokens=1024)
+    if not raw:
+        return None
+    try:
         raw = re.sub(r"^```(?:json)?\s*", "", raw)
         raw = re.sub(r"\s*```$", "", raw)
+        # Extract JSON object if surrounded by other text
+        m = re.search(r'\{.*\}', raw, re.DOTALL)
+        if m:
+            raw = m.group(0)
         data = json.loads(raw)
         data["years_experience"] = float(data.get("years_experience") or 0)
         data["skills"] = [s.lower().strip() for s in (data.get("skills") or [])]
-        logger.info("Claude parsed CV: %s, %d skills", data.get("full_name"), len(data["skills"]))
+        logger.info("Groq parsed CV: %s, %d skills", data.get("full_name"), len(data["skills"]))
         return data
     except Exception as e:
-        logger.warning("Claude CV parse failed: %s", e)
+        logger.warning("Groq CV parse JSON error: %s | raw: %s", e, raw[:200])
         return None
 
 
@@ -81,33 +99,20 @@ def explain_match(
     missing: List[str],
     score: float,
 ) -> str:
-    """Generate a 1–2 sentence personalised explanation for the match."""
-    client = _client()
+    prompt = f"""Write exactly 2 short sentences (max 50 words total) explaining why this job is a {score:.0f}% match.
+Be specific and mention actual skills. No bullet points. No greetings.
 
-    if not client:
-        return _fallback_explanation(candidate_exp, min_exp, matched, missing, score)
+Candidate: {candidate_name} | {candidate_exp} yrs | {candidate_edu or 'unspecified'}
+Job: {job_title} | {min_exp}+ yrs required
+Matched skills: {', '.join(matched[:5]) or 'none'}
+Missing skills: {', '.join(missing[:3]) or 'none'}
 
-    try:
-        prompt = f"""Write exactly 2 short sentences (max 55 words total) explaining why this job is a {score:.0f}% match for this candidate.
-Be specific, positive, and mention concrete skills or experience. No bullet points.
+2 sentences only:"""
 
-Candidate: {candidate_name} | {candidate_exp} yrs exp | {candidate_edu or 'unspecified education'}
-Candidate skills: {', '.join(candidate_skills[:12])}
-Job: {job_title} | requires {min_exp}+ yrs | {edu_required or 'any education'}
-Matched skills: {', '.join(matched[:6]) or 'none'}
-Missing skills: {', '.join(missing[:4]) or 'none'}
-
-2-sentence explanation:"""
-
-        msg = client.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=120,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        return msg.content[0].text.strip()
-    except Exception as e:
-        logger.debug("Claude explain failed: %s", e)
-        return _fallback_explanation(candidate_exp, min_exp, matched, missing, score)
+    result = _generate(prompt, max_tokens=100)
+    if result:
+        return result
+    return _fallback_explanation(candidate_exp, min_exp, matched, missing, score)
 
 
 def _fallback_explanation(
@@ -116,8 +121,7 @@ def _fallback_explanation(
 ) -> str:
     parts = []
     if matched:
-        top = ", ".join(matched[:3])
-        parts.append(f"Your skills in {top} align well with this role")
+        parts.append(f"Your skills in {', '.join(matched[:3])} align well with this role")
     if candidate_exp >= (min_exp or 0):
         parts.append("your experience meets the requirement")
     elif min_exp > 0:
@@ -129,38 +133,23 @@ def _fallback_explanation(
     return ". ".join(parts).capitalize() + "."
 
 
-# ── CV Summary for Candidate view ──────────────────────────────────────────────
+# ── Profile Summary ────────────────────────────────────────────────────────────
 
 def summarise_profile(
     name: str, skills: List[str], exp: float,
     edu: Optional[str], matched_jobs_count: int,
 ) -> str:
-    """One-paragraph profile summary shown to the candidate after CV upload."""
-    client = _client()
-    if not client:
-        return (
-            f"We detected {len(skills)} skills in your CV including "
-            f"{', '.join(skills[:4])}{'...' if len(skills)>4 else ''}. "
-            f"Based on your {exp} years of experience, "
-            f"we found {matched_jobs_count} matching job{'s' if matched_jobs_count!=1 else ''} for you."
-        )
-    try:
-        msg = client.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=160,
-            messages=[{
-                "role": "user",
-                "content": f"""Write a 2-sentence encouraging profile summary for a job seeker (no greetings, no bullet points).
+    prompt = f"""Write 2 short encouraging sentences for a job seeker profile. No greetings, no bullet points.
 Name: {name} | Experience: {exp} yrs | Education: {edu or 'not specified'}
-Skills: {', '.join(skills[:15])}
-Matched jobs found: {matched_jobs_count}
-Summary:""",
-            }],
-        )
-        return msg.content[0].text.strip()
-    except Exception as e:
-        logger.debug("Claude summary failed: %s", e)
-        return (
-            f"We detected {len(skills)} skills from your CV. "
-            f"Found {matched_jobs_count} matching job{'s' if matched_jobs_count!=1 else ''} for you."
-        )
+Top skills: {', '.join(skills[:10])}
+Matching jobs found: {matched_jobs_count}
+2 sentences:"""
+
+    result = _generate(prompt, max_tokens=120)
+    if result:
+        return result
+    return (
+        f"We detected {len(skills)} skills in your CV including "
+        f"{', '.join(skills[:4])}{'...' if len(skills) > 4 else ''}. "
+        f"Found {matched_jobs_count} matching job{'s' if matched_jobs_count != 1 else ''} for you."
+    )
