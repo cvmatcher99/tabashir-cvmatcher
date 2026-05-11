@@ -20,8 +20,8 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from database import Candidate, JobDescription, Skill, candidate_skills as cs_table, get_db, init_db
-from matcher import extract_experience_from_text, extract_skills_from_text, match_candidates
-from schemas import CandidateOut, JobCreate, JobOut, MatchResult, StatsOut
+from matcher import extract_experience_from_text, extract_skills_from_text, match_candidates, recommend_jobs
+from schemas import CandidateOut, JobCreate, JobMatchResult, JobOut, MatchResult, StatsOut
 from cv_parser import parse_cv
 
 # ── Logging ───────────────────────────────────────────────────────────────────
@@ -335,6 +335,81 @@ def export_matches_csv(job_id: int, db: Session = Depends(get_db)):
         media_type="text/csv",
         headers={"Content-Disposition": f"attachment; filename=matches_job_{job_id}.csv"},
     )
+
+
+# ── Job Recommendations for Candidate ────────────────────────────────────────
+@app.get(
+    "/candidates/{candidate_id}/recommend-jobs",
+    response_model=list[JobMatchResult],
+    tags=["Matching"],
+    summary="Recommend best-matching jobs for a candidate",
+)
+def get_job_recommendations(candidate_id: int, top_k: int = 10, db: Session = Depends(get_db)):
+    cand = db.query(Candidate).filter(Candidate.id == candidate_id).first()
+    if not cand:
+        raise HTTPException(status_code=404, detail="Candidate not found.")
+    results = recommend_jobs(cand, db)
+    logger.info("Recommended %d jobs for candidate id=%d", len(results), candidate_id)
+    return results[:top_k]
+
+
+@app.post(
+    "/find-jobs",
+    response_model=list[JobMatchResult],
+    status_code=200,
+    tags=["Matching"],
+    summary="Upload a CV and instantly get matching job recommendations",
+)
+async def find_jobs_for_cv(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    """
+    One-shot endpoint for candidates: upload your CV → get ranked job list.
+    Does NOT store the candidate permanently unless email is new.
+    """
+    ext = Path(file.filename).suffix.lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=422, detail=f"Unsupported file type: {ext}")
+
+    content = await file.read()
+    if len(content) > MAX_FILE_SIZE_MB * 1024 * 1024:
+        raise HTTPException(status_code=413, detail=f"File exceeds {MAX_FILE_SIZE_MB} MB.")
+
+    parsed = parse_cv(content, file.filename)
+
+    # Reuse existing candidate if email matches, else create temp object
+    cand = None
+    if parsed.get("email"):
+        cand = db.query(Candidate).filter(Candidate.email == parsed["email"]).first()
+
+    if not cand:
+        cand = Candidate(
+            full_name=parsed.get("full_name") or "Candidate",
+            email=parsed.get("email"),
+            phone=parsed.get("phone"),
+            location=parsed.get("location"),
+            linkedin=parsed.get("linkedin"),
+            github=parsed.get("github"),
+            years_experience=parsed.get("years_experience", 0.0),
+            education_level=parsed.get("education_level"),
+            education_field=parsed.get("education_field"),
+            raw_text=parsed.get("raw_text", ""),
+            file_name=file.filename,
+        )
+        db.add(cand)
+        db.flush()
+        for skill_name in parsed.get("skills", []):
+            if skill_name:
+                skill = db.query(Skill).filter(Skill.name == skill_name.lower().strip()).first()
+                if not skill:
+                    skill = Skill(name=skill_name.lower().strip())
+                    db.add(skill)
+                    db.flush()
+                cand.skills.append(skill)
+        db.commit()
+        db.refresh(cand)
+
+    results = recommend_jobs(cand, db)
+    logger.info("find-jobs: %d recommendations for '%s'", len(results), cand.full_name)
+    return results[:10]
 
 
 # ── Health ─────────────────────────────────────────────────────────────────────

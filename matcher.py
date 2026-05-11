@@ -12,7 +12,7 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 
 from database import Candidate, JobDescription, Skill
-from schemas import MatchResult, CandidateOut, SkillOut
+from schemas import MatchResult, JobMatchResult, CandidateOut, JobOut, SkillOut
 
 logger = logging.getLogger(__name__)
 
@@ -162,6 +162,71 @@ def match_candidates(job: JobDescription, db: Session) -> List[MatchResult]:
                 education_score=round(raw_edu, 2),
                 matched_skills=matched,
                 missing_skills=missing,
+            )
+        )
+
+    results.sort(key=lambda r: r.score, reverse=True)
+    return results
+
+
+# ── Reverse: recommend jobs for a candidate ───────────────────────────────────
+
+def _build_why(score: float, matched: List[str], missing: List[str],
+               exp_ok: bool, edu_ok: bool) -> str:
+    parts = []
+    if matched:
+        parts.append(f"You have {len(matched)} of the required skills")
+    if exp_ok:
+        parts.append("your experience meets the requirement")
+    if edu_ok:
+        parts.append("your education qualifies")
+    if missing:
+        parts.append(f"you're missing {len(missing)} skill(s): {', '.join(missing[:3])}")
+    return ". ".join(parts).capitalize() + "." if parts else "Partial match."
+
+
+def recommend_jobs(candidate: Candidate, db: Session) -> List[JobMatchResult]:
+    jobs: List[JobDescription] = db.query(JobDescription).all()
+    cand_skill_names = [s.name for s in candidate.skills]
+    results = []
+
+    for job in jobs:
+        req_skill_names = [s.name for s in job.required_skills]
+
+        raw_skill, matched, missing = _skill_score(cand_skill_names, req_skill_names)
+        raw_exp = _exp_score(candidate.years_experience, job.min_experience)
+        raw_edu = _edu_score(candidate.education_level, job.education_required)
+        semantic = _semantic_skill_boost(cand_skill_names, req_skill_names)
+
+        total = round(min(
+            raw_skill * WEIGHTS["skill"]
+            + raw_exp * WEIGHTS["experience"]
+            + raw_edu * WEIGHTS["education"]
+            + semantic,
+            100.0,
+        ), 2)
+
+        exp_ok = candidate.years_experience >= (job.min_experience or 0)
+        edu_ok = _edu_rank(candidate.education_level) >= _edu_rank(job.education_required)
+
+        results.append(
+            JobMatchResult(
+                job=JobOut(
+                    id=job.id,
+                    title=job.title,
+                    description=job.description,
+                    min_experience=job.min_experience,
+                    education_required=job.education_required,
+                    created_at=job.created_at,
+                    required_skills=[SkillOut(id=s.id, name=s.name) for s in job.required_skills],
+                ),
+                score=total,
+                skill_score=round(raw_skill, 2),
+                experience_score=round(raw_exp, 2),
+                education_score=round(raw_edu, 2),
+                matched_skills=matched,
+                missing_skills=missing,
+                why=_build_why(total, matched, missing, exp_ok, edu_ok),
             )
         )
 

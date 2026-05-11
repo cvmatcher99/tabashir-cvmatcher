@@ -57,6 +57,18 @@ class MatchResult(BaseModel):
     missing_skills: List[str]
 
 
+class JobMatchResult(BaseModel):
+    """A job recommended for a specific candidate."""
+    job: JobOut
+    score: float
+    skill_score: float
+    experience_score: float
+    education_score: float
+    matched_skills: List[str]
+    missing_skills: List[str]
+    why: str                    # human-readable explanation
+
+
 class StatsOut(BaseModel):
     total_candidates: int
     total_jobs: int

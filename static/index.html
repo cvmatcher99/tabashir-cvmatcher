@@ -161,8 +161,14 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:#f0f2f7;c
       <svg><use href="#ic-briefcase"/></svg> Jobs
       <span class="nav-badge" id="badge-j" style="display:none"></span>
     </div>
+    <div class="nav-item" id="nav-findjobs" onclick="showPane('findjobs')" style="background:rgba(5,150,105,.18);color:#6ee7b7;margin-top:8px">
+      <svg><use href="#ic-star"/></svg> Find My Jobs
+    </div>
+
+    <div style="height:1px;background:rgba(255,255,255,.08);margin:8px 4px"></div>
+
     <div class="nav-item" id="nav-match" onclick="showPane('match')">
-      <svg><use href="#ic-target"/></svg> Match
+      <svg><use href="#ic-target"/></svg> Match (HR)
     </div>
   </nav>
 
@@ -369,6 +375,55 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:#f0f2f7;c
     </div>
   </div>
 
+  <!-- ══ FIND MY JOBS ══════════════════════════════════════════════════════ -->
+  <div class="pane" id="pane-findjobs" style="max-width:720px">
+    <div style="background:linear-gradient(135deg,#064e3b,#065f46);border-radius:20px;padding:28px 32px;margin-bottom:24px;color:#fff">
+      <div style="font-size:22px;font-weight:800;margin-bottom:6px">Find Your Perfect Job</div>
+      <div style="font-size:14px;color:#a7f3d0;line-height:1.6">Upload your CV and our AI will instantly match you with the most suitable jobs from our database, ranked by how well your skills and experience fit.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Upload Your CV</div>
+      <div class="drop-zone" id="fj-drop"
+           ondragover="event.preventDefault();this.classList.add('over')"
+           ondragleave="this.classList.remove('over')"
+           ondrop="fjDrop(event)"
+           onclick="document.getElementById('fj-file').click()">
+        <div style="width:52px;height:52px;background:#ecfdf5;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:14px">
+          <svg width="24" height="24" style="stroke:#059669"><use href="#ic-upload"/></svg>
+        </div>
+        <p style="font-weight:600;color:#374151;font-size:14px">Drop your CV here, or <span style="color:#059669">browse</span></p>
+        <p style="color:#94a3b8;font-size:12px;margin-top:6px">PDF or DOCX — maximum 10 MB</p>
+        <div id="fj-chip" style="display:none;margin-top:12px;background:#ecfdf5;color:#065f46;font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px"></div>
+      </div>
+      <input id="fj-file" type="file" accept=".pdf,.docx,.doc" style="display:none" onchange="fjSelect(event)"/>
+
+      <div id="fj-progress" style="display:none;margin-top:16px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <div style="width:16px;height:16px;border:2px solid #059669;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite"></div>
+          <span style="font-size:13px;color:#64748b">Analyzing your CV and finding the best jobs…</span>
+        </div>
+        <div style="height:3px;background:#e2e8f0;border-radius:99px;overflow:hidden">
+          <div style="height:100%;background:linear-gradient(90deg,#059669,#34d399);border-radius:99px;animation:progress 1.5s ease infinite"></div>
+        </div>
+      </div>
+
+      <button id="fj-btn" class="btn btn-success" style="margin-top:16px;width:100%;justify-content:center;font-size:14px;padding:12px" disabled onclick="findJobs()">
+        <svg width="15" height="15"><use href="#ic-star"/></svg> Find Matching Jobs
+      </button>
+      <div id="fj-msg" style="margin-top:10px;font-size:13px"></div>
+    </div>
+
+    <!-- Parsed CV summary -->
+    <div id="fj-profile" style="display:none" class="card">
+      <div class="card-title">Your Profile (Extracted from CV)</div>
+      <div id="fj-profile-content"></div>
+    </div>
+
+    <!-- Job results -->
+    <div id="fj-results"></div>
+  </div>
+
   <!-- ══ MATCH ═════════════════════════════════════════════════════════════ -->
   <div class="pane" id="pane-match">
     <div class="card" style="max-width:600px">
@@ -416,11 +471,12 @@ let searchTimer = null;
 let activePane = 'dashboard';
 
 const META = {
-  dashboard:  {title:'Dashboard',   sub:'Overview of your recruitment pipeline'},
-  upload:     {title:'Upload CV',   sub:'Parse and add a new candidate'},
-  candidates: {title:'Candidates',  sub:'Browse, search, and manage candidates'},
-  jobs:       {title:'Jobs',        sub:'Create and manage job descriptions'},
-  match:      {title:'Match',       sub:'Rank candidates against a job description'},
+  dashboard:  {title:'Dashboard',        sub:'Overview of your recruitment pipeline'},
+  upload:     {title:'Upload CV',        sub:'Parse and add a new candidate'},
+  candidates: {title:'Candidates',       sub:'Browse, search, and manage candidates'},
+  jobs:       {title:'Jobs',             sub:'Create and manage job descriptions'},
+  findjobs:   {title:'Find My Jobs',     sub:'Upload your CV and get instant AI job recommendations'},
+  match:      {title:'Match (HR)',       sub:'Rank candidates against a job description'},
 };
 
 // ── Navigation ──────────────────────────────────────────────────────────────
@@ -436,6 +492,7 @@ function showPane(name) {
   if (name === 'candidates') loadCandidates();
   if (name === 'jobs')       loadJobs();
   if (name === 'match')      { loadJobs(); populateJobSelect(); }
+  if (name === 'findjobs')   { document.getElementById('fj-results').innerHTML=''; }
 }
 function refreshCurrent() { showPane(activePane); }
 
@@ -858,6 +915,167 @@ function mini(label, val) {
       <div style="height:100%;border-radius:99px;background:${col};width:${val}%"></div>
     </div>
   </div>`;
+}
+
+// ── Find Jobs (candidate-facing) ─────────────────────────────────────────────
+let fjFile = null;
+
+function fjSelect(e) { fjSetFile(e.target.files[0]); }
+function fjDrop(e) {
+  e.preventDefault();
+  document.getElementById('fj-drop').classList.remove('over');
+  fjSetFile(e.dataTransfer.files[0]);
+}
+function fjSetFile(f) {
+  if (!f) return;
+  fjFile = f;
+  const chip = document.getElementById('fj-chip');
+  chip.textContent = f.name;
+  chip.style.display = '';
+  document.getElementById('fj-btn').disabled = false;
+}
+
+async function findJobs() {
+  if (!fjFile) return;
+  const btn  = document.getElementById('fj-btn');
+  const msg  = document.getElementById('fj-msg');
+  const res1 = document.getElementById('fj-results');
+  const prof = document.getElementById('fj-profile');
+
+  btn.disabled = true;
+  btn.innerHTML = 'Analyzing…';
+  msg.innerHTML = '';
+  res1.innerHTML = '';
+  prof.style.display = 'none';
+  document.getElementById('fj-progress').style.display = '';
+
+  const fd = new FormData();
+  fd.append('file', fjFile);
+
+  try {
+    const res  = await fetch(`${API}/find-jobs`, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Failed to process CV');
+
+    // Show how many jobs found
+    if (!data.length) {
+      res1.innerHTML = `
+        <div class="card" style="text-align:center;padding:40px">
+          <div style="font-size:40px;margin-bottom:12px">🔍</div>
+          <div style="font-weight:700;color:#374151;font-size:15px">No jobs found yet</div>
+          <div style="color:#94a3b8;font-size:13px;margin-top:6px">Ask the HR team to add job descriptions first.</div>
+        </div>`;
+      return;
+    }
+
+    // Show profile card first by fetching candidate data
+    const topCandId = data[0]?.job?.id ? null : null;
+    renderFjProfile(data);
+    renderFjResults(data);
+    toast(`Found ${data.length} matching jobs for you!`);
+
+  } catch(e) {
+    msg.innerHTML = `<span style="color:#dc2626">${e.message}</span>`;
+    toast(e.message, false);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="15" height="15"><use href="#ic-star"/></svg> Find Matching Jobs';
+    document.getElementById('fj-progress').style.display = 'none';
+  }
+}
+
+function renderFjProfile(data) {
+  // We can infer candidate skills from matched/missing across all jobs
+  const allMatched = [...new Set(data.flatMap(r => r.matched_skills))];
+  const prof = document.getElementById('fj-profile');
+  const content = document.getElementById('fj-profile-content');
+  content.innerHTML = `
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+      <div style="background:#eef2ff;border-radius:12px;padding:12px 20px;text-align:center;flex:1;min-width:100px">
+        <div style="font-size:22px;font-weight:800;color:#4f46e5">${data.length}</div>
+        <div style="font-size:11px;color:#6366f1;margin-top:2px">Jobs Matched</div>
+      </div>
+      <div style="background:#ecfdf5;border-radius:12px;padding:12px 20px;text-align:center;flex:1;min-width:100px">
+        <div style="font-size:22px;font-weight:800;color:#059669">${allMatched.length}</div>
+        <div style="font-size:11px;color:#059669;margin-top:2px">Skills Matched</div>
+      </div>
+      <div style="background:#fffbeb;border-radius:12px;padding:12px 20px;text-align:center;flex:1;min-width:100px">
+        <div style="font-size:22px;font-weight:800;color:#d97706">${data[0] ? data[0].score.toFixed(0)+'%' : '—'}</div>
+        <div style="font-size:11px;color:#d97706;margin-top:2px">Top Match Score</div>
+      </div>
+    </div>
+    <div class="label" style="margin-bottom:6px">Your Detected Skills</div>
+    <div>${allMatched.map(s=>`<span class="tag tag-green">${s}</span>`).join('')||'<span style="color:#94a3b8;font-size:12px">none detected</span>'}</div>
+  `;
+  prof.style.display = '';
+}
+
+function renderFjResults(data) {
+  const el = document.getElementById('fj-results');
+  el.innerHTML = `
+    <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:14px">
+      ${data.length} job${data.length!==1?'s':''} ranked by match — best first
+    </div>
+  ` + data.map((r, i) => {
+    const job = r.job;
+    const col = r.score>=75?'#059669':r.score>=50?'#d97706':'#dc2626';
+    const barCol = r.score>=75?'#059669':r.score>=50?'#f59e0b':'#ef4444';
+    const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+
+    return `
+    <div class="card" style="border-left:4px solid ${col};transition:all .2s">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            ${medal ? `<span style="font-size:18px">${medal}</span>` : `<span style="font-size:13px;font-weight:700;color:#94a3b8">#${i+1}</span>`}
+            <span style="font-size:16px;font-weight:800;color:#0f172a">${job.title}</span>
+          </div>
+          <p style="font-size:12px;color:#94a3b8;margin-top:4px">
+            ${job.min_experience ? job.min_experience+' yrs required' : 'No experience requirement'}
+            ${job.education_required ? ' · '+job.education_required : ''}
+          </p>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:32px;font-weight:900;color:${col};line-height:1">${r.score.toFixed(0)}<span style="font-size:16px">%</span></div>
+          <div style="font-size:10px;color:#94a3b8;margin-top:2px">match score</div>
+        </div>
+      </div>
+
+      <!-- Main score bar -->
+      <div class="score-track" style="margin-bottom:14px">
+        <div class="score-fill" style="background:${barCol}" data-w="${r.score}%"></div>
+      </div>
+
+      <!-- Why this job -->
+      <div style="background:#f8fafc;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12.5px;color:#374151;line-height:1.6">
+        <span style="font-weight:600;color:#64748b">Why this job: </span>${r.why}
+      </div>
+
+      <!-- Sub scores -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
+        ${mini('Skills',     r.skill_score)}
+        ${mini('Experience', r.experience_score)}
+        ${mini('Education',  r.education_score)}
+      </div>
+
+      <!-- Skill tags -->
+      <div>
+        ${r.matched_skills.map(s=>`<span class="tag tag-green">${s}</span>`).join('')}
+        ${r.missing_skills.slice(0,5).map(s=>`<span class="tag tag-red">missing: ${s}</span>`).join('')}
+        ${r.missing_skills.length>5?`<span class="tag tag-gray">+${r.missing_skills.length-5} more missing</span>`:''}
+      </div>
+
+      <!-- Job description snippet -->
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9">
+        <p style="font-size:12px;color:#64748b;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${job.description}</p>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Animate bars
+  requestAnimationFrame(() => setTimeout(() => {
+    document.querySelectorAll('.score-fill[data-w]').forEach(b => { b.style.width = b.dataset.w; });
+  }, 60));
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
