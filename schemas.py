@@ -1,10 +1,8 @@
 from __future__ import annotations
 from datetime import datetime
 from typing import List, Optional
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
-
-# ── Skill ─────────────────────────────────────────────────────────────────────
 
 class SkillBase(BaseModel):
     name: str
@@ -15,12 +13,13 @@ class SkillOut(SkillBase):
         from_attributes = True
 
 
-# ── Candidate ─────────────────────────────────────────────────────────────────
-
 class CandidateBase(BaseModel):
     full_name: str
     email: Optional[str] = None
     phone: Optional[str] = None
+    location: Optional[str] = None
+    linkedin: Optional[str] = None
+    github: Optional[str] = None
     years_experience: float = 0.0
     education_level: Optional[str] = None
     education_field: Optional[str] = None
@@ -33,8 +32,6 @@ class CandidateOut(CandidateBase):
     class Config:
         from_attributes = True
 
-
-# ── Job Description ───────────────────────────────────────────────────────────
 
 class JobCreate(BaseModel):
     title: str
@@ -50,13 +47,20 @@ class JobOut(JobCreate):
         from_attributes = True
 
 
-# ── Matching ──────────────────────────────────────────────────────────────────
-
 class MatchResult(BaseModel):
     candidate: CandidateOut
-    score: float                   # 0–100
+    score: float
     skill_score: float
     experience_score: float
     education_score: float
     matched_skills: List[str]
     missing_skills: List[str]
+
+
+class StatsOut(BaseModel):
+    total_candidates: int
+    total_jobs: int
+    total_skills: int
+    avg_experience: float
+    top_skills: List[dict]
+    recent_candidates: List[dict]

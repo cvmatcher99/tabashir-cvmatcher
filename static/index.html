@@ -1,178 +1,379 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>CV Matcher</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📄</text></svg>" />
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-  .tab-active { @apply border-b-2 border-indigo-600 text-indigo-600 font-semibold; }
-  .card { @apply bg-white rounded-xl shadow-md p-5 mb-4; }
-  .badge { @apply inline-block bg-indigo-100 text-indigo-700 text-xs font-medium px-2 py-0.5 rounded-full mr-1 mb-1; }
-  .badge-green { @apply inline-block bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full mr-1 mb-1; }
-  .badge-red   { @apply inline-block bg-red-100   text-red-700   text-xs font-medium px-2 py-0.5 rounded-full mr-1 mb-1; }
-  .score-bar   { transition: width 0.6s ease; }
+  :root { --sidebar: #1e1b4b; --accent: #6366f1; }
+  body { font-family: 'Inter', system-ui, sans-serif; }
+  .sidebar-item { @apply flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-200 hover:bg-white/10 hover:text-white cursor-pointer transition-all; }
+  .sidebar-item.active { @apply bg-white/15 text-white font-semibold; }
+  .stat-card { @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex items-center gap-4; }
+  .badge { @apply inline-flex items-center bg-indigo-50 text-indigo-700 text-xs font-medium px-2.5 py-1 rounded-full mr-1 mb-1; }
+  .badge-green { @apply inline-flex items-center bg-emerald-50 text-emerald-700 text-xs font-medium px-2.5 py-1 rounded-full mr-1 mb-1; }
+  .badge-red   { @apply inline-flex items-center bg-red-50 text-red-600 text-xs font-medium px-2.5 py-1 rounded-full mr-1 mb-1; }
+  .btn-primary { @apply bg-indigo-600 text-white px-4 py-2.5 rounded-xl font-semibold hover:bg-indigo-700 transition disabled:opacity-40 disabled:cursor-not-allowed; }
+  .btn-ghost   { @apply text-indigo-600 border border-indigo-200 px-4 py-2 rounded-xl text-sm font-medium hover:bg-indigo-50 transition; }
+  .card { @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4; }
+  .input { @apply border border-gray-200 rounded-xl px-3 py-2.5 text-sm w-full focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 outline-none transition; }
+  .score-bar { transition: width 0.8s cubic-bezier(.4,0,.2,1); }
+  .avatar { @apply w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .fade-in { animation: fadeIn .25s ease; }
 </style>
 </head>
-<body class="bg-gray-50 min-h-screen font-sans">
+<body class="bg-gray-50 min-h-screen flex">
 
-<!-- Header -->
-<header class="bg-indigo-700 text-white px-6 py-4 shadow-lg">
-  <div class="max-w-5xl mx-auto flex items-center gap-3">
-    <span class="text-3xl">📄</span>
-    <div>
-      <h1 class="text-2xl font-bold tracking-tight">CV Matcher</h1>
-      <p class="text-indigo-200 text-sm">Upload CVs · Browse Candidates · Match Jobs</p>
+<!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
+<aside class="w-64 min-h-screen flex-shrink-0 flex flex-col" style="background:var(--sidebar)">
+  <div class="px-5 py-6 border-b border-white/10">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 bg-indigo-500 rounded-xl flex items-center justify-center text-xl">📄</div>
+      <div>
+        <div class="text-white font-bold text-lg leading-tight">CV Matcher</div>
+        <div class="text-indigo-300 text-xs">v2.0</div>
+      </div>
     </div>
   </div>
+
+  <nav class="flex-1 p-3 space-y-1 mt-2">
+    <div class="sidebar-item active" onclick="showPane('dashboard')" id="nav-dashboard">
+      <span class="text-lg">📊</span><span>Dashboard</span>
+    </div>
+    <div class="sidebar-item" onclick="showPane('upload')" id="nav-upload">
+      <span class="text-lg">⬆️</span><span>Upload CV</span>
+    </div>
+    <div class="sidebar-item" onclick="showPane('candidates')" id="nav-candidates">
+      <span class="text-lg">👥</span><span>Candidates</span>
+      <span id="badge-candidates" class="ml-auto bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full hidden"></span>
+    </div>
+    <div class="sidebar-item" onclick="showPane('jobs')" id="nav-jobs">
+      <span class="text-lg">💼</span><span>Jobs</span>
+      <span id="badge-jobs" class="ml-auto bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full hidden"></span>
+    </div>
+    <div class="sidebar-item" onclick="showPane('match')" id="nav-match">
+      <span class="text-lg">🎯</span><span>Match</span>
+    </div>
+  </nav>
+
+  <div class="p-4 border-t border-white/10">
+    <a href="/docs" target="_blank" class="flex items-center gap-2 text-indigo-300 hover:text-white text-sm transition">
+      <span>📖</span><span>API Docs</span>
+    </a>
+  </div>
+</aside>
+
+<!-- ── Main ──────────────────────────────────────────────────────────────── -->
+<main class="flex-1 overflow-auto">
+
+<!-- Top Bar -->
+<header class="bg-white border-b border-gray-100 px-8 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+  <div>
+    <h1 id="page-title" class="text-xl font-bold text-gray-800">Dashboard</h1>
+    <p id="page-sub" class="text-xs text-gray-400 mt-0.5">Overview of your recruitment pipeline</p>
+  </div>
+  <button onclick="refreshCurrent()" class="text-gray-400 hover:text-indigo-600 transition text-xl" title="Refresh">↻</button>
 </header>
 
-<!-- Tabs -->
-<nav class="bg-white border-b shadow-sm sticky top-0 z-10">
-  <div class="max-w-5xl mx-auto flex gap-6 px-6">
-    <button onclick="showTab('upload')"   id="tab-upload"   class="py-3 text-sm border-b-2 border-transparent text-gray-500 hover:text-indigo-600 transition">⬆️ Upload CV</button>
-    <button onclick="showTab('candidates')" id="tab-candidates" class="py-3 text-sm border-b-2 border-transparent text-gray-500 hover:text-indigo-600 transition">👥 Candidates</button>
-    <button onclick="showTab('jobs')"     id="tab-jobs"     class="py-3 text-sm border-b-2 border-transparent text-gray-500 hover:text-indigo-600 transition">💼 Jobs</button>
-    <button onclick="showTab('match')"    id="tab-match"    class="py-3 text-sm border-b-2 border-transparent text-gray-500 hover:text-indigo-600 transition">🎯 Match</button>
+<div class="p-8">
+
+<!-- ══ DASHBOARD ══════════════════════════════════════════════════════════ -->
+<section id="pane-dashboard" class="fade-in">
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="stat-card">
+      <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center text-2xl">👥</div>
+      <div><div class="text-2xl font-bold text-gray-800" id="stat-candidates">—</div><div class="text-sm text-gray-500">Candidates</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-2xl">💼</div>
+      <div><div class="text-2xl font-bold text-gray-800" id="stat-jobs">—</div><div class="text-sm text-gray-500">Jobs</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center text-2xl">⭐</div>
+      <div><div class="text-2xl font-bold text-gray-800" id="stat-exp">—</div><div class="text-sm text-gray-500">Avg Experience</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center text-2xl">🏷️</div>
+      <div><div class="text-2xl font-bold text-gray-800" id="stat-skills">—</div><div class="text-sm text-gray-500">Unique Skills</div></div>
+    </div>
   </div>
-</nav>
 
-<main class="max-w-5xl mx-auto px-6 py-8">
-
-<!-- ── Upload CV ─────────────────────────────────────────────── -->
-<section id="pane-upload" class="hidden">
-  <h2 class="text-xl font-bold text-gray-800 mb-4">Upload CV</h2>
-  <div class="card">
-    <label class="block">
-      <span class="text-sm font-medium text-gray-700 mb-1 block">Select PDF or DOCX file</span>
-      <div id="drop-zone"
-           class="mt-1 flex flex-col items-center justify-center border-2 border-dashed border-indigo-300 rounded-lg p-10 cursor-pointer hover:border-indigo-500 transition bg-indigo-50"
-           ondragover="event.preventDefault()" ondrop="handleDrop(event)" onclick="document.getElementById('cv-file').click()">
-        <span class="text-4xl mb-2">📎</span>
-        <p class="text-sm text-gray-500">Drag & drop or <span class="text-indigo-600 font-medium">click to browse</span></p>
-        <p class="text-xs text-gray-400 mt-1">PDF, DOCX – max 10 MB</p>
-        <p id="file-name" class="mt-2 text-sm text-indigo-700 font-medium"></p>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="card">
+      <h3 class="font-bold text-gray-700 mb-4">Top Skills</h3>
+      <div id="skills-chart-container" class="relative h-64">
+        <canvas id="skills-chart"></canvas>
+        <p id="skills-chart-empty" class="text-gray-400 text-sm text-center pt-20 hidden">No data yet</p>
       </div>
-      <input id="cv-file" type="file" accept=".pdf,.docx,.doc" class="hidden" onchange="onFileSelect(event)" />
-    </label>
-    <button onclick="uploadCV()"
-            class="mt-4 w-full bg-indigo-600 text-white py-2.5 rounded-lg font-semibold hover:bg-indigo-700 transition disabled:opacity-50"
-            id="upload-btn" disabled>
+    </div>
+    <div class="card">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold text-gray-700">Recent Uploads</h3>
+        <button onclick="showPane('candidates')" class="text-xs text-indigo-600 hover:underline">View all →</button>
+      </div>
+      <div id="recent-list"><p class="text-gray-400 text-sm">No candidates yet.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ UPLOAD ══════════════════════════════════════════════════════════════ -->
+<section id="pane-upload" class="hidden fade-in max-w-2xl">
+  <div class="card">
+    <h2 class="font-bold text-gray-700 mb-4">Upload CV</h2>
+    <div id="drop-zone"
+         class="flex flex-col items-center justify-center border-2 border-dashed border-indigo-200 rounded-2xl p-12 cursor-pointer hover:border-indigo-500 hover:bg-indigo-50 transition bg-gray-50"
+         ondragover="event.preventDefault()" ondrop="handleDrop(event)"
+         onclick="document.getElementById('cv-file').click()">
+      <div class="text-5xl mb-3">📎</div>
+      <p class="font-semibold text-gray-600">Drag & drop or <span class="text-indigo-600">click to browse</span></p>
+      <p class="text-sm text-gray-400 mt-1">PDF or DOCX — max 10 MB</p>
+      <p id="file-name" class="mt-3 text-sm font-medium text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full hidden"></p>
+    </div>
+    <input id="cv-file" type="file" accept=".pdf,.docx,.doc" class="hidden" onchange="onFileSelect(event)"/>
+
+    <div id="upload-progress" class="mt-4 hidden">
+      <div class="flex items-center gap-3 mb-2">
+        <div class="animate-spin w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full"></div>
+        <span class="text-sm text-gray-600">Parsing CV…</span>
+      </div>
+      <div class="w-full bg-gray-100 rounded-full h-1.5">
+        <div class="bg-indigo-600 h-1.5 rounded-full animate-pulse" style="width:70%"></div>
+      </div>
+    </div>
+
+    <button onclick="uploadCV()" id="upload-btn" disabled
+            class="btn-primary mt-4 w-full text-center">
       Upload & Parse
     </button>
     <div id="upload-msg" class="mt-3 text-sm"></div>
   </div>
 
   <div id="parsed-card" class="card hidden">
-    <h3 class="font-semibold text-gray-700 mb-3">Parsed Result</h3>
+    <div class="flex items-center gap-2 mb-4">
+      <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600">✓</div>
+      <h3 class="font-bold text-gray-700">Parsed Successfully</h3>
+    </div>
     <div id="parsed-content"></div>
   </div>
 </section>
 
-<!-- ── Candidates ────────────────────────────────────────────── -->
-<section id="pane-candidates" class="hidden">
-  <div class="flex items-center justify-between mb-4">
-    <h2 class="text-xl font-bold text-gray-800">Candidates</h2>
-    <button onclick="loadCandidates()" class="text-sm text-indigo-600 hover:underline">↻ Refresh</button>
+<!-- ══ CANDIDATES ══════════════════════════════════════════════════════════ -->
+<section id="pane-candidates" class="hidden fade-in">
+  <!-- Search & Filters -->
+  <div class="card mb-4">
+    <div class="flex flex-wrap gap-3">
+      <input id="search-q" class="input flex-1 min-w-48" placeholder="🔍  Search by name or email…" oninput="debounceSearch()"/>
+      <input id="search-skill" class="input w-44" placeholder="Filter by skill…" oninput="debounceSearch()"/>
+      <input id="search-exp" type="number" min="0" step="1" class="input w-36" placeholder="Min exp (yrs)" oninput="debounceSearch()"/>
+      <select id="search-edu" class="input w-40" onchange="loadCandidates()">
+        <option value="">Any education</option>
+        <option>Bachelor</option><option>Master</option>
+        <option>PhD</option><option>Associate</option>
+      </select>
+      <button onclick="loadCandidates()" class="btn-ghost">↻ Refresh</button>
+    </div>
   </div>
+  <div id="candidates-count" class="text-sm text-gray-400 mb-3"></div>
   <div id="candidates-list"><p class="text-gray-400">Loading…</p></div>
 </section>
 
-<!-- ── Jobs ──────────────────────────────────────────────────── -->
-<section id="pane-jobs" class="hidden">
-  <h2 class="text-xl font-bold text-gray-800 mb-4">Job Descriptions</h2>
-  <div class="card">
-    <h3 class="font-semibold text-gray-700 mb-3">Add New Job</h3>
-    <div class="grid gap-3">
-      <input id="job-title" placeholder="Job title (e.g. Senior Python Developer)" class="border rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-indigo-300 outline-none" />
-      <textarea id="job-desc" rows="5" placeholder="Paste the full job description here…" class="border rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-indigo-300 outline-none resize-none"></textarea>
-      <div class="flex gap-3">
-        <input id="job-exp" type="number" min="0" step="0.5" placeholder="Min experience (years)" class="border rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-indigo-300 outline-none" />
-        <select id="job-edu" class="border rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-indigo-300 outline-none">
-          <option value="">Education required (any)</option>
-          <option>High School</option><option>Associate</option>
-          <option>Bachelor</option><option>Master</option><option>PhD</option>
-        </select>
+<!-- ══ JOBS ════════════════════════════════════════════════════════════════ -->
+<section id="pane-jobs" class="hidden fade-in">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div>
+      <div class="card">
+        <h3 class="font-bold text-gray-700 mb-4">Add New Job</h3>
+        <div class="space-y-3">
+          <input id="job-title" class="input" placeholder="Job title e.g. Senior Python Developer"/>
+          <textarea id="job-desc" rows="6" class="input resize-none" placeholder="Paste the full job description here…" oninput="previewSkills()"></textarea>
+          <div class="flex gap-3">
+            <input id="job-exp" type="number" min="0" step="0.5" class="input" placeholder="Min experience (years)"/>
+            <select id="job-edu" class="input">
+              <option value="">Any education</option>
+              <option>High School</option><option>Associate</option>
+              <option>Bachelor</option><option>Master</option><option>PhD</option>
+            </select>
+          </div>
+          <div id="skill-preview" class="hidden">
+            <p class="text-xs text-gray-500 mb-1">Skills detected from description:</p>
+            <div id="skill-preview-tags"></div>
+          </div>
+          <button onclick="createJob()" class="btn-primary w-full">Create Job</button>
+          <div id="job-msg" class="text-sm"></div>
+        </div>
       </div>
-      <button onclick="createJob()" class="bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition">Create Job</button>
-      <div id="job-msg" class="text-sm"></div>
+    </div>
+    <div>
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-bold text-gray-700">Existing Jobs</h3>
+        <button onclick="loadJobs()" class="text-xs text-indigo-600 hover:underline">↻ Refresh</button>
+      </div>
+      <div id="jobs-list"><p class="text-gray-400">Loading…</p></div>
     </div>
   </div>
-  <div class="flex items-center justify-between mb-3">
-    <h3 class="font-semibold text-gray-700">Existing Jobs</h3>
-    <button onclick="loadJobs()" class="text-sm text-indigo-600 hover:underline">↻ Refresh</button>
-  </div>
-  <div id="jobs-list"><p class="text-gray-400">Loading…</p></div>
 </section>
 
-<!-- ── Match ──────────────────────────────────────────────────── -->
-<section id="pane-match" class="hidden">
-  <h2 class="text-xl font-bold text-gray-800 mb-4">Match Candidates to Job</h2>
-  <div class="card">
-    <label class="block text-sm font-medium text-gray-700 mb-1">Select Job</label>
+<!-- ══ MATCH ═══════════════════════════════════════════════════════════════ -->
+<section id="pane-match" class="hidden fade-in">
+  <div class="card max-w-2xl mb-6">
+    <h3 class="font-bold text-gray-700 mb-3">Select Job to Match Against</h3>
     <div class="flex gap-3">
-      <select id="match-job-select" class="border rounded-lg px-3 py-2 text-sm flex-1 focus:ring-2 focus:ring-indigo-300 outline-none">
+      <select id="match-job-select" class="input flex-1">
         <option value="">— choose a job —</option>
       </select>
-      <button onclick="runMatch()" class="bg-green-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-green-700 transition">Find Matches</button>
+      <button onclick="runMatch()" class="bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-emerald-700 transition">
+        Find Matches
+      </button>
     </div>
   </div>
   <div id="match-results"></div>
 </section>
 
+</div><!-- /p-8 -->
 </main>
 
-<!-- Toast -->
-<div id="toast" class="fixed bottom-6 right-6 bg-gray-800 text-white text-sm px-4 py-2.5 rounded-lg shadow-xl hidden transition"></div>
+<!-- ── Toast ──────────────────────────────────────────────────────────────── -->
+<div id="toast" class="fixed bottom-6 right-6 text-sm px-4 py-3 rounded-xl shadow-xl hidden transition-all max-w-xs"></div>
+
+<!-- ── Candidate Detail Modal ─────────────────────────────────────────────── -->
+<div id="modal" class="fixed inset-0 bg-black/40 z-50 hidden flex items-center justify-center p-4" onclick="closeModal(event)">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-auto p-6" onclick="event.stopPropagation()">
+    <div class="flex items-start justify-between mb-4">
+      <h2 class="text-xl font-bold text-gray-800" id="modal-name"></h2>
+      <button onclick="document.getElementById('modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+    </div>
+    <div id="modal-content"></div>
+  </div>
+</div>
 
 <script>
-const API = '';   // same origin
+const API = '';
+let skillsChart = null;
+let searchTimer = null;
+let currentPane = 'dashboard';
 
-// ── Tabs ──────────────────────────────────────────────────────────────────────
-function showTab(name) {
-  ['upload','candidates','jobs','match'].forEach(t => {
-    document.getElementById(`pane-${t}`).classList.add('hidden');
-    document.getElementById(`tab-${t}`).classList.remove('border-indigo-600','text-indigo-600','font-semibold');
-    document.getElementById(`tab-${t}`).classList.add('border-transparent','text-gray-500');
+// ── Pane navigation ────────────────────────────────────────────────────────
+const pageMeta = {
+  dashboard:  { title: 'Dashboard',   sub: 'Overview of your recruitment pipeline' },
+  upload:     { title: 'Upload CV',   sub: 'Parse and store a new candidate CV' },
+  candidates: { title: 'Candidates',  sub: 'Browse and search all stored candidates' },
+  jobs:       { title: 'Jobs',        sub: 'Manage job descriptions' },
+  match:      { title: 'Match',       sub: 'Rank candidates against a job description' },
+};
+
+function showPane(name) {
+  ['dashboard','upload','candidates','jobs','match'].forEach(p => {
+    document.getElementById(`pane-${p}`).classList.add('hidden');
+    document.getElementById(`nav-${p}`).classList.remove('active');
   });
-  document.getElementById(`pane-${name}`).classList.remove('hidden');
-  const btn = document.getElementById(`tab-${name}`);
-  btn.classList.add('border-indigo-600','text-indigo-600','font-semibold');
-  btn.classList.remove('border-transparent','text-gray-500');
+  const pane = document.getElementById(`pane-${name}`);
+  pane.classList.remove('hidden');
+  pane.classList.remove('fade-in');
+  void pane.offsetWidth;
+  pane.classList.add('fade-in');
+  document.getElementById(`nav-${name}`).classList.add('active');
+  document.getElementById('page-title').textContent = pageMeta[name].title;
+  document.getElementById('page-sub').textContent   = pageMeta[name].sub;
+  currentPane = name;
+  if (name === 'dashboard')  loadDashboard();
   if (name === 'candidates') loadCandidates();
-  if (name === 'jobs') loadJobs();
-  if (name === 'match') { loadJobs(); loadMatchJobs(); }
+  if (name === 'jobs')       loadJobs();
+  if (name === 'match')      { loadJobs(); loadMatchJobs(); }
 }
 
-// ── Toast ──────────────────────────────────────────────────────────────────────
-function toast(msg, ok=true) {
+function refreshCurrent() { showPane(currentPane); }
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+function toast(msg, ok = true) {
   const el = document.getElementById('toast');
   el.textContent = msg;
-  el.className = `fixed bottom-6 right-6 text-sm px-4 py-2.5 rounded-lg shadow-xl transition ${ok ? 'bg-green-700' : 'bg-red-700'} text-white`;
+  el.className = `fixed bottom-6 right-6 text-sm px-4 py-3 rounded-xl shadow-xl transition-all max-w-xs ${ok ? 'bg-emerald-700' : 'bg-red-600'} text-white`;
   el.classList.remove('hidden');
-  setTimeout(() => el.classList.add('hidden'), 3500);
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.add('hidden'), 3500);
 }
 
-// ── Upload ──────────────────────────────────────────────────────────────────────
+// ── Avatar colour ──────────────────────────────────────────────────────────
+const COLOURS = ['bg-indigo-500','bg-purple-500','bg-emerald-500','bg-rose-500','bg-amber-500','bg-cyan-500'];
+function avatarColor(name) { return COLOURS[name.charCodeAt(0) % COLOURS.length]; }
+function initials(name) { return name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase(); }
+
+// ── Dashboard ──────────────────────────────────────────────────────────────
+async function loadDashboard() {
+  try {
+    const res = await fetch(`${API}/stats`);
+    const d = await res.json();
+
+    document.getElementById('stat-candidates').textContent = d.total_candidates;
+    document.getElementById('stat-jobs').textContent       = d.total_jobs;
+    document.getElementById('stat-exp').textContent        = d.avg_experience + ' yrs';
+    document.getElementById('stat-skills').textContent     = d.total_skills;
+
+    document.getElementById(`badge-candidates`).textContent = d.total_candidates;
+    document.getElementById(`badge-candidates`).classList.toggle('hidden', d.total_candidates === 0);
+    document.getElementById(`badge-jobs`).textContent = d.total_jobs;
+    document.getElementById(`badge-jobs`).classList.toggle('hidden', d.total_jobs === 0);
+
+    // Chart
+    if (d.top_skills.length) {
+      document.getElementById('skills-chart-empty').classList.add('hidden');
+      const labels = d.top_skills.map(s => s.name);
+      const data   = d.top_skills.map(s => s.count);
+      if (skillsChart) skillsChart.destroy();
+      skillsChart = new Chart(document.getElementById('skills-chart'), {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            data, backgroundColor: '#6366f1', borderRadius: 6, borderSkipped: false,
+          }]
+        },
+        options: {
+          indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { x: { grid: { display: false }, ticks: { stepSize: 1 } }, y: { grid: { display: false } } }
+        }
+      });
+    } else {
+      document.getElementById('skills-chart-empty').classList.remove('hidden');
+    }
+
+    // Recent
+    const el = document.getElementById('recent-list');
+    if (!d.recent_candidates.length) {
+      el.innerHTML = '<p class="text-gray-400 text-sm">No candidates yet. <button onclick="showPane(\'upload\')" class="text-indigo-600 hover:underline">Upload one →</button></p>';
+    } else {
+      el.innerHTML = d.recent_candidates.map(c => `
+        <div class="flex items-center gap-3 py-2.5 border-b border-gray-50 last:border-0 cursor-pointer hover:bg-gray-50 rounded-lg px-1 transition" onclick="openCandidateModal(${c.id})">
+          <div class="avatar ${avatarColor(c.name)}">${initials(c.name)}</div>
+          <div class="flex-1 min-w-0">
+            <p class="font-medium text-gray-800 text-sm truncate">${c.name}</p>
+            <p class="text-xs text-gray-400">${c.email || '—'}</p>
+          </div>
+          <div class="text-right text-xs text-gray-400">
+            <div>${c.skills} skills</div>
+            <div>${c.exp} yrs</div>
+          </div>
+        </div>
+      `).join('');
+    }
+  } catch(e) { toast('Failed to load dashboard', false); }
+}
+
+// ── Upload ─────────────────────────────────────────────────────────────────
 let selectedFile = null;
-
-function onFileSelect(e) {
-  selectedFile = e.target.files[0];
-  if (selectedFile) {
-    document.getElementById('file-name').textContent = selectedFile.name;
-    document.getElementById('upload-btn').disabled = false;
-  }
-}
-
-function handleDrop(e) {
-  e.preventDefault();
-  const file = e.dataTransfer.files[0];
-  if (file) {
-    selectedFile = file;
-    document.getElementById('file-name').textContent = file.name;
-    document.getElementById('upload-btn').disabled = false;
-  }
+function onFileSelect(e) { setFile(e.target.files[0]); }
+function handleDrop(e) { e.preventDefault(); setFile(e.dataTransfer.files[0]); }
+function setFile(f) {
+  if (!f) return;
+  selectedFile = f;
+  const fn = document.getElementById('file-name');
+  fn.textContent = f.name;
+  fn.classList.remove('hidden');
+  document.getElementById('upload-btn').disabled = false;
 }
 
 async function uploadCV() {
@@ -180,97 +381,194 @@ async function uploadCV() {
   const btn = document.getElementById('upload-btn');
   const msg = document.getElementById('upload-msg');
   btn.disabled = true;
-  btn.textContent = 'Uploading…';
-  msg.textContent = '';
+  btn.textContent = 'Parsing…';
+  msg.innerHTML = '';
+  document.getElementById('upload-progress').classList.remove('hidden');
 
   const fd = new FormData();
   fd.append('file', selectedFile);
-
   try {
     const res = await fetch(`${API}/candidates/upload`, { method: 'POST', body: fd });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Upload failed');
-    msg.innerHTML = `<span class="text-green-600 font-medium">✓ Uploaded successfully!</span>`;
+    msg.innerHTML = `<span class="text-emerald-600 font-medium">✓ ${data.full_name} added successfully!</span>`;
     renderParsedCard(data);
     toast(`${data.full_name} added!`);
+    selectedFile = null;
+    document.getElementById('file-name').classList.add('hidden');
   } catch(err) {
-    msg.innerHTML = `<span class="text-red-600">✗ ${err.message}</span>`;
+    msg.innerHTML = `<span class="text-red-500">✗ ${err.message}</span>`;
     toast(err.message, false);
   } finally {
-    btn.disabled = false;
+    btn.disabled = true;
     btn.textContent = 'Upload & Parse';
+    document.getElementById('upload-progress').classList.add('hidden');
   }
 }
 
 function renderParsedCard(c) {
-  const card = document.getElementById('parsed-card');
-  card.classList.remove('hidden');
+  document.getElementById('parsed-card').classList.remove('hidden');
   document.getElementById('parsed-content').innerHTML = `
-    <div class="grid grid-cols-2 gap-2 text-sm mb-3">
-      <div><span class="text-gray-500">Name:</span> <strong>${c.full_name}</strong></div>
-      <div><span class="text-gray-500">Email:</span> ${c.email || '—'}</div>
-      <div><span class="text-gray-500">Phone:</span> ${c.phone || '—'}</div>
-      <div><span class="text-gray-500">Experience:</span> ${c.years_experience} yrs</div>
-      <div><span class="text-gray-500">Education:</span> ${c.education_level || '—'} ${c.education_field ? '('+c.education_field+')' : ''}</div>
+    <div class="flex items-center gap-3 mb-4">
+      <div class="avatar w-14 h-14 text-lg ${avatarColor(c.full_name)}">${initials(c.full_name)}</div>
+      <div>
+        <h3 class="font-bold text-gray-800 text-lg">${c.full_name}</h3>
+        <p class="text-sm text-gray-500">${c.email || '—'}</p>
+      </div>
     </div>
-    <div class="text-sm text-gray-500 mb-1">Skills detected:</div>
+    <div class="grid grid-cols-2 gap-3 text-sm mb-4">
+      ${row('📞 Phone', c.phone)}
+      ${row('📍 Location', c.location)}
+      ${row('🎓 Education', [c.education_level, c.education_field].filter(Boolean).join(' · '))}
+      ${row('⏱ Experience', c.years_experience + ' years')}
+      ${c.linkedin ? row('🔗 LinkedIn', `<a href="https://${c.linkedin}" target="_blank" class="text-indigo-600 hover:underline">${c.linkedin}</a>`) : ''}
+      ${c.github   ? row('🐙 GitHub', `<a href="https://${c.github}" target="_blank" class="text-indigo-600 hover:underline">${c.github}</a>`) : ''}
+    </div>
+    <p class="text-xs text-gray-500 mb-2">Skills detected (${(c.skills||[]).length}):</p>
     <div>${(c.skills||[]).map(s=>`<span class="badge">${s.name}</span>`).join('') || '<span class="text-gray-400 text-xs">none</span>'}</div>
   `;
 }
+function row(label, val) {
+  if (!val) return '';
+  return `<div class="bg-gray-50 rounded-lg p-2.5"><span class="text-gray-500 text-xs block">${label}</span><span class="font-medium text-gray-800">${val}</span></div>`;
+}
 
-// ── Candidates ──────────────────────────────────────────────────────────────────
+// ── Candidates ─────────────────────────────────────────────────────────────
+function debounceSearch() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(loadCandidates, 350);
+}
+
 async function loadCandidates() {
-  const el = document.getElementById('candidates-list');
-  el.innerHTML = '<p class="text-gray-400">Loading…</p>';
+  const el   = document.getElementById('candidates-list');
+  const cnt  = document.getElementById('candidates-count');
+  const q    = document.getElementById('search-q')?.value.trim() || '';
+  const skill= document.getElementById('search-skill')?.value.trim() || '';
+  const exp  = parseFloat(document.getElementById('search-exp')?.value) || 0;
+  const edu  = document.getElementById('search-edu')?.value || '';
+
+  const params = new URLSearchParams();
+  if (q)    params.set('q', q);
+  if (skill)params.set('skill', skill);
+  if (exp)  params.set('min_exp', exp);
+  if (edu)  params.set('education', edu);
+
+  el.innerHTML = '<p class="text-gray-400 text-sm">Loading…</p>';
   try {
-    const res = await fetch(`${API}/candidates`);
+    const res  = await fetch(`${API}/candidates?${params}`);
     const data = await res.json();
-    if (!data.length) { el.innerHTML = '<p class="text-gray-400">No candidates yet.</p>'; return; }
+    cnt.textContent = `${data.length} candidate${data.length !== 1 ? 's' : ''} found`;
+    if (!data.length) { el.innerHTML = '<p class="text-gray-400">No candidates found.</p>'; return; }
     el.innerHTML = data.map(c => `
-      <div class="card hover:shadow-lg transition">
-        <div class="flex items-start justify-between">
-          <div>
-            <h3 class="font-bold text-gray-800 text-lg">${c.full_name}</h3>
-            <p class="text-sm text-gray-500">${c.email || ''} ${c.phone ? '· '+c.phone : ''}</p>
-          </div>
-          <div class="text-right text-sm text-gray-500">
-            <div>${c.years_experience} yrs exp</div>
-            <div>${c.education_level || '—'}</div>
+      <div class="card hover:shadow-md transition cursor-pointer" onclick="openCandidateModal(${c.id})">
+        <div class="flex items-start gap-4">
+          <div class="avatar w-12 h-12 text-base ${avatarColor(c.full_name)}">${initials(c.full_name)}</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-2 flex-wrap">
+              <div>
+                <h3 class="font-bold text-gray-800">${c.full_name}</h3>
+                <p class="text-sm text-gray-400">${[c.email, c.location].filter(Boolean).join(' · ')}</p>
+              </div>
+              <div class="flex gap-2 text-right text-xs text-gray-500 flex-shrink-0">
+                <span class="bg-indigo-50 text-indigo-700 px-2 py-1 rounded-lg font-medium">${c.years_experience} yrs</span>
+                <span class="bg-purple-50 text-purple-700 px-2 py-1 rounded-lg font-medium">${c.education_level || '—'}</span>
+              </div>
+            </div>
+            <div class="mt-2 flex flex-wrap">
+              ${(c.skills||[]).slice(0,8).map(s=>`<span class="badge">${s.name}</span>`).join('')}
+              ${(c.skills||[]).length > 8 ? `<span class="text-xs text-gray-400 mt-1">+${c.skills.length-8} more</span>` : ''}
+            </div>
           </div>
         </div>
-        <div class="mt-2">${(c.skills||[]).map(s=>`<span class="badge">${s.name}</span>`).join('')}</div>
-        <button onclick="deleteCandidate(${c.id})" class="mt-2 text-xs text-red-500 hover:underline">Delete</button>
       </div>
     `).join('');
   } catch(e) { el.innerHTML = `<p class="text-red-500">${e.message}</p>`; }
 }
 
+async function openCandidateModal(id) {
+  const modal = document.getElementById('modal');
+  modal.classList.remove('hidden');
+  document.getElementById('modal-content').innerHTML = '<p class="text-gray-400">Loading…</p>';
+  try {
+    const res = await fetch(`${API}/candidates/${id}`);
+    const c   = await res.json();
+    document.getElementById('modal-name').textContent = c.full_name;
+    document.getElementById('modal-content').innerHTML = `
+      <div class="space-y-3 text-sm mb-4">
+        ${c.email    ? `<div class="flex items-center gap-2 text-gray-600"><span>📧</span>${c.email}</div>` : ''}
+        ${c.phone    ? `<div class="flex items-center gap-2 text-gray-600"><span>📞</span>${c.phone}</div>` : ''}
+        ${c.location ? `<div class="flex items-center gap-2 text-gray-600"><span>📍</span>${c.location}</div>` : ''}
+        ${c.linkedin ? `<div class="flex items-center gap-2"><span>🔗</span><a href="https://${c.linkedin}" target="_blank" class="text-indigo-600 hover:underline">${c.linkedin}</a></div>` : ''}
+        ${c.github   ? `<div class="flex items-center gap-2"><span>🐙</span><a href="https://${c.github}" target="_blank" class="text-indigo-600 hover:underline">${c.github}</a></div>` : ''}
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <div class="bg-indigo-50 rounded-xl p-3 text-center"><div class="text-2xl font-bold text-indigo-700">${c.years_experience}</div><div class="text-xs text-indigo-500">Years Exp</div></div>
+        <div class="bg-purple-50 rounded-xl p-3 text-center"><div class="text-2xl font-bold text-purple-700">${c.skills.length}</div><div class="text-xs text-purple-500">Skills</div></div>
+      </div>
+      ${c.education_level ? `<div class="bg-gray-50 rounded-xl p-3 mb-4 text-sm"><span class="text-gray-500">Education: </span><strong>${[c.education_level,c.education_field].filter(Boolean).join(' · ')}</strong></div>` : ''}
+      <p class="text-xs text-gray-500 mb-2">All Skills:</p>
+      <div>${(c.skills||[]).map(s=>`<span class="badge">${s.name}</span>`).join('')}</div>
+      <div class="mt-4 pt-4 border-t flex justify-end">
+        <button onclick="deleteCandidate(${c.id})" class="text-sm text-red-500 hover:underline">Delete candidate</button>
+      </div>
+    `;
+  } catch(e) { document.getElementById('modal-content').innerHTML = `<p class="text-red-500">${e.message}</p>`; }
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal'))
+    document.getElementById('modal').classList.add('hidden');
+}
+
 async function deleteCandidate(id) {
   if (!confirm('Delete this candidate?')) return;
   await fetch(`${API}/candidates/${id}`, {method:'DELETE'});
+  document.getElementById('modal').classList.add('hidden');
   toast('Candidate deleted');
   loadCandidates();
 }
 
-// ── Jobs ──────────────────────────────────────────────────────────────────────
+// ── Jobs ───────────────────────────────────────────────────────────────────
+let previewTimer = null;
+function previewSkills() {
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(async () => {
+    const desc = document.getElementById('job-desc').value;
+    if (desc.length < 20) { document.getElementById('skill-preview').classList.add('hidden'); return; }
+    try {
+      const res = await fetch(`${API}/skills`);
+      const all = await res.json();
+      const text = desc.toLowerCase();
+      const found = all.filter(s => new RegExp('\\b'+s.name.replace(/[+.]/g,'\\$&')+'\\b').test(text));
+      const tags  = document.getElementById('skill-preview-tags');
+      if (found.length) {
+        tags.innerHTML = found.map(s=>`<span class="badge">${s.name}</span>`).join('');
+        document.getElementById('skill-preview').classList.remove('hidden');
+      } else {
+        document.getElementById('skill-preview').classList.add('hidden');
+      }
+    } catch(e) {}
+  }, 400);
+}
+
 async function loadJobs() {
   const el = document.getElementById('jobs-list');
   if (!el) return;
-  el.innerHTML = '<p class="text-gray-400">Loading…</p>';
+  el.innerHTML = '<p class="text-gray-400 text-sm">Loading…</p>';
   try {
-    const res = await fetch(`${API}/jobs`);
+    const res  = await fetch(`${API}/jobs`);
     const data = await res.json();
-    if (!data.length) { el.innerHTML = '<p class="text-gray-400">No jobs yet.</p>'; return; }
+    if (!data.length) { el.innerHTML = '<p class="text-gray-400 text-sm">No jobs yet.</p>'; return; }
     el.innerHTML = data.map(j => `
-      <div class="card">
-        <div class="flex items-start justify-between">
-          <div>
+      <div class="card hover:shadow-md transition">
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex-1 min-w-0">
             <h3 class="font-bold text-gray-800">${j.title}</h3>
-            <p class="text-xs text-gray-400">ID: ${j.id} · ${j.min_experience} yrs min · ${j.education_required||'any edu'}</p>
+            <p class="text-xs text-gray-400 mt-0.5">ID ${j.id} · ${j.min_experience} yrs exp · ${j.education_required || 'any edu'}</p>
           </div>
-          <button onclick="deleteJob(${j.id})" class="text-xs text-red-500 hover:underline">Delete</button>
+          <button onclick="deleteJob(${j.id})" class="text-xs text-red-400 hover:text-red-600 flex-shrink-0">✕</button>
         </div>
-        <p class="text-sm text-gray-600 mt-2 line-clamp-2">${j.description.substring(0,200)}…</p>
+        <p class="text-sm text-gray-500 mt-2 line-clamp-2">${j.description.substring(0,180)}…</p>
         <div class="mt-2">${(j.required_skills||[]).map(s=>`<span class="badge">${s.name}</span>`).join('')}</div>
       </div>
     `).join('');
@@ -279,11 +577,11 @@ async function loadJobs() {
 
 async function loadMatchJobs() {
   try {
-    const res = await fetch(`${API}/jobs`);
+    const res  = await fetch(`${API}/jobs`);
     const data = await res.json();
-    const sel = document.getElementById('match-job-select');
+    const sel  = document.getElementById('match-job-select');
     sel.innerHTML = '<option value="">— choose a job —</option>' +
-      data.map(j => `<option value="${j.id}">${j.title} (ID ${j.id})</option>`).join('');
+      data.map(j=>`<option value="${j.id}">${j.title} (ID ${j.id})</option>`).join('');
   } catch(e) {}
 }
 
@@ -293,20 +591,21 @@ async function createJob() {
   const exp   = parseFloat(document.getElementById('job-exp').value) || 0;
   const edu   = document.getElementById('job-edu').value;
   const msg   = document.getElementById('job-msg');
-
   if (!title || !desc) { msg.innerHTML='<span class="text-red-500">Title and description are required.</span>'; return; }
   try {
-    const res = await fetch(`${API}/jobs`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
+    const res  = await fetch(`${API}/jobs`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({title, description:desc, min_experience:exp, education_required:edu||null})
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Failed');
-    msg.innerHTML=`<span class="text-green-600">✓ Job "${data.title}" created (${data.required_skills.length} skills extracted)</span>`;
+    msg.innerHTML=`<span class="text-emerald-600">✓ Job "${data.title}" created — ${data.required_skills.length} skills extracted</span>`;
     toast('Job created!');
+    document.getElementById('job-title').value = '';
+    document.getElementById('job-desc').value  = '';
+    document.getElementById('skill-preview').classList.add('hidden');
     loadJobs();
-  } catch(e) { msg.innerHTML=`<span class="text-red-500">✗ ${e.message}</span>`; toast(e.message,false); }
+  } catch(e) { msg.innerHTML=`<span class="text-red-500">✗ ${e.message}</span>`; toast(e.message, false); }
 }
 
 async function deleteJob(id) {
@@ -316,61 +615,88 @@ async function deleteJob(id) {
   loadJobs();
 }
 
-// ── Matching ──────────────────────────────────────────────────────────────────
+// ── Matching ───────────────────────────────────────────────────────────────
 async function runMatch() {
   const jobId = document.getElementById('match-job-select').value;
-  const el = document.getElementById('match-results');
+  const el    = document.getElementById('match-results');
   if (!jobId) { toast('Please select a job', false); return; }
-
   el.innerHTML = '<p class="text-gray-400 mt-4">Matching…</p>';
   try {
-    const res = await fetch(`${API}/jobs/${jobId}/matches`);
+    const res  = await fetch(`${API}/jobs/${jobId}/matches`);
     const data = await res.json();
     if (!data.length) { el.innerHTML='<p class="text-gray-400 mt-4">No candidates to match.</p>'; return; }
 
-    el.innerHTML = `<p class="text-sm text-gray-500 mt-2 mb-4">${data.length} candidate(s) ranked:</p>` +
-      data.map((r,i) => `
-        <div class="card hover:shadow-lg transition">
-          <div class="flex items-start justify-between gap-4">
-            <div class="flex-1">
-              <div class="flex items-center gap-2 mb-1">
-                <span class="text-lg font-bold text-gray-300 w-7">#${i+1}</span>
-                <h3 class="font-bold text-gray-800 text-lg">${r.candidate.full_name}</h3>
-                <span class="ml-auto text-2xl font-extrabold ${scoreColor(r.score)}">${r.score.toFixed(0)}%</span>
+    const exportUrl = `${API}/jobs/${jobId}/matches/export`;
+    el.innerHTML = `
+      <div class="flex items-center justify-between mb-4">
+        <p class="text-sm text-gray-500">${data.length} candidate(s) ranked</p>
+        <a href="${exportUrl}" class="btn-ghost flex items-center gap-2 text-sm">
+          <span>⬇️</span> Export CSV
+        </a>
+      </div>
+    ` + data.map((r,i) => {
+      const c = r.candidate;
+      return `
+      <div class="card hover:shadow-md transition">
+        <div class="flex items-start gap-4">
+          <div class="text-3xl font-black text-gray-200 w-8 flex-shrink-0 pt-1">${i+1}</div>
+          <div class="avatar ${avatarColor(c.full_name)} flex-shrink-0">${initials(c.full_name)}</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-2 flex-wrap mb-2">
+              <div>
+                <h3 class="font-bold text-gray-800 cursor-pointer hover:text-indigo-600" onclick="openCandidateModal(${c.id})">${c.full_name}</h3>
+                <p class="text-xs text-gray-400">${[c.email, c.location].filter(Boolean).join(' · ')} · ${c.years_experience} yrs · ${c.education_level||'—'}</p>
               </div>
-              <div class="w-full bg-gray-100 rounded-full h-2 mb-3">
-                <div class="score-bar h-2 rounded-full ${scoreBarColor(r.score)}" style="width:${r.score}%"></div>
-              </div>
-              <div class="grid grid-cols-3 gap-2 text-xs text-gray-500 mb-2">
-                <div>Skills <strong class="text-gray-700">${r.skill_score.toFixed(0)}%</strong></div>
-                <div>Experience <strong class="text-gray-700">${r.experience_score.toFixed(0)}%</strong></div>
-                <div>Education <strong class="text-gray-700">${r.education_score.toFixed(0)}%</strong></div>
-              </div>
-              <p class="text-xs text-gray-500">${r.candidate.email || ''} · ${r.candidate.years_experience} yrs · ${r.candidate.education_level||'—'}</p>
+              <div class="text-3xl font-black ${scoreColor(r.score)}">${r.score.toFixed(0)}<span class="text-lg">%</span></div>
+            </div>
+
+            <!-- Score bar -->
+            <div class="w-full bg-gray-100 rounded-full h-2 mb-3">
+              <div class="score-bar h-2 rounded-full ${scoreBarColor(r.score)}" style="width:0%" data-width="${r.score}%"></div>
+            </div>
+
+            <!-- Score breakdown -->
+            <div class="grid grid-cols-3 gap-2 mb-3">
+              ${miniBar('Skills', r.skill_score)}
+              ${miniBar('Experience', r.experience_score)}
+              ${miniBar('Education', r.education_score)}
+            </div>
+
+            <!-- Skill badges -->
+            <div>
+              ${r.matched_skills.map(s=>`<span class="badge-green">✓ ${s}</span>`).join('')}
+              ${r.missing_skills.map(s=>`<span class="badge-red">✗ ${s}</span>`).join('')}
             </div>
           </div>
-          <div class="mt-2">
-            ${r.matched_skills.map(s=>`<span class="badge-green">${s}</span>`).join('')}
-            ${r.missing_skills.map(s=>`<span class="badge-red">✗ ${s}</span>`).join('')}
-          </div>
         </div>
-      `).join('');
+      </div>
+    `}).join('');
+
+    // Animate bars
+    requestAnimationFrame(() => {
+      document.querySelectorAll('.score-bar[data-width]').forEach(bar => {
+        bar.style.width = bar.dataset.width;
+      });
+    });
   } catch(e) { el.innerHTML=`<p class="text-red-500 mt-4">${e.message}</p>`; toast(e.message,false); }
 }
 
-function scoreColor(s) {
-  if (s >= 75) return 'text-green-600';
-  if (s >= 50) return 'text-yellow-600';
-  return 'text-red-500';
-}
-function scoreBarColor(s) {
-  if (s >= 75) return 'bg-green-500';
-  if (s >= 50) return 'bg-yellow-400';
-  return 'bg-red-400';
+function miniBar(label, val) {
+  const color = val >= 75 ? 'bg-emerald-500' : val >= 50 ? 'bg-amber-400' : 'bg-red-400';
+  return `
+    <div class="bg-gray-50 rounded-lg p-2">
+      <div class="flex justify-between text-xs text-gray-500 mb-1"><span>${label}</span><span class="font-semibold text-gray-700">${val.toFixed(0)}%</span></div>
+      <div class="w-full bg-gray-200 rounded-full h-1">
+        <div class="${color} h-1 rounded-full" style="width:${val}%"></div>
+      </div>
+    </div>`;
 }
 
-// init
-showTab('upload');
+function scoreColor(s)    { return s>=75?'text-emerald-600':s>=50?'text-amber-500':'text-red-500'; }
+function scoreBarColor(s) { return s>=75?'bg-emerald-500':s>=50?'bg-amber-400':'bg-red-400'; }
+
+// ── Init ───────────────────────────────────────────────────────────────────
+showPane('dashboard');
 </script>
 </body>
 </html>

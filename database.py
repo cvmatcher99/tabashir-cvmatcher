@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 from sqlalchemy import (
     create_engine, Column, Integer, String, Float, Text,
-    DateTime, ForeignKey, Table
+    DateTime, ForeignKey, Table, text
 )
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from dotenv import load_dotenv
@@ -18,19 +18,14 @@ engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-
-# Association table: candidate ↔ skill
 candidate_skills = Table(
-    "candidate_skills",
-    Base.metadata,
+    "candidate_skills", Base.metadata,
     Column("candidate_id", Integer, ForeignKey("candidates.id", ondelete="CASCADE"), primary_key=True),
     Column("skill_id",     Integer, ForeignKey("skills.id",      ondelete="CASCADE"), primary_key=True),
 )
 
-# Association table: job_description ↔ skill
 job_skills = Table(
-    "job_skills",
-    Base.metadata,
+    "job_skills", Base.metadata,
     Column("job_id",   Integer, ForeignKey("job_descriptions.id", ondelete="CASCADE"), primary_key=True),
     Column("skill_id", Integer, ForeignKey("skills.id",           ondelete="CASCADE"), primary_key=True),
 )
@@ -43,8 +38,11 @@ class Candidate(Base):
     full_name        = Column(String(255), nullable=False)
     email            = Column(String(255), unique=True, index=True)
     phone            = Column(String(50))
+    location         = Column(String(255))
+    linkedin         = Column(String(255))
+    github           = Column(String(255))
     years_experience = Column(Float, default=0.0)
-    education_level  = Column(String(100))   # e.g. "Bachelor", "Master", "PhD", "High School"
+    education_level  = Column(String(100))
     education_field  = Column(String(255))
     raw_text         = Column(Text)
     file_name        = Column(String(255))
@@ -59,8 +57,8 @@ class Skill(Base):
     id   = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), unique=True, nullable=False, index=True)
 
-    candidates = relationship("Candidate", secondary=candidate_skills, back_populates="skills")
-    job_descriptions = relationship("JobDescription", secondary=job_skills, back_populates="required_skills")
+    candidates       = relationship("Candidate",       secondary=candidate_skills, back_populates="skills")
+    job_descriptions = relationship("JobDescription",  secondary=job_skills,       back_populates="required_skills")
 
 
 class JobDescription(Base):
@@ -86,3 +84,18 @@ def get_db():
 
 def init_db():
     Base.metadata.create_all(bind=engine)
+    # Safe migrations for new columns on existing installs
+    new_cols = [
+        ("location", "VARCHAR(255)"),
+        ("linkedin", "VARCHAR(255)"),
+        ("github",   "VARCHAR(255)"),
+    ]
+    with engine.connect() as conn:
+        for col, col_type in new_cols:
+            try:
+                conn.execute(text(
+                    f"ALTER TABLE candidates ADD COLUMN IF NOT EXISTS {col} {col_type}"
+                ))
+                conn.commit()
+            except Exception:
+                pass
