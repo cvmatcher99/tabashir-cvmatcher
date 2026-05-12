@@ -221,6 +221,212 @@ Nice to have:
         "min_experience": 3.0,
         "education_required": "Bachelor",
     },
+
+    # ── Non-tech jobs ──────────────────────────────────────────────────────────
+
+    {
+        "title": "Operations Manager",
+        "description": """We are looking for an experienced Operations Manager to oversee daily operations.
+
+Responsibilities:
+- Supervise and manage day-to-day operational activities
+- Develop and implement operational policies and procedures
+- Coordinate between departments to ensure smooth workflow
+- Monitor performance metrics and prepare reports
+- Manage teams and conduct performance evaluations
+- Handle customer complaints and resolve escalations
+- Ensure compliance with company standards and regulations
+
+Requirements:
+- 5+ years of experience in operations or management
+- Strong leadership and decision-making skills
+- Excellent communication and problem-solving skills
+- Experience in operational management and supervision
+- Customer service orientation
+- Proficiency in Microsoft Office (Excel, Word, PowerPoint)
+- Ability to work under pressure and manage multiple priorities
+
+Nice to have:
+- Experience in government or semi-government sector
+- Knowledge of quality management systems
+- PMP or management certification""",
+        "min_experience": 5.0,
+        "education_required": "Bachelor",
+    },
+    {
+        "title": "Banking & Finance Professional",
+        "description": """We are seeking an experienced Banking Professional to join our financial services team.
+
+Responsibilities:
+- Manage corporate and retail banking relationships
+- Process loans, credit facilities, and financial products
+- Handle Islamic finance products and transactions
+- Conduct financial analysis and risk assessment
+- Ensure compliance with banking regulations and AML policies
+- Manage client portfolios and provide financial advisory
+- Coordinate with internal departments for smooth transactions
+
+Requirements:
+- 5+ years of banking or financial services experience
+- Knowledge of Islamic finance and banking products
+- Experience in corporate banking and client relationship management
+- Strong understanding of credit analysis and risk management
+- Excellent communication and negotiation skills
+- Proficiency in banking systems and Microsoft Office
+- Knowledge of AML/KYC regulations
+
+Preferred:
+- CFA, CISI or similar financial certification
+- Experience in UAE/GCC banking sector
+- Arabic language proficiency""",
+        "min_experience": 5.0,
+        "education_required": "Bachelor",
+    },
+    {
+        "title": "Customer Service Representative",
+        "description": """We are hiring a Customer Service Representative to deliver exceptional client experiences.
+
+Responsibilities:
+- Handle customer inquiries via phone, email, and in-person
+- Resolve complaints and provide appropriate solutions
+- Process customer requests and follow up to ensure resolution
+- Maintain accurate records of customer interactions
+- Coordinate with other departments to address customer needs
+- Achieve customer satisfaction targets and KPIs
+- Assist in training new team members
+
+Requirements:
+- 2+ years of customer service experience
+- Excellent communication and interpersonal skills
+- Strong problem-solving and conflict resolution abilities
+- Ability to handle high-pressure situations professionally
+- Experience with reservation systems or CRM software
+- Proficiency in Microsoft Office
+- Patient, empathetic, and customer-focused attitude
+
+Nice to have:
+- Experience with Amadeus or Galileo systems
+- Multilingual skills (Arabic/English)
+- Call center experience""",
+        "min_experience": 2.0,
+        "education_required": "Bachelor",
+    },
+    {
+        "title": "HR & Administrative Officer",
+        "description": """We are looking for an HR and Administrative Officer to support our human resources functions.
+
+Responsibilities:
+- Manage recruitment, onboarding, and employee records
+- Coordinate training and development programs
+- Handle payroll processing and attendance management
+- Develop and implement HR policies and procedures
+- Manage employee relations and resolve workplace issues
+- Oversee administrative operations and office management
+- Ensure compliance with labor laws and company policies
+
+Requirements:
+- 3+ years of HR or administrative experience
+- Knowledge of HR policies, labor law, and compliance
+- Experience in recruitment and performance management
+- Strong organizational and communication skills
+- Proficiency in Microsoft Office (Excel, Word)
+- Ability to maintain confidentiality and handle sensitive information
+- Attention to detail and multitasking ability
+
+Preferred:
+- CIPD, SHRM or HR certification
+- Experience in UAE/GCC labor law
+- Arabic language skills""",
+        "min_experience": 3.0,
+        "education_required": "Bachelor",
+    },
+    {
+        "title": "Electrical Engineer / Technician",
+        "description": """We are seeking a qualified Electrical Engineer to join our technical team.
+
+Responsibilities:
+- Design, install, and maintain electrical systems and equipment
+- Conduct inspections and troubleshoot electrical faults
+- Ensure compliance with electrical safety standards and codes
+- Coordinate with project teams for electrical installations
+- Prepare technical reports and maintenance schedules
+- Supervise electrical maintenance work and contractors
+- Manage electrical projects from planning to completion
+
+Requirements:
+- 3+ years of electrical engineering or maintenance experience
+- Strong knowledge of electrical installations and systems
+- Experience in project coordination and site supervision
+- Knowledge of electrical safety standards and regulations
+- Ability to read and interpret electrical drawings and schematics
+- Experience with maintenance and troubleshooting
+- Valid electrical certification or license
+
+Nice to have:
+- Experience in industrial or construction projects
+- Knowledge of PLC systems and automation
+- UAE/GCC work experience""",
+        "min_experience": 3.0,
+        "education_required": "Bachelor",
+    },
+    {
+        "title": "Sales & Business Development Executive",
+        "description": """We are looking for a driven Sales Executive to grow our business and client base.
+
+Responsibilities:
+- Identify and develop new business opportunities
+- Build and maintain strong client relationships
+- Present and pitch products/services to potential clients
+- Achieve monthly and quarterly sales targets
+- Prepare proposals, contracts, and sales reports
+- Coordinate with operations team for client delivery
+- Attend networking events and industry exhibitions
+
+Requirements:
+- 3+ years of sales or business development experience
+- Proven track record of achieving sales targets
+- Excellent communication and negotiation skills
+- Strong customer relationship management abilities
+- Experience with CRM systems
+- Self-motivated and results-oriented
+- Valid driving license
+
+Preferred:
+- Experience in B2B sales
+- Knowledge of UAE/GCC market
+- Arabic language skills""",
+        "min_experience": 3.0,
+        "education_required": "Bachelor",
+    },
+    {
+        "title": "Accountant / Finance Officer",
+        "description": """We are hiring an experienced Accountant to manage our financial operations.
+
+Responsibilities:
+- Prepare financial statements and reports
+- Manage accounts payable and receivable
+- Conduct bank reconciliations and journal entries
+- Assist in budgeting, forecasting, and financial planning
+- Ensure compliance with accounting standards and tax regulations
+- Process payroll and employee expense claims
+- Support internal and external audits
+
+Requirements:
+- 3+ years of accounting or finance experience
+- Strong knowledge of accounting principles and standards
+- Proficiency in accounting software (SAP, QuickBooks, or similar)
+- Advanced Excel skills for financial analysis
+- Experience in financial reporting and reconciliation
+- Attention to detail and analytical mindset
+- Knowledge of VAT and tax regulations
+
+Preferred:
+- CPA, ACCA or CMA certification
+- Experience in UAE/GCC accounting standards
+- Experience with ERP systems""",
+        "min_experience": 3.0,
+        "education_required": "Bachelor",
+    },
 ]
 
 
