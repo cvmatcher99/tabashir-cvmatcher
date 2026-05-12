@@ -527,33 +527,63 @@ def salary_estimate(
 ) -> Dict[str, Any]:
     """Estimate monthly salary range in AED for the UAE/Gulf market."""
 
-    prompt = f"""You are a UAE compensation specialist with deep knowledge of Gulf market salaries.
+    prompt = f"""You are a UAE compensation specialist. Use these REAL 2024-2025 UAE monthly salary benchmarks (AED) to guide your answer:
 
-Profile:
+SALARY BENCHMARKS (monthly AED, gross):
+- Software Engineer: Junior 8k-12k | Mid 14k-22k | Senior 25k-40k
+- Data Analyst / BI: Junior 7k-11k | Mid 13k-20k | Senior 22k-35k
+- DevOps / Cloud: Mid 18k-28k | Senior 30k-45k
+- Accountant: Junior 5k-8k | Mid 9k-15k | Senior 16k-25k
+- Finance Manager / CFO: Senior 25k-45k | Director 50k-90k
+- CMA / CPA holder: +20-30% premium over base
+- HR Specialist: Junior 6k-9k | Mid 10k-16k | Senior 18k-28k
+- HR Manager: 22k-40k
+- Marketing / Digital Marketing: Junior 6k-10k | Mid 11k-18k | Senior 20k-32k
+- Sales Executive: Base 6k-12k + commission (OTE 15k-35k)
+- Operations Manager: Mid 15k-25k | Senior 28k-45k
+- Administrative Assistant: 4k-8k
+- Office Manager: 8k-15k
+- Civil/Mechanical/Electrical Engineer: Junior 8k-14k | Mid 15k-25k | Senior 28k-45k
+- HVAC Technician: 5k-12k
+- Nurse (RN): 8k-16k (+ housing allowance)
+- Doctor/Physician: 25k-70k depending on specialty
+- Pharmacist: 10k-20k
+- Teacher / School Principal: Teacher 8k-16k | Principal 20k-40k
+- Customer Service Rep: 4k-7k
+- Call Center Team Leader: 8k-14k
+- Graphic Designer: 6k-12k
+- PR / Communications: 10k-22k
+- IT Support: 6k-12k
+- Project Manager (PMP): 20k-40k
+
+Candidate Profile:
 - Experience: {exp} years
 - Education: {edu or 'not specified'} in {edu_field or 'not specified'}
 - Skills: {', '.join(skills[:25]) if skills else 'not specified'}
-- Location: {location}
+
+Instructions:
+1. Identify the most likely role from the skills/edu
+2. Pick the appropriate experience band (junior <3 yrs, mid 3-7, senior 7+, manager 10+)
+3. Use the benchmarks above — do NOT invent numbers outside these realistic ranges
+4. min should be ~15% below mid, max ~25% above mid
 
 Return ONLY valid JSON:
 {{
-  "role_detected": "<most likely job title based on profile>",
-  "field": "<industry field>",
+  "role_detected": "<specific job title>",
+  "field": "<industry>",
   "salary_aed": {{
-    "min": <integer, monthly AED>,
-    "mid": <integer, monthly AED>,
-    "max": <integer, monthly AED>
+    "min": <integer>,
+    "mid": <integer>,
+    "max": <integer>
   }},
   "level": "<Junior | Mid-Level | Senior | Manager>",
   "factors": [
-    {{"factor": "<factor name>", "impact": "<Positive | Negative | Neutral>", "detail": "<one sentence>"}}
+    {{"factor": "<factor>", "impact": "<Positive | Negative | Neutral>", "detail": "<one sentence>"}}
   ],
-  "negotiation_range": "<e.g. AED 12,000 – 16,000>",
-  "top_paying_companies": ["<company 1 in UAE for this role>", "<company 2>", "<company 3>"],
-  "market_note": "<one sentence about demand for this profile in UAE 2025>"
+  "negotiation_range": "<e.g. AED 14,000 – 18,000>",
+  "top_paying_companies": ["<UAE company 1>", "<UAE company 2>", "<UAE company 3>"],
+  "market_note": "<one realistic sentence about this profile in UAE 2025>"
 }}
-
-Base salaries on realistic 2024-2025 UAE market data. Be specific and accurate."""
 
     raw = _generate(prompt, max_tokens=800)
     if not raw:
@@ -570,21 +600,33 @@ Base salaries on realistic 2024-2025 UAE market data. Be specific and accurate."
 
 
 def _fallback_salary(skills: List[str], exp: float, edu: Optional[str]) -> Dict[str, Any]:
-    base = 8000 + int(exp * 1200)
-    edu_bonus = 3000 if edu and 'master' in (edu or '').lower() else 1500 if edu and 'bachelor' in (edu or '').lower() else 0
-    mid = base + edu_bonus
+    # Realistic UAE salary bands by experience
+    if exp < 2:
+        mid = 7000
+    elif exp < 5:
+        mid = 12000
+    elif exp < 9:
+        mid = 20000
+    else:
+        mid = 30000
+    # Education bonus
+    if edu and 'master' in (edu or '').lower():
+        mid = int(mid * 1.2)
+    elif edu and ('bachelor' in (edu or '').lower() or 'bsc' in (edu or '').lower()):
+        mid = int(mid * 1.1)
+    level = "Senior" if exp >= 8 else "Mid-Level" if exp >= 3 else "Junior"
     return {
         "role_detected": "Professional",
         "field": "General",
-        "salary_aed": {"min": mid - 2000, "mid": mid, "max": mid + 4000},
-        "level": "Senior" if exp >= 8 else "Mid-Level" if exp >= 3 else "Junior",
+        "salary_aed": {"min": int(mid * 0.85), "mid": mid, "max": int(mid * 1.25)},
+        "level": level,
         "factors": [
-            {"factor": "Years of Experience", "impact": "Positive", "detail": f"{exp:.0f} years adds significant value."},
-            {"factor": "Education", "impact": "Positive", "detail": "Higher education generally commands premium salaries."},
+            {"factor": "Years of Experience", "impact": "Positive", "detail": f"{exp:.0f} years of experience is a strong asset."},
+            {"factor": "UAE Market Demand", "impact": "Positive", "detail": "UAE has high demand for experienced professionals."},
         ],
-        "negotiation_range": f"AED {mid - 1000:,} – {mid + 3000:,}",
-        "top_paying_companies": ["ADNOC", "Emirates Group", "Dubai Government entities"],
-        "market_note": "UAE job market remains strong with high demand for experienced professionals.",
+        "negotiation_range": f"AED {int(mid*0.9):,} – {int(mid*1.2):,}",
+        "top_paying_companies": ["ADNOC", "Emirates Group", "Dubai Holding"],
+        "market_note": "UAE salaries are tax-free, making them highly competitive globally.",
     }
 
 
