@@ -258,6 +258,162 @@ footer a:hover { color: var(--primary); }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 
+/* ── Premium Career Coach ─────────────────────────────── */
+.premium-cta-wrap { text-align: center; margin-top: 20px; }
+.premium-label {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: linear-gradient(135deg, rgba(251,191,36,0.12), rgba(245,158,11,0.08));
+  border: 1px solid rgba(251,191,36,0.3);
+  color: #fbbf24; font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+  padding: 4px 14px; border-radius: 20px; text-transform: uppercase; margin-bottom: 14px;
+}
+.btn-premium {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 15px 36px; border-radius: 14px; font-size: 15px; font-weight: 700;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+  color: white; border: none; cursor: pointer; transition: all 0.3s;
+  box-shadow: 0 4px 28px rgba(245,158,11,0.35); position: relative; overflow: hidden;
+}
+.btn-premium::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+  pointer-events: none;
+}
+.btn-premium:hover { transform: translateY(-3px); box-shadow: 0 10px 44px rgba(245,158,11,0.5); }
+.btn-premium:disabled { opacity: 0.65; cursor: default; transform: none; box-shadow: none; }
+.premium-hint { font-size: 12px; color: var(--text3); margin-top: 10px; }
+
+/* Coach Panel */
+.coach-panel {
+  display: none; margin-top: 28px;
+  background: var(--card); border: 1px solid rgba(251,191,36,0.2);
+  border-radius: 22px; overflow: hidden; animation: fadeUp 0.5s ease;
+}
+.coach-header {
+  padding: 26px 32px;
+  background: linear-gradient(135deg, rgba(245,158,11,0.07), rgba(180,83,9,0.04));
+  border-bottom: 1px solid rgba(251,191,36,0.12);
+  display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+}
+.coach-icon {
+  width: 52px; height: 52px; border-radius: 15px; flex-shrink: 0;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  display: flex; align-items: center; justify-content: center; font-size: 24px;
+}
+.coach-header-text { flex: 1; min-width: 160px; }
+.coach-header-text h3 { font-size: 19px; font-weight: 800; margin-bottom: 4px; }
+.coach-header-text p { font-size: 13px; color: var(--text2); }
+.coach-field-pill {
+  padding: 7px 16px; border-radius: 10px; font-size: 12px; font-weight: 700;
+  background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.25); color: #fbbf24;
+}
+.coach-level-pill {
+  padding: 7px 16px; border-radius: 10px; font-size: 12px; font-weight: 700;
+  background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2); color: #a5b4fc;
+}
+
+.coach-body { padding: 28px 32px; display: flex; flex-direction: column; gap: 26px; }
+
+.coach-section-title {
+  font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 14px; display: flex; align-items: center; gap: 10px;
+}
+.coach-section-title span { flex: 1; height: 1px; background: var(--border); display: block; }
+
+/* Strengths */
+.strength-item {
+  display: flex; align-items: flex-start; gap: 10px; padding: 11px 15px;
+  background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.15);
+  border-radius: 10px; margin-bottom: 8px; font-size: 13px; color: var(--text2); line-height: 1.55;
+}
+.strength-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; flex-shrink: 0; margin-top: 5px; }
+
+/* Gaps */
+.gap-item {
+  padding: 16px 18px; background: rgba(239,68,68,0.04);
+  border: 1px solid rgba(239,68,68,0.12); border-radius: 13px; margin-bottom: 10px;
+}
+.gap-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.gap-skill-name { font-size: 14px; font-weight: 700; }
+.gap-imp {
+  font-size: 10px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 6px; white-space: nowrap;
+}
+.imp-high   { background: rgba(239,68,68,0.14); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+.imp-medium { background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2); }
+.imp-low    { background: rgba(99,102,241,0.1);  color: #a5b4fc; border: 1px solid rgba(99,102,241,0.2); }
+.gap-why { font-size: 12px; color: var(--text3); margin-bottom: 10px; line-height: 1.55; }
+.course-link {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 13px; border-radius: 9px; font-size: 12px; font-weight: 600;
+  background: rgba(99,102,241,0.09); border: 1px solid rgba(99,102,241,0.2);
+  color: #a5b4fc; text-decoration: none; transition: all 0.2s;
+}
+.course-link:hover { background: rgba(99,102,241,0.18); color: #f9fafb; }
+.course-link.free { background: rgba(16,185,129,0.08); border-color: rgba(16,185,129,0.2); color: #34d399; }
+.course-link.free:hover { background: rgba(16,185,129,0.16); color: #f9fafb; }
+.course-platform { font-size: 10px; font-weight: 700; letter-spacing: .4px; opacity: .75; }
+
+/* Action Plan */
+.action-item {
+  display: flex; gap: 16px; padding: 16px 18px;
+  background: rgba(99,102,241,0.04); border: 1px solid rgba(99,102,241,0.1);
+  border-radius: 13px; margin-bottom: 10px;
+}
+.action-num {
+  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--primary), var(--primary2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; color: white; margin-top: 2px;
+}
+.action-body { flex: 1; min-width: 0; }
+.action-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.action-meta { display: flex; flex-wrap: wrap; gap: 10px; font-size: 11px; color: var(--text3); margin-bottom: 7px; }
+.action-meta b { color: var(--text2); font-weight: 600; }
+.action-desc { font-size: 12px; color: var(--text2); line-height: 1.55; margin-bottom: 8px; }
+
+/* Career Path */
+.path-track { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.path-node {
+  padding: 8px 18px; border-radius: 22px; font-size: 13px; font-weight: 600;
+  background: rgba(99,102,241,0.09); border: 1px solid rgba(99,102,241,0.2); color: #a5b4fc;
+}
+.path-node.current { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.25); color: #34d399; }
+.path-arrow { color: var(--text3); font-size: 18px; font-weight: 300; }
+
+/* UAE Tip */
+.uae-tip {
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba(6,182,212,0.06), rgba(99,102,241,0.04));
+  border: 1px solid rgba(6,182,212,0.18); border-radius: 12px;
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.uae-tip-icon { font-size: 22px; flex-shrink: 0; line-height: 1; }
+.uae-tip-text { font-size: 13px; color: var(--text2); line-height: 1.65; }
+.uae-tip-text strong { color: var(--accent); }
+
+/* Coach Loading */
+.coach-loading {
+  padding: 52px 28px; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+}
+.coach-spinner {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 3px solid rgba(245,158,11,0.18); border-top-color: #f59e0b;
+  animation: spin 0.85s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.coach-loading p { font-size: 14px; color: var(--text2); }
+.coach-loading small { font-size: 12px; color: var(--text3); }
+
+@media (max-width: 768px) {
+  .coach-header { padding: 18px 18px; }
+  .coach-body { padding: 18px 18px; }
+  .action-item { flex-direction: column; gap: 10px; }
+  .action-num { width: 28px; height: 28px; font-size: 11px; }
+}
+/* ───────────────────────────────────────────────────────── */
+
 @media (max-width: 768px) {
   nav { padding: 12px 16px; }
   .nav-brand h1 { font-size: 16px; }
@@ -384,6 +540,25 @@ footer a:hover { color: var(--primary); }
       Upload Another CV
     </button>
   </div>
+
+  <!-- ✨ Premium Career Coach CTA -->
+  <div class="premium-cta-wrap" id="premium-cta" style="display:none;">
+    <div class="premium-label">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="#fbbf24" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      Premium Feature — Free Today
+    </div>
+    <br>
+    <button class="btn-premium" id="btn-coach" onclick="openCareerCoach()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      ✨ Get My Full Career Coaching Report
+    </button>
+    <p class="premium-hint">AI identifies your skill gaps and recommends real courses to advance your career</p>
+  </div>
+
+  <!-- Career Coach Results Panel -->
+  <div class="coach-panel" id="coach-panel"></div>
 </div>
 
 <div class="how-section">
@@ -433,6 +608,8 @@ footer a:hover { color: var(--primary); }
 </footer>
 
 <script>
+let lastUploadedFile = null;
+
 fetch('/stats').then(r=>r.json()).then(d=>{
   document.getElementById('hs-c').textContent = d.total_candidates;
   document.getElementById('hs-j').textContent = d.total_jobs;
@@ -462,6 +639,7 @@ async function handleFile(file) {
   setStep(1, 15, 'Uploading "'+file.name+'"...');
   await sleep(400);
   setStep(2, 40, 'Extracting text and parsing your CV...');
+  lastUploadedFile = file;
   const form = new FormData();
   form.append('file', file);
   let results;
@@ -509,6 +687,15 @@ function showResults(results) {
         </div>
       </div>`);
   }
+
+  // Show premium CTA whenever we have results
+  const cta = document.getElementById('premium-cta');
+  const coachPanel = document.getElementById('coach-panel');
+  cta.style.display = results.length ? 'block' : 'none';
+  coachPanel.style.display = 'none';
+  coachPanel.innerHTML = '';
+  const btnCoach = document.getElementById('btn-coach');
+  if (btnCoach) { btnCoach.disabled = false; btnCoach.textContent = '✨ Get My Full Career Coaching Report'; btnCoach.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> ✨ Get My Full Career Coaching Report'; }
 
   document.getElementById('r-title').textContent = results.length ? 'Your Top Job Matches' : 'No Matches Found';
   document.getElementById('r-sub').textContent = results.length
@@ -599,6 +786,166 @@ function resetUpload() {
   document.getElementById('pstatus').style.color='';
   document.getElementById('file-input').value='';
   document.getElementById('jobs-container').innerHTML='';
+  document.getElementById('premium-cta').style.display='none';
+  const cp=document.getElementById('coach-panel');
+  cp.style.display='none'; cp.innerHTML='';
+  lastUploadedFile = null;
+}
+
+async function openCareerCoach() {
+  if (!lastUploadedFile) { alert('Please upload a CV first.'); return; }
+  const btn = document.getElementById('btn-coach');
+  btn.disabled = true;
+  btn.innerHTML = '<div style="width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.3);border-top-color:white;animation:spin .8s linear infinite;"></div> Analyzing your career profile...';
+
+  const panel = document.getElementById('coach-panel');
+  panel.style.display = 'block';
+  panel.innerHTML = `<div class="coach-loading">
+    <div class="coach-spinner"></div>
+    <p>AI is building your personalized career report...</p>
+    <small>This may take 10–20 seconds</small>
+  </div>`;
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  try {
+    const form = new FormData();
+    form.append('file', lastUploadedFile);
+    const resp = await fetch('/career-coach', { method: 'POST', body: form });
+    if (!resp.ok) { const e = await resp.json().catch(()=>({})); throw new Error(e.detail || 'Request failed'); }
+    const data = await resp.json();
+    renderCoachReport(data);
+  } catch(e) {
+    panel.innerHTML = `<div class="coach-loading">
+      <div style="font-size:32px">⚠️</div>
+      <p style="color:#f87171">Could not generate report: ${e.message}</p>
+      <small>Please try again in a few seconds</small>
+    </div>`;
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> ✨ Try Again';
+  }
+}
+
+function renderCoachReport(d) {
+  const panel = document.getElementById('coach-panel');
+
+  // ── Header
+  let headerHtml = `
+    <div class="coach-header">
+      <div class="coach-icon">🎯</div>
+      <div class="coach-header-text">
+        <h3>Your Personalized Career Report</h3>
+        <p>AI-powered gap analysis & action plan tailored to the UAE job market</p>
+      </div>
+      ${d.field ? `<div class="coach-field-pill">${d.field}</div>` : ''}
+      ${d.current_level ? `<div class="coach-level-pill">${d.current_level}</div>` : ''}
+    </div>`;
+
+  // ── Body sections
+  let bodyHtml = '<div class="coach-body">';
+
+  // 1. Strengths
+  if (d.strengths && d.strengths.length) {
+    bodyHtml += `<div>
+      <div class="coach-section-title">💪 Your Strengths <span></span></div>
+      ${d.strengths.map(s=>`<div class="strength-item"><div class="strength-dot"></div>${s}</div>`).join('')}
+    </div>`;
+  }
+
+  // 2. Skill Gaps
+  if (d.gaps && d.gaps.length) {
+    const gapsHtml = d.gaps.map(g => {
+      const impClass = (g.importance||'').toLowerCase().includes('high') ? 'imp-high'
+                     : (g.importance||'').toLowerCase().includes('medium') ? 'imp-medium' : 'imp-low';
+      let courseHtml = '';
+      if (g.course && g.course.url) {
+        const freeClass = g.course.free ? ' free' : '';
+        const freeBadge = g.course.free ? '<span style="font-size:10px;opacity:.8">🆓 Free</span>' : '';
+        courseHtml = `<a class="course-link${freeClass}" href="${g.course.url}" target="_blank" rel="noopener">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          ${g.course.title||'View Course'}
+          <span class="course-platform">${g.course.platform||''}</span>
+          ${freeBadge}
+        </a>`;
+      }
+      return `<div class="gap-item">
+        <div class="gap-top">
+          <div class="gap-skill-name">${g.skill||'Skill'}</div>
+          <div class="gap-imp ${impClass}">${g.importance||'—'}</div>
+        </div>
+        ${g.why ? `<div class="gap-why">${g.why}</div>` : ''}
+        ${courseHtml}
+      </div>`;
+    }).join('');
+    bodyHtml += `<div>
+      <div class="coach-section-title">📋 Skills to Develop <span></span></div>
+      ${gapsHtml}
+    </div>`;
+  }
+
+  // 3. Action Plan
+  if (d.action_plan && d.action_plan.length) {
+    const actionsHtml = d.action_plan.map((a, i) => {
+      let courseHtml = '';
+      if (a.course && a.course.url) {
+        const freeClass = a.course.free ? ' free' : '';
+        const freeBadge = a.course.free ? '<span style="font-size:10px;opacity:.8">🆓</span>' : '';
+        courseHtml = `<a class="course-link${freeClass}" href="${a.course.url}" target="_blank" rel="noopener">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          ${a.course.title||'Course'}
+          <span class="course-platform">${a.course.platform||''}</span>
+          ${freeBadge}
+        </a>`;
+      }
+      return `<div class="action-item">
+        <div class="action-num">${i+1}</div>
+        <div class="action-body">
+          <div class="action-title">${a.step||'Step '+(i+1)}</div>
+          <div class="action-meta">
+            ${a.duration ? `<span>⏱ <b>${a.duration}</b></span>` : ''}
+            ${a.skill_gained ? `<span>🎯 <b>${a.skill_gained}</b></span>` : ''}
+          </div>
+          ${a.action ? `<div class="action-desc">${a.action}</div>` : ''}
+          ${courseHtml}
+        </div>
+      </div>`;
+    }).join('');
+    bodyHtml += `<div>
+      <div class="coach-section-title">📚 Your 90-Day Action Plan <span></span></div>
+      ${actionsHtml}
+    </div>`;
+  }
+
+  // 4. Career Path
+  if (d.career_path && d.career_path.length) {
+    const pathHtml = d.career_path.map((node, i) => {
+      const isCurrent = i === 0;
+      return `${i > 0 ? '<span class="path-arrow">→</span>' : ''}<div class="path-node${isCurrent?' current':''}">${node}</div>`;
+    }).join('');
+    bodyHtml += `<div>
+      <div class="coach-section-title">🛤️ Career Progression Path <span></span></div>
+      <div class="path-track">${pathHtml}</div>
+    </div>`;
+  }
+
+  // 5. UAE Tip
+  if (d.uae_tip) {
+    bodyHtml += `<div class="uae-tip">
+      <div class="uae-tip-icon">🇦🇪</div>
+      <div class="uae-tip-text"><strong>UAE Market Tip:</strong> ${d.uae_tip}</div>
+    </div>`;
+  }
+
+  bodyHtml += '</div>'; // close coach-body
+
+  panel.innerHTML = headerHtml + bodyHtml;
+
+  // Scroll to panel
+  setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+
+  // Swap button to "Regenerate"
+  const btn = document.getElementById('btn-coach');
+  btn.disabled = false;
+  btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Regenerate Report';
 }
 
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}

@@ -457,6 +457,48 @@ async def find_jobs_for_cv(file: UploadFile = File(...), db: Session = Depends(g
     return results[:10]
 
 
+# ── Career Coach ──────────────────────────────────────────────────────────────
+@app.post(
+    "/career-coach",
+    tags=["Career Coach"],
+    summary="Generate a premium career development report for a candidate",
+)
+async def career_coach(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
+    """
+    Upload a CV and receive a full career coaching report:
+    strengths, skill gaps with real course links, action plan, and career roadmap.
+    Covers office/admin, engineering, and medical fields — UAE market focused.
+    """
+    ext = Path(file.filename).suffix.lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=422, detail=f"Unsupported file type: {ext}")
+
+    content = await file.read()
+    if len(content) > MAX_FILE_SIZE_MB * 1024 * 1024:
+        raise HTTPException(status_code=413, detail=f"File exceeds {MAX_FILE_SIZE_MB} MB.")
+
+    parsed = parse_cv(content, file.filename)
+
+    from ai_service import career_coach_analysis
+    report = career_coach_analysis(
+        name=parsed.get("full_name") or "Candidate",
+        skills=parsed.get("skills") or [],
+        exp=parsed.get("years_experience") or 0.0,
+        edu=parsed.get("education_level"),
+        edu_field=parsed.get("education_field"),
+        raw_text=parsed.get("raw_text") or "",
+    )
+
+    if not report:
+        raise HTTPException(status_code=500, detail="Could not generate career report.")
+
+    logger.info("Career coach report generated for '%s'", parsed.get("full_name"))
+    return report
+
+
 # ── Health ─────────────────────────────────────────────────────────────────────
 @app.get("/health", tags=["System"])
 def health():
