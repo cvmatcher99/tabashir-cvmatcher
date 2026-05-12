@@ -566,6 +566,7 @@ footer a:hover { color: var(--primary); }
         </svg>
         Choose File
       </button>
+      <div id="upload-guest-hint" style="display:none;margin-top:14px;font-size:12px;color:var(--text3);display:flex;align-items:center;justify-content:center;gap:6px;"></div>
     </div>
     <div class="progress-wrap" id="prog-wrap">
       <div class="progress-steps" id="steps-row">
@@ -674,6 +675,39 @@ footer a:hover { color: var(--primary); }
 let lastUploadedFile = null;
 let currentUser = null;
 let googleClientId = '';
+const GUEST_UPLOAD_LIMIT = 2;
+
+// ── Upload counter helpers ────────────────────────────────────────────────────
+function getUploadCount() {
+  return parseInt(localStorage.getItem('cv_upload_count') || '0', 10);
+}
+function incrementUploadCount() {
+  localStorage.setItem('cv_upload_count', getUploadCount() + 1);
+}
+function canUpload() {
+  if (currentUser) return true;          // signed-in → unlimited
+  return getUploadCount() < GUEST_UPLOAD_LIMIT;
+}
+function uploadsLeft() {
+  if (currentUser) return Infinity;
+  return Math.max(0, GUEST_UPLOAD_LIMIT - getUploadCount());
+}
+function updateUploadUI() {
+  const hint = document.getElementById('upload-guest-hint');
+  if (!hint) return;
+  if (currentUser) {
+    hint.style.display = 'none';
+  } else {
+    const left = uploadsLeft();
+    if (left > 0) {
+      hint.style.display = 'block';
+      hint.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> ${left} free upload${left>1?'s':''} remaining — <button onclick="triggerGoogleSignIn()" style="background:none;border:none;color:#a5b4fc;font-size:12px;font-weight:600;cursor:pointer;padding:0;text-decoration:underline;">Sign in for unlimited</button>`;
+    } else {
+      hint.style.display = 'block';
+      hint.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> <span style="color:#f87171">Free limit reached</span> — <button onclick="triggerGoogleSignIn()" style="background:none;border:none;color:#a5b4fc;font-size:12px;font-weight:600;cursor:pointer;padding:0;text-decoration:underline;">Sign in to continue</button>`;
+    }
+  }
+}
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 async function initAuth() {
@@ -744,8 +778,9 @@ function setUser(user) {
   }
   document.getElementById('user-name').textContent = user.name;
 
-  // Update Career Coach CTA
+  // Update Career Coach CTA + upload counter
   updateCoachCTA();
+  updateUploadUI();
 }
 
 function signOut() {
@@ -762,6 +797,52 @@ function signOut() {
   const cp = document.getElementById('coach-panel');
   if (cp) { cp.style.display = 'none'; cp.innerHTML = ''; }
   updateCoachCTA();
+  updateUploadUI();
+}
+
+function showUploadLimitModal() {
+  const existing = document.getElementById('g_signin_popup');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'g_signin_popup';
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(6px);';
+  modal.innerHTML = `
+    <div style="
+      background:linear-gradient(160deg,#13172b 0%,#0d1117 100%);
+      border:1px solid rgba(239,68,68,0.25);
+      border-radius:24px;text-align:center;
+      max-width:400px;width:92%;
+      box-shadow:0 32px 80px rgba(0,0,0,.7);
+      overflow:hidden;
+    ">
+      <div style="height:4px;background:linear-gradient(90deg,#ef4444,#f59e0b,#6366f1);"></div>
+      <div style="padding:36px 32px 32px;">
+        <div style="width:56px;height:56px;border-radius:16px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div style="font-size:19px;font-weight:800;margin-bottom:8px;color:#f9fafb;">Free Limit Reached</div>
+        <div style="font-size:13px;color:#6b7280;margin-bottom:6px;line-height:1.6;">You've used your <strong style="color:#9ca3af">${GUEST_UPLOAD_LIMIT} free uploads</strong>.</div>
+        <div style="font-size:13px;color:#6b7280;margin-bottom:28px;line-height:1.6;">Sign in with Google to get unlimited uploads and AI Career Coaching.</div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;align-items:center;">
+          <div id="g_btn_target_limit" style="display:flex;justify-content:center;"></div>
+          <button onclick="document.getElementById('g_signin_popup').remove()"
+            style="background:none;border:none;color:#4b5563;font-size:12px;cursor:pointer;padding:6px 16px;border-radius:8px;transition:all .2s;"
+            onmouseover="this.style.color='#9ca3af'" onmouseout="this.style.color='#4b5563'">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+  if (window.google && window.google.accounts) {
+    google.accounts.id.renderButton(document.getElementById('g_btn_target_limit'), {
+      theme: 'filled_black', size: 'large', width: 300, text: 'signin_with',
+    });
+  }
 }
 
 function triggerGoogleSignIn() {
@@ -863,7 +944,7 @@ function updateCoachCTA() {
 }
 
 // Init on load
-initAuth();
+initAuth().then(() => updateUploadUI());
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -895,6 +976,12 @@ async function handleFile(file) {
   if (!file) return;
   const ext = '.'+file.name.split('.').pop().toLowerCase();
   if (!['.pdf','.docx','.doc'].includes(ext)) { alert('Please upload a PDF, DOCX, or DOC file.'); return; }
+
+  // ── Upload gate ──────────────────────────────────────────────────────────
+  if (!canUpload()) {
+    showUploadLimitModal();
+    return;
+  }
   document.getElementById('upload-content').style.display = 'none';
   document.getElementById('prog-wrap').style.display = 'block';
   document.getElementById('drop-zone').style.cursor = 'default';
@@ -920,6 +1007,8 @@ async function handleFile(file) {
     setTimeout(resetUpload, 3500);
     return;
   }
+  if (!currentUser) incrementUploadCount();
+  updateUploadUI();
   showResults(results);
 }
 
@@ -1053,6 +1142,7 @@ function resetUpload() {
   const cp=document.getElementById('coach-panel');
   cp.style.display='none'; cp.innerHTML='';
   lastUploadedFile = null;
+  updateUploadUI();
 }
 
 async function openCareerCoach() {
