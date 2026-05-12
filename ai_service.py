@@ -583,7 +583,7 @@ Return ONLY valid JSON:
   "negotiation_range": "<e.g. AED 14,000 – 18,000>",
   "top_paying_companies": ["<UAE company 1>", "<UAE company 2>", "<UAE company 3>"],
   "market_note": "<one realistic sentence about this profile in UAE 2025>"
-}}
+}}"""
 
     raw = _generate(prompt, max_tokens=800)
     if not raw:
