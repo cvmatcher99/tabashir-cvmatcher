@@ -688,15 +688,24 @@ async function initAuth() {
     try { setUser(JSON.parse(saved)); } catch(e) { localStorage.removeItem('cv_matcher_user'); }
   }
 
-  // Init Google One-Tap if client ID available
-  if (googleClientId && window.google) {
-    document.getElementById('g_id_onload').setAttribute('data-client_id', googleClientId);
-    google.accounts.id.initialize({
-      client_id: googleClientId,
-      callback: onGoogleCredential,
-      auto_select: false,
-    });
+  // Init Google Sign-In — wait for GSI library if not yet loaded
+  if (googleClientId) {
+    if (window.google && window.google.accounts) {
+      _initGSI();
+    } else {
+      window.onGoogleLibraryLoad = _initGSI;
+    }
   }
+}
+
+function _initGSI() {
+  if (!googleClientId || !window.google) return;
+  google.accounts.id.initialize({
+    client_id: googleClientId,
+    callback: onGoogleCredential,
+    auto_select: false,
+    ux_mode: 'popup',
+  });
 }
 
 function decodeJWT(token) {
@@ -756,28 +765,45 @@ function signOut() {
 }
 
 function triggerGoogleSignIn() {
-  if (!googleClientId || !window.google) {
-    // Fallback: no client ID configured
+  if (!googleClientId) {
     alert('Google Sign-In is not configured yet.\nPlease add GOOGLE_CLIENT_ID to the environment variables.');
     return;
   }
-  google.accounts.id.prompt(notification => {
-    if (notification.isSkippedMoment() || notification.isDismissedMoment()) {
-      // Render button as fallback
-      const el = document.createElement('div');
-      el.id = 'g_signin_popup';
-      el.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:9999;';
-      el.innerHTML = `<div style="background:#111827;border:1px solid #374151;border-radius:16px;padding:32px 28px;text-align:center;max-width:360px;width:90%">
-        <div style="font-size:17px;font-weight:700;margin-bottom:8px;">Sign in to CV Matcher</div>
-        <div style="font-size:13px;color:#9ca3af;margin-bottom:24px;">Unlock AI Career Coaching and premium features</div>
-        <div id="g_btn_target"></div>
-        <button onclick="document.getElementById('g_signin_popup').remove()" style="margin-top:16px;background:none;border:none;color:#6b7280;font-size:12px;cursor:pointer;">Cancel</button>
-      </div>`;
-      document.body.appendChild(el);
-      google.accounts.id.renderButton(document.getElementById('g_btn_target'), {
-        theme: 'filled_black', size: 'large', width: 300, text: 'signin_with',
-      });
-    }
+  if (!window.google || !window.google.accounts) {
+    alert('Google Sign-In is still loading, please try again in a moment.');
+    return;
+  }
+
+  // Remove existing popup if any
+  const existing = document.getElementById('g_signin_popup');
+  if (existing) existing.remove();
+
+  // Build modal
+  const modal = document.createElement('div');
+  modal.id = 'g_signin_popup';
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(4px);';
+  modal.innerHTML = `
+    <div style="background:#111827;border:1px solid #374151;border-radius:20px;padding:36px 32px;text-align:center;max-width:380px;width:92%;box-shadow:0 24px 64px rgba(0,0,0,.6);">
+      <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div style="font-size:18px;font-weight:800;margin-bottom:6px;">Sign in to CV Matcher</div>
+      <div style="font-size:13px;color:#9ca3af;margin-bottom:28px;line-height:1.5;">Unlock AI Career Coaching and<br>personalized course recommendations</div>
+      <div id="g_btn_target" style="display:flex;justify-content:center;"></div>
+      <button onclick="document.getElementById('g_signin_popup').remove()" style="margin-top:18px;background:none;border:none;color:#6b7280;font-size:12px;cursor:pointer;transition:color .2s;" onmouseover="this.style.color='#9ca3af'" onmouseout="this.style.color='#6b7280'">Cancel</button>
+    </div>`;
+  document.body.appendChild(modal);
+
+  // Close on backdrop click
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+  // Render the official Google button
+  google.accounts.id.renderButton(document.getElementById('g_btn_target'), {
+    theme: 'filled_black',
+    size: 'large',
+    width: 300,
+    text: 'signin_with',
+    shape: 'rectangular',
   });
 }
 
