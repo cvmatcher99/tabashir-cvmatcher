@@ -51,11 +51,27 @@ def _generate(prompt: str, max_tokens: int = 800) -> Optional[str]:
 
 def parse_cv_claude(text: str) -> Optional[Dict[str, Any]]:
     """Extract structured candidate data from raw CV text using AI."""
-    prompt = f"""Extract structured information from this CV. Return ONLY valid JSON with these exact keys:
-full_name, email, phone, linkedin (URL or null), github (URL or null),
-location (city/country or null), years_experience (number),
-education_level (one of: PhD, Master, Bachelor, Associate, High School, or null),
-education_field (string or null), skills (array of lowercase tech/professional skill strings).
+    prompt = f"""You are an expert HR analyst specializing in Gulf region (UAE/GCC) CVs. Extract structured information from this CV.
+
+Return ONLY valid JSON with these exact keys:
+- full_name: candidate's full name (string)
+- email: email address (string or null)
+- phone: phone number (string or null)
+- linkedin: LinkedIn URL (string or null)
+- github: GitHub URL (string or null)
+- location: city/country (string or null)
+- years_experience: total years of professional work experience as a number (0 if student/fresh graduate, count all paid jobs and internships)
+- education_level: MUST be one of exactly: "PhD", "Master", "Bachelor", "Associate", "Diploma", "High School", or null
+- education_field: field of study like "Business Administration", "Computer Science", "Banking", "Engineering", etc. (string or null)
+- skills: array of skill strings. IMPORTANT - include ALL of:
+  * Technical skills (software, tools, programming languages, certifications)
+  * Professional/domain skills (banking, finance, HVAC, HR, accounting, customer service, sales, operations, media, journalism, graphic design, etc.)
+  * Software tools (Microsoft Office, SAP, QuickBooks, Amadeus, Adobe Creative Suite, etc.)
+  * Management skills (team leadership, project management, strategic planning, performance management, etc.)
+  * Soft skills that are explicitly mentioned (communication, customer service, problem-solving, etc.)
+  * Languages (arabic, english, etc.)
+  * Certifications and licenses (CMA, ACCA, CPA, PMP, driving license, etc.)
+  Be generous — extract 6–20 skills. Use lowercase. Do NOT skip domain/professional skills.
 
 CV TEXT:
 \"\"\"

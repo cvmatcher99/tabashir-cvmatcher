@@ -15,6 +15,7 @@ from typing import Any, Dict, List, Optional
 logger = logging.getLogger(__name__)
 
 KNOWN_SKILLS: List[str] = [
+    # ── Tech / Programming ──────────────────────────────────────────────────────
     "python", "java", "javascript", "typescript", "c++", "c#", "c", "go", "rust",
     "ruby", "php", "swift", "kotlin", "scala", "r", "matlab", "perl", "bash",
     "shell", "powershell", "vba", "dart", "lua",
@@ -36,14 +37,71 @@ KNOWN_SKILLS: List[str] = [
     "figma", "postman", "swagger", "graphql", "rest api", "soap", "grpc",
     "microservices", "agile", "scrum", "kanban", "tdd", "ci/cd",
     "openai", "langchain", "llm", "prompt engineering",
+
+    # ── Business / Finance / Accounting ────────────────────────────────────────
+    "accounting", "financial reporting", "bookkeeping", "budgeting", "forecasting",
+    "ifrs", "gaap", "vat", "tax", "corporate tax", "payroll", "accounts payable",
+    "accounts receivable", "bank reconciliation", "audit", "financial analysis",
+    "financial planning", "cost management", "erp", "sap", "quickbooks", "oracle financials",
+    "cma", "cpa", "acca", "cfa", "banking", "islamic finance", "credit analysis",
+    "risk management", "portfolio management", "investment", "treasury",
+    "aml", "kyc", "compliance", "financial modeling", "ms excel", "microsoft excel",
+
+    # ── Operations / Management ─────────────────────────────────────────────────
+    "operations management", "project management", "team leadership", "strategic planning",
+    "performance management", "kpi", "process improvement", "quality management",
+    "supply chain", "logistics", "procurement", "vendor management", "resource planning",
+    "change management", "stakeholder management", "reporting", "decision making",
+    "problem solving", "pmp", "six sigma", "lean", "iso", "efqm",
+
+    # ── HR / Administration ─────────────────────────────────────────────────────
+    "human resources", "recruitment", "onboarding", "employee relations", "labor law",
+    "training and development", "performance appraisal", "hr policies", "payroll processing",
+    "office management", "administrative support", "data entry", "document management",
+    "scheduling", "microsoft office", "word", "powerpoint", "outlook",
+    "cipd", "shrm",
+
+    # ── Sales / Marketing / PR ──────────────────────────────────────────────────
+    "sales", "business development", "client relationship management", "crm",
+    "negotiation", "marketing", "digital marketing", "social media", "social media management",
+    "content creation", "content marketing", "seo", "email marketing", "advertising",
+    "brand management", "public relations", "media relations", "communications",
+    "copywriting", "graphic design", "adobe creative suite", "photoshop",
+    "illustrator", "indesign", "canva", "video editing", "photo editing",
+    "journalism", "scripting", "voiceover", "podcast", "video production",
+
+    # ── Customer Service / Call Center ──────────────────────────────────────────
+    "customer service", "call center", "customer experience", "complaint handling",
+    "conflict resolution", "quality assurance", "crm software", "amadeus",
+    "reservation systems", "customer satisfaction",
+
+    # ── Engineering / Technical ─────────────────────────────────────────────────
+    "hvac", "air conditioning", "refrigeration", "electrical engineering",
+    "mechanical engineering", "maintenance", "troubleshooting", "installation",
+    "plc", "autocad", "civil engineering", "project coordination",
+    "safety standards", "technical support", "facilities management",
+
+    # ── Education / Healthcare ──────────────────────────────────────────────────
+    "teaching", "curriculum development", "accreditation", "school administration",
+    "educational leadership", "training", "coaching", "mentoring",
+    "healthcare", "nursing", "medical", "biology", "research",
+
+    # ── Soft Skills (explicitly mentioned in CVs) ────────────────────────────────
+    "communication", "teamwork", "time management", "leadership", "organization",
+    "interpersonal skills", "multitasking", "attention to detail", "adaptability",
+    "critical thinking", "analytical skills", "presentation",
+
+    # ── Languages ───────────────────────────────────────────────────────────────
+    "arabic", "english", "french",
 ]
 
 EDUCATION_LEVELS = {
-    "phd": 4, "doctorate": 4,
-    "master": 3, "msc": 3, "mba": 3, "m.s.": 3, "m.sc": 3,
-    "bachelor": 2, "bsc": 2, "b.s.": 2, "b.sc": 2, "undergraduate": 2,
-    "associate": 1, "diploma": 1, "certificate": 1,
-    "high school": 0, "secondary": 0,
+    "phd": 5, "doctorate": 5,
+    "master": 4, "msc": 4, "mba": 4, "m.s.": 4, "m.sc": 4, "mca": 4,
+    "bachelor": 3, "bsc": 3, "b.s.": 3, "b.sc": 3, "b.a.": 3, "bba": 3,
+    "undergraduate": 3, "college": 3,
+    "associate": 2, "diploma": 2, "certificate": 2, "higher national": 2,
+    "high school": 1, "secondary": 1, "national service": 0,
 }
 
 

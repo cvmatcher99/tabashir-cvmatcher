@@ -222,7 +222,7 @@ Nice to have:
         "education_required": "Bachelor",
     },
 
-    # ── Non-tech jobs ──────────────────────────────────────────────────────────
+    # ── Non-tech jobs (existing) ───────────────────────────────────────────────
 
     {
         "title": "Operations Manager",
@@ -425,6 +425,334 @@ Preferred:
 - Experience in UAE/GCC accounting standards
 - Experience with ERP systems""",
         "min_experience": 3.0,
+        "education_required": "Bachelor",
+    },
+
+    # ── Additional Gulf-region jobs ─────────────────────────────────────────────
+
+    {
+        "title": "Media & Content Production Specialist",
+        "description": """We are looking for a creative Media and Content Production Specialist to join our communications team.
+
+Responsibilities:
+- Produce and coordinate digital content for broadcast, web, and social media platforms
+- Write and edit scripts for video, audio, and multimedia productions
+- Present on-camera and record professional voiceovers for various content formats
+- Manage social media accounts and create engaging digital storytelling content
+- Produce and host podcasts and audio/video features
+- Collaborate with editorial and creative teams on news and feature stories
+- Manage story development from concept to final delivery
+
+Requirements:
+- 2+ years of experience in media, journalism, or content production
+- Proven skills in scripting, video production, and content creation
+- Experience in social media management and digital storytelling
+- On-camera presenting and voiceover skills
+- Strong communication and writing skills in English and/or Arabic
+- Proficiency in video editing software and multimedia tools
+- Ability to work in a fast-paced newsroom or media environment
+
+Nice to have:
+- Experience in broadcast journalism (TV, radio, online)
+- Podcast production experience
+- Bilingual (Arabic/English)
+- Portfolio of published multimedia content""",
+        "min_experience": 2.0,
+        "education_required": "Bachelor",
+    },
+    {
+        "title": "Graphic Designer / Visual Content Creator",
+        "description": """We are seeking a talented Graphic Designer to produce high-quality visual content for our brand.
+
+Responsibilities:
+- Design graphics, banners, and marketing materials for digital and print
+- Create and schedule social media posts and visual content
+- Edit photos and produce short-form video content
+- Design presentations, brochures, and corporate communications
+- Maintain brand consistency across all visual assets
+- Collaborate with marketing and communications teams
+
+Requirements:
+- Experience in graphic design, photo editing, and visual content creation
+- Proficiency in Adobe Creative Suite (Photoshop, Illustrator, InDesign) or Canva
+- Photo and video editing skills
+- Experience with social media content creation
+- Strong eye for design, color, and typography
+- Microsoft Office proficiency (PowerPoint, Word)
+- Attention to detail and ability to meet deadlines
+
+Nice to have:
+- Experience with motion graphics or animation
+- Social media management experience
+- Arabic language skills
+- Portfolio of design work""",
+        "min_experience": 1.0,
+        "education_required": "High School",
+    },
+    {
+        "title": "HVAC Technician / Facilities Maintenance",
+        "description": """We are hiring a skilled HVAC Technician to maintain and repair air conditioning and refrigeration systems.
+
+Responsibilities:
+- Install, maintain, and repair air conditioning, split AC, and refrigeration systems
+- Diagnose and troubleshoot mechanical and electrical faults in HVAC equipment
+- Perform scheduled preventive maintenance on cooling and ventilation systems
+- Ensure compliance with quality, safety, and health standards
+- Maintain service records and prepare maintenance reports
+- Respond to emergency breakdowns and urgent maintenance calls
+- Coordinate with facilities management and building operations teams
+
+Requirements:
+- 3+ years of HVAC maintenance and installation experience
+- Hands-on experience with split AC systems, chillers, and refrigeration
+- Ability to diagnose mechanical and electrical faults
+- Knowledge of safety standards and compliance regulations
+- Technical diploma or certification in refrigeration and air conditioning
+- Teamwork and communication skills
+
+Nice to have:
+- Experience in facilities management companies
+- Knowledge of BMS (Building Management Systems)
+- UAE/GCC work experience
+- Valid UAE driving license""",
+        "min_experience": 3.0,
+        "education_required": "Associate",
+    },
+    {
+        "title": "Senior Finance Manager / CFO",
+        "description": """We are seeking an experienced Senior Finance Manager to lead our financial operations and strategy.
+
+Responsibilities:
+- Lead financial planning, budgeting, forecasting, and strategic cost optimization
+- Ensure full IFRS compliance and prepare consolidated financial statements
+- Manage UAE corporate tax filings, VAT returns, and regulatory reporting
+- Oversee ERP systems implementation and financial process automation
+- Drive business growth through financial analysis and management reporting
+- Manage and mentor the finance team
+- Liaise with auditors, banks, and regulatory authorities
+
+Requirements:
+- 10+ years of financial management experience in UAE/GCC
+- CMA, CPA, ACCA, or equivalent professional certification
+- Deep knowledge of IFRS, UAE corporate tax, and VAT regulations
+- Proven experience with ERP systems (SAP, Oracle, or similar)
+- Strong skills in budgeting, forecasting, and financial modelling
+- Experience managing finance teams and presenting to senior leadership
+- Bachelor's degree in Accounting, Finance, or Commerce
+
+Preferred:
+- Certified UAE Tax Agent or IFRS certification
+- Experience in multi-entity corporate group finance
+- Arabic language proficiency""",
+        "min_experience": 10.0,
+        "education_required": "Bachelor",
+    },
+    {
+        "title": "Strategic Planning & Government Affairs Manager",
+        "description": """We are looking for a seasoned Strategic Planning professional to drive organizational excellence.
+
+Responsibilities:
+- Develop and implement organizational strategic plans aligned with national vision
+- Design and manage KPIs, performance management frameworks, and balanced scorecards
+- Lead institutional excellence initiatives and quality management programs
+- Coordinate cross-functional teams and manage government relations
+- Prepare executive reports and strategic presentations for senior leadership
+- Drive continuous improvement and change management initiatives
+- Represent the organization in government and semi-government forums
+
+Requirements:
+- 10+ years of experience in strategic planning or government management
+- Proven expertise in KPI development and performance management
+- Experience in institutional excellence frameworks (EFQM, ISO, etc.)
+- Strong leadership and cross-functional team management
+- Excellent Arabic and English communication skills
+- Bachelor's degree in Business Administration, Public Administration, or related field
+
+Preferred:
+- Experience in UAE government or semi-government sector
+- PMP, Lean Six Sigma, or equivalent certification
+- Master's degree in Strategic Management or Public Policy
+- Knowledge of UAE National Vision and federal strategies""",
+        "min_experience": 10.0,
+        "education_required": "Bachelor",
+    },
+    {
+        "title": "School Principal / Education Manager",
+        "description": """We are seeking an experienced education leader to serve as School Principal and drive academic excellence.
+
+Responsibilities:
+- Lead school operations, academic programs, and institutional development
+- Drive accreditation processes and quality assurance standards
+- Develop strategic plans to improve student outcomes and enrollment
+- Manage teaching staff, conduct performance evaluations, and provide mentoring
+- Foster a culture of leadership, innovation, and continuous improvement
+- Handle crisis management, parent relations, and community engagement
+- Prepare reports for regulatory bodies and education authorities
+
+Requirements:
+- 10+ years of experience in education management or school leadership
+- Proven track record in school administration and academic leadership
+- Experience with accreditation bodies (Cognia, KHDA, or equivalent)
+- Strong skills in strategic planning, quality assurance, and staff development
+- Excellent leadership, communication, and problem-solving skills
+- Bachelor's or Master's degree in Education or Education Management
+
+Preferred:
+- Experience in UAE/GCC education sector
+- Knowledge of international accreditation standards
+- Arabic language proficiency
+- Awards or recognition for educational excellence""",
+        "min_experience": 10.0,
+        "education_required": "Bachelor",
+    },
+    {
+        "title": "Administrative Assistant / Office Coordinator",
+        "description": """We are looking for a reliable and organized Administrative Assistant to support our office operations.
+
+Responsibilities:
+- Provide administrative and clerical support to management and office staff
+- Manage correspondence, filing, scheduling, and document management
+- Handle data entry, report preparation, and spreadsheet management
+- Coordinate meetings, events, and office logistics
+- Assist with reception duties and visitor management
+- Support HR and operations functions as needed
+- Manage office supplies and coordinate with vendors
+
+Requirements:
+- Strong organizational and time management skills
+- Proficiency in Microsoft Office (Word, Excel, PowerPoint, Outlook)
+- Excellent communication and interpersonal skills
+- Data entry and document management experience
+- Ability to multitask and work in a team environment
+- Attention to detail and professional attitude
+- Arabic and English language skills
+
+Nice to have:
+- Experience in UAE government or corporate environment
+- Graphic design or presentation skills
+- Experience with Adobe Creative Suite or Canva
+- Valid UAE driving license""",
+        "min_experience": 0.0,
+        "education_required": "High School",
+    },
+    {
+        "title": "Social Media Manager / Digital Marketing Executive",
+        "description": """We are hiring a Social Media Manager to grow our digital presence and engage our audience.
+
+Responsibilities:
+- Create, schedule, and publish engaging content across social media platforms
+- Develop and implement social media strategies aligned with marketing goals
+- Produce graphic designs, photos, and short videos for digital campaigns
+- Monitor analytics and report on social media performance and KPIs
+- Manage online community engagement and respond to comments/messages
+- Collaborate with content, marketing, and creative teams
+- Stay up to date with social media trends and platform updates
+
+Requirements:
+- Experience in social media management and digital content creation
+- Proficiency in content creation tools (Canva, Adobe Creative Suite, or similar)
+- Photo and video editing skills for social media formats
+- Strong written and visual communication skills
+- Understanding of social media analytics and reporting
+- Creativity and ability to develop engaging digital campaigns
+- Arabic and/or English language skills
+
+Nice to have:
+- Experience with paid social media advertising (Meta Ads, TikTok Ads)
+- Graphic design background
+- Experience in UAE/GCC markets
+- Google Analytics or Meta Business Suite certification""",
+        "min_experience": 1.0,
+        "education_required": "High School",
+    },
+    {
+        "title": "Public Relations & Communications Officer",
+        "description": """We are seeking a skilled PR and Communications Officer to manage our public image and media relations.
+
+Responsibilities:
+- Develop and implement public relations and communications strategies
+- Manage media relations, press releases, and corporate communications
+- Handle customer service escalations and client relationship management
+- Coordinate with banking, financial, or corporate clients
+- Manage call center operations and ensure quality service delivery
+- Prepare communications reports, briefings, and executive presentations
+- Represent the organization at external events and forums
+
+Requirements:
+- 3+ years of experience in public relations, communications, or customer service
+- Excellent verbal and written communication skills in Arabic and English
+- Experience in media relations, corporate communications, or banking PR
+- Strong customer relationship management abilities
+- Proficiency in Microsoft Office and social media platforms
+- Ability to handle high-pressure situations and manage multiple stakeholders
+- Bachelor's degree in Public Relations, Media, Communications, or related field
+
+Preferred:
+- Experience in UAE banking or financial services sector
+- Knowledge of compliance and regulatory communication requirements
+- Experience with CRM systems
+- Arabic media writing skills""",
+        "min_experience": 3.0,
+        "education_required": "Bachelor",
+    },
+    {
+        "title": "Quality Assurance & Operations Coordinator",
+        "description": """We are looking for a detail-oriented Quality Assurance professional to maintain operational standards.
+
+Responsibilities:
+- Monitor and evaluate operational processes and service quality
+- Develop and implement quality control procedures and standards
+- Conduct audits, inspections, and quality assessments
+- Analyze customer feedback and resolve service quality issues
+- Prepare quality reports and present findings to management
+- Coordinate with operations teams to improve workflow efficiency
+- Train staff on quality standards and compliance requirements
+
+Requirements:
+- 2+ years of experience in quality control, quality assurance, or operations
+- Strong analytical and problem-solving skills
+- Knowledge of quality management systems and standards
+- Experience with administrative operations and reporting
+- Proficiency in Microsoft Office (Excel, Word)
+- Attention to detail and process-oriented mindset
+- Good communication and team coordination skills
+
+Nice to have:
+- ISO or quality management certification
+- Experience in customer service quality monitoring
+- Knowledge of UAE regulatory standards
+- Arabic language proficiency""",
+        "min_experience": 2.0,
+        "education_required": "Associate",
+    },
+    {
+        "title": "Call Center Team Leader / Customer Experience Manager",
+        "description": """We are seeking an experienced Call Center Team Leader to manage our customer service operations.
+
+Responsibilities:
+- Lead and supervise call center agents and customer service teams
+- Monitor call quality, resolve escalations, and ensure KPI achievement
+- Coach and develop team members through regular feedback and training
+- Manage multi-channel customer inquiries (phone, email, chat, in-person)
+- Prepare daily/weekly performance reports and dashboards
+- Implement process improvements to enhance customer satisfaction
+- Coordinate with branch operations and retail teams
+
+Requirements:
+- 5+ years of customer service or call center experience, including team leadership
+- Proven track record in achieving customer satisfaction targets
+- Strong leadership, coaching, and people management skills
+- Excellent communication and conflict resolution abilities
+- Experience with CRM systems and customer service tools
+- Ability to handle escalations and high-pressure environments
+- Quality assurance and performance monitoring experience
+
+Nice to have:
+- Experience in UAE retail, banking, or telecom call centers
+- Knowledge of Amadeus, Galileo, or reservation systems
+- Bilingual Arabic/English
+- Customer experience management certification""",
+        "min_experience": 5.0,
         "education_required": "Bachelor",
     },
 ]
