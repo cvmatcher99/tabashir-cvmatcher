@@ -541,7 +541,7 @@ footer a:hover { color: var(--primary); }
     </button>
   </div>
 
-  <!-- ✨ Premium Career Coach CTA -->
+  <!-- Premium Career Coach CTA -->
   <div class="premium-cta-wrap" id="premium-cta" style="display:none;">
     <div class="premium-label">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="#fbbf24" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -552,7 +552,7 @@ footer a:hover { color: var(--primary); }
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
       </svg>
-      ✨ Get My Full Career Coaching Report
+      Get My Full Career Coaching Report
     </button>
     <p class="premium-hint">AI identifies your skill gaps and recommends real courses to advance your career</p>
   </div>
@@ -623,7 +623,12 @@ function setStep(n, pct, msg) {
   for (let i=1;i<=4;i++) {
     const el=document.getElementById('s'+i);
     el.className='step'+(i<n?' done':i===n?' active':'');
-    el.querySelector('.step-circle').textContent = i<n ? '✓' : String(i);
+    const sc = el.querySelector('.step-circle');
+    if (i < n) {
+      sc.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+    } else {
+      sc.textContent = String(i);
+    }
   }
   document.getElementById('pbar').style.width = pct+'%';
   document.getElementById('pstatus').textContent = msg;
@@ -695,7 +700,7 @@ function showResults(results) {
   coachPanel.style.display = 'none';
   coachPanel.innerHTML = '';
   const btnCoach = document.getElementById('btn-coach');
-  if (btnCoach) { btnCoach.disabled = false; btnCoach.textContent = '✨ Get My Full Career Coaching Report'; btnCoach.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> ✨ Get My Full Career Coaching Report'; }
+  if (btnCoach) { btnCoach.disabled = false; btnCoach.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Get My Full Career Coaching Report'; }
 
   document.getElementById('r-title').textContent = results.length ? 'Your Top Job Matches' : 'No Matches Found';
   document.getElementById('r-sub').textContent = results.length
@@ -816,12 +821,12 @@ async function openCareerCoach() {
     renderCoachReport(data);
   } catch(e) {
     panel.innerHTML = `<div class="coach-loading">
-      <div style="font-size:32px">⚠️</div>
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       <p style="color:#f87171">Could not generate report: ${e.message}</p>
       <small>Please try again in a few seconds</small>
     </div>`;
     btn.disabled = false;
-    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> ✨ Try Again';
+    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Try Again';
   }
 }
 
@@ -831,7 +836,11 @@ function renderCoachReport(d) {
   // ── Header
   let headerHtml = `
     <div class="coach-header">
-      <div class="coach-icon">🎯</div>
+      <div class="coach-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2">
+          <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+        </svg>
+      </div>
       <div class="coach-header-text">
         <h3>Your Personalized Career Report</h3>
         <p>AI-powered gap analysis & action plan tailored to the UAE job market</p>
@@ -846,7 +855,9 @@ function renderCoachReport(d) {
   // 1. Strengths
   if (d.strengths && d.strengths.length) {
     bodyHtml += `<div>
-      <div class="coach-section-title">💪 Your Strengths <span></span></div>
+      <div class="coach-section-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Your Strengths <span></span></div>
       ${d.strengths.map(s=>`<div class="strength-item"><div class="strength-dot"></div>${s}</div>`).join('')}
     </div>`;
   }
@@ -859,7 +870,7 @@ function renderCoachReport(d) {
       let courseHtml = '';
       if (g.course && g.course.url) {
         const freeClass = g.course.free ? ' free' : '';
-        const freeBadge = g.course.free ? '<span style="font-size:10px;opacity:.8">🆓 Free</span>' : '';
+        const freeBadge = g.course.free ? '<span style="font-size:10px;opacity:.8;font-weight:700;">FREE</span>' : '';
         courseHtml = `<a class="course-link${freeClass}" href="${g.course.url}" target="_blank" rel="noopener">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           ${g.course.title||'View Course'}
@@ -877,7 +888,9 @@ function renderCoachReport(d) {
       </div>`;
     }).join('');
     bodyHtml += `<div>
-      <div class="coach-section-title">📋 Skills to Develop <span></span></div>
+      <div class="coach-section-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Skills to Develop <span></span></div>
       ${gapsHtml}
     </div>`;
   }
@@ -888,7 +901,7 @@ function renderCoachReport(d) {
       let courseHtml = '';
       if (a.course && a.course.url) {
         const freeClass = a.course.free ? ' free' : '';
-        const freeBadge = a.course.free ? '<span style="font-size:10px;opacity:.8">🆓</span>' : '';
+        const freeBadge = a.course.free ? '<span style="font-size:10px;opacity:.8;font-weight:700;">FREE</span>' : '';
         courseHtml = `<a class="course-link${freeClass}" href="${a.course.url}" target="_blank" rel="noopener">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           ${a.course.title||'Course'}
@@ -901,8 +914,8 @@ function renderCoachReport(d) {
         <div class="action-body">
           <div class="action-title">${a.step||'Step '+(i+1)}</div>
           <div class="action-meta">
-            ${a.duration ? `<span>⏱ <b>${a.duration}</b></span>` : ''}
-            ${a.skill_gained ? `<span>🎯 <b>${a.skill_gained}</b></span>` : ''}
+            ${a.duration ? `<span><b>${a.duration}</b></span>` : ''}
+            ${a.skill_gained ? `<span><b>${a.skill_gained}</b></span>` : ''}
           </div>
           ${a.action ? `<div class="action-desc">${a.action}</div>` : ''}
           ${courseHtml}
@@ -910,7 +923,9 @@ function renderCoachReport(d) {
       </div>`;
     }).join('');
     bodyHtml += `<div>
-      <div class="coach-section-title">📚 Your 90-Day Action Plan <span></span></div>
+      <div class="coach-section-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        90-Day Action Plan <span></span></div>
       ${actionsHtml}
     </div>`;
   }
@@ -922,7 +937,9 @@ function renderCoachReport(d) {
       return `${i > 0 ? '<span class="path-arrow">→</span>' : ''}<div class="path-node${isCurrent?' current':''}">${node}</div>`;
     }).join('');
     bodyHtml += `<div>
-      <div class="coach-section-title">🛤️ Career Progression Path <span></span></div>
+      <div class="coach-section-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Career Progression Path <span></span></div>
       <div class="path-track">${pathHtml}</div>
     </div>`;
   }
@@ -930,7 +947,9 @@ function renderCoachReport(d) {
   // 5. UAE Tip
   if (d.uae_tip) {
     bodyHtml += `<div class="uae-tip">
-      <div class="uae-tip-icon">🇦🇪</div>
+      <div class="uae-tip-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </div>
       <div class="uae-tip-text"><strong>UAE Market Tip:</strong> ${d.uae_tip}</div>
     </div>`;
   }
