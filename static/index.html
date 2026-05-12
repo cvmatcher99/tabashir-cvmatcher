@@ -284,6 +284,63 @@ footer a:hover { color: var(--primary); }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 
+/* ── Premium Shared ──────────────────────────────────────────────────────────── */
+.premium-buttons-row { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:20px; }
+.btn-prem {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:11px 22px; border-radius:11px; font-size:13px; font-weight:700;
+  border:none; cursor:pointer; transition:all 0.25s; position:relative; overflow:hidden;
+}
+.btn-prem::before { content:''; position:absolute; inset:0; background:rgba(255,255,255,.1); opacity:0; transition:opacity .2s; }
+.btn-prem:hover::before { opacity:1; }
+.btn-prem:hover { transform:translateY(-2px); }
+.btn-prem:disabled { opacity:.6; cursor:default; transform:none; }
+.btn-score    { background:linear-gradient(135deg,#059669,#10b981); color:white; box-shadow:0 4px 20px rgba(16,185,129,.3); }
+.btn-interview{ background:linear-gradient(135deg,#6366f1,#8b5cf6); color:white; box-shadow:0 4px 20px rgba(99,102,241,.3); }
+.btn-salary   { background:linear-gradient(135deg,#d97706,#f59e0b); color:white; box-shadow:0 4px 20px rgba(245,158,11,.3); }
+.btn-lock-prem{ background:linear-gradient(135deg,#374151,#1f2937); color:var(--text3); cursor:pointer; }
+.panel-loading { padding:40px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:14px; }
+.panel-spinner { width:36px; height:36px; border-radius:50%; border:3px solid rgba(99,102,241,.2); border-top-color:#6366f1; animation:spin .85s linear infinite; }
+
+/* CV Score Panel */
+.score-report-panel { display:none; background:var(--card); border:1px solid rgba(16,185,129,0.2); border-radius:20px; overflow:hidden; animation:fadeUp .5s ease; margin-top:20px; }
+.score-report-header { padding:22px 28px; background:linear-gradient(135deg,rgba(16,185,129,.07),rgba(5,150,105,.04)); border-bottom:1px solid rgba(16,185,129,.12); display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+.score-circle-big { width:72px; height:72px; border-radius:50%; flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:800; border:3px solid; }
+.grade-a { border-color:#10b981; color:#10b981; background:rgba(16,185,129,.08); }
+.grade-b { border-color:#6366f1; color:#6366f1; background:rgba(99,102,241,.08); }
+.grade-c { border-color:#f59e0b; color:#f59e0b; background:rgba(245,158,11,.08); }
+.grade-d { border-color:#ef4444; color:#ef4444; background:rgba(239,68,68,.08); }
+.score-big-num { font-size:22px; line-height:1; }
+.score-big-label { font-size:9px; color:var(--text3); font-weight:600; letter-spacing:.5px; margin-top:2px; }
+.score-section-bar { margin-bottom:12px; }
+.score-section-name { display:flex; justify-content:space-between; font-size:12px; font-weight:600; margin-bottom:5px; }
+.score-section-name span { color:var(--text3); }
+.score-track { height:6px; background:var(--border); border-radius:99px; overflow:hidden; }
+.score-fill { height:100%; border-radius:99px; transition:width 1s ease; }
+
+/* Interview Panel */
+.interview-panel { display:none; background:var(--card); border:1px solid rgba(99,102,241,.2); border-radius:20px; overflow:hidden; animation:fadeUp .5s ease; margin-top:20px; }
+.interview-header { padding:22px 28px; background:linear-gradient(135deg,rgba(99,102,241,.07),rgba(139,92,246,.04)); border-bottom:1px solid rgba(99,102,241,.12); display:flex; gap:14px; align-items:center; }
+.q-item { padding:14px 16px; border:1px solid var(--border); border-radius:12px; margin-bottom:10px; }
+.q-type { display:inline-block; font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; padding:3px 9px; border-radius:6px; margin-bottom:8px; }
+.q-technical  { background:rgba(6,182,212,.1); color:#22d3ee; border:1px solid rgba(6,182,212,.2); }
+.q-behavioral { background:rgba(139,92,246,.1); color:#a78bfa; border:1px solid rgba(139,92,246,.2); }
+.q-situational{ background:rgba(245,158,11,.1); color:#fbbf24; border:1px solid rgba(245,158,11,.2); }
+.q-text { font-size:14px; font-weight:600; margin-bottom:6px; }
+.q-why  { font-size:11px; color:var(--text3); margin-bottom:8px; }
+.q-tip  { font-size:12px; color:var(--text2); background:rgba(99,102,241,.06); border-left:2px solid var(--primary); padding:8px 12px; border-radius:0 8px 8px 0; }
+
+/* Salary Panel */
+.salary-panel { display:none; background:var(--card); border:1px solid rgba(251,191,36,.2); border-radius:20px; overflow:hidden; animation:fadeUp .5s ease; margin-top:20px; }
+.salary-header { padding:22px 28px; background:linear-gradient(135deg,rgba(245,158,11,.07),rgba(180,83,9,.04)); border-bottom:1px solid rgba(251,191,36,.12); display:flex; gap:14px; align-items:center; }
+.salary-range-bar { position:relative; height:10px; background:var(--border); border-radius:99px; margin:16px 0 8px; }
+.salary-range-fill { position:absolute; top:0; height:100%; border-radius:99px; background:linear-gradient(90deg,#f59e0b,#fbbf24); transition:width 1.2s ease; }
+.factor-item { display:flex; gap:10px; align-items:flex-start; padding:10px 14px; background:rgba(255,255,255,.02); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; font-size:12px; color:var(--text2); }
+.factor-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:3px; }
+.f-positive { background:#10b981; } .f-negative { background:#ef4444; } .f-neutral { background:#6b7280; }
+
+@media(max-width:768px){ .premium-buttons-row { flex-direction:column; align-items:stretch; } .btn-prem { justify-content:center; } }
+
 /* ── Premium Career Coach ─────────────────────────────── */
 .premium-cta-wrap { text-align: center; margin-top: 20px; }
 .premium-label {
@@ -623,6 +680,42 @@ footer a:hover { color: var(--primary); }
 
   <!-- Career Coach Results Panel -->
   <div class="coach-panel" id="coach-panel"></div>
+
+  <!-- 3 Premium Feature Buttons (shown when signed in + have results) -->
+  <div id="extra-premium-btns" style="display:none;">
+    <div style="text-align:center;margin-top:8px;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:12px;">More Premium Tools</div>
+      <div class="premium-buttons-row">
+        <!-- CV Score -->
+        <button class="btn-prem btn-score" id="btn-cv-score" onclick="openCvScore()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          CV Score
+        </button>
+        <!-- Interview Prep — needs job selection -->
+        <button class="btn-prem btn-interview" id="btn-interview" onclick="openInterviewSelect()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Interview Prep
+        </button>
+        <!-- Salary Estimator -->
+        <button class="btn-prem btn-salary" id="btn-salary" onclick="openSalary()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Salary Estimate
+        </button>
+      </div>
+    </div>
+    <!-- Locked row for guests -->
+    <div id="extra-premium-lock" style="display:none;text-align:center;margin-top:12px;">
+      <button class="btn-prem btn-lock-prem" onclick="triggerGoogleSignIn()" style="width:100%;max-width:380px;justify-content:center;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Sign in to unlock CV Score, Interview Prep & Salary Estimate
+      </button>
+    </div>
+  </div>
+
+  <!-- Result panels -->
+  <div class="score-report-panel" id="score-panel"></div>
+  <div class="interview-panel" id="interview-panel"></div>
+  <div class="salary-panel" id="salary-panel"></div>
 </div>
 
 <div class="how-section">
@@ -673,6 +766,7 @@ footer a:hover { color: var(--primary); }
 
 <script>
 let lastUploadedFile = null;
+let lastMatchResults = [];
 let currentUser = null;
 let googleClientId = '';
 const GUEST_UPLOAD_LIMIT = 2;
@@ -781,6 +875,7 @@ function setUser(user) {
   // Update Career Coach CTA + upload counter
   updateCoachCTA();
   updateUploadUI();
+  updateExtraPremium();
 }
 
 function signOut() {
@@ -798,6 +893,7 @@ function signOut() {
   if (cp) { cp.style.display = 'none'; cp.innerHTML = ''; }
   updateCoachCTA();
   updateUploadUI();
+  updateExtraPremium();
 }
 
 function showUploadLimitModal() {
@@ -1009,6 +1105,7 @@ async function handleFile(file) {
   }
   if (!currentUser) incrementUploadCount();
   updateUploadUI();
+  lastMatchResults = results;
   showResults(results);
 }
 
@@ -1048,6 +1145,10 @@ function showResults(results) {
   const btnCoach = document.getElementById('btn-coach');
   if (btnCoach) { btnCoach.disabled = false; btnCoach.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Get My Full Career Coaching Report'; }
   updateCoachCTA();
+  // Show extra premium buttons when we have results
+  const epb = document.getElementById('extra-premium-btns');
+  if (epb) epb.style.display = results.length ? 'block' : 'none';
+  updateExtraPremium();
 
   document.getElementById('r-title').textContent = results.length ? 'Your Top Job Matches' : 'No Matches Found';
   document.getElementById('r-sub').textContent = results.length
@@ -1141,7 +1242,12 @@ function resetUpload() {
   document.getElementById('premium-cta').style.display='none';
   const cp=document.getElementById('coach-panel');
   cp.style.display='none'; cp.innerHTML='';
+  ['score-panel','interview-panel','salary-panel'].forEach(id=>{
+    const p=document.getElementById(id); if(p){p.style.display='none';p.innerHTML='';}
+  });
+  const epb=document.getElementById('extra-premium-btns'); if(epb) epb.style.display='none';
   lastUploadedFile = null;
+  lastMatchResults = [];
   updateUploadUI();
 }
 
@@ -1315,6 +1421,221 @@ function renderCoachReport(d) {
     btn.disabled = false;
     btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Regenerate Report';
   }
+}
+
+// ── Extra Premium Features ────────────────────────────────────────────────────
+function updateExtraPremium() {
+  const btnRow = document.querySelector('.premium-buttons-row');
+  const lockRow = document.getElementById('extra-premium-lock');
+  if (!btnRow || !lockRow) return;
+  if (currentUser) {
+    btnRow.style.display = 'flex';
+    lockRow.style.display = 'none';
+  } else {
+    btnRow.style.display = 'none';
+    lockRow.style.display = 'block';
+  }
+}
+
+function _panelLoading(id, color) {
+  const p = document.getElementById(id);
+  p.style.display = 'block';
+  p.innerHTML = `<div class="panel-loading"><div class="panel-spinner" style="border-top-color:${color};"></div><p style="font-size:13px;color:var(--text2)">AI is analyzing...</p><small style="color:var(--text3)">10–20 seconds</small></div>`;
+  p.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+// ── CV Score ──────────────────────────────────────────────────────────────────
+async function openCvScore() {
+  if (!lastUploadedFile) return;
+  const btn = document.getElementById('btn-cv-score');
+  btn.disabled = true;
+  _panelLoading('score-panel', '#10b981');
+  try {
+    const form = new FormData(); form.append('file', lastUploadedFile);
+    const resp = await fetch('/cv-score', { method:'POST', body:form });
+    if (!resp.ok) throw new Error((await resp.json().catch(()=>({}))).detail || 'Failed');
+    renderCvScore(await resp.json());
+  } catch(e) {
+    document.getElementById('score-panel').innerHTML = `<div class="panel-loading"><p style="color:#f87171">Error: ${e.message}</p></div>`;
+  } finally { btn.disabled = false; }
+}
+
+function renderCvScore(d) {
+  const gradeColor = d.grade==='A'?'#10b981':d.grade==='B'?'#6366f1':d.grade==='C'?'#f59e0b':'#ef4444';
+  const gradeClass = 'grade-'+(d.grade||'c').toLowerCase();
+  const sectionsHtml = (d.sections||[]).map(s => {
+    const pct = Math.round((s.score/s.max)*100);
+    const col = pct>=80?'#10b981':pct>=60?'#6366f1':pct>=40?'#f59e0b':'#ef4444';
+    return `<div class="score-section-bar">
+      <div class="score-section-name">${s.name}<span>${s.score}/${s.max}</span></div>
+      <div class="score-track"><div class="score-fill" data-w="${pct}" style="background:${col};width:0%"></div></div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px;">${s.feedback||''}</div>
+    </div>`;
+  }).join('');
+  const winsHtml = (d.quick_wins||[]).map(w=>`<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;font-size:13px;color:var(--text2);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" style="flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>${w}</div>`).join('');
+  const panel = document.getElementById('score-panel');
+  panel.innerHTML = `
+    <div class="score-report-header">
+      <div class="score-circle-big ${gradeClass}"><div class="score-big-num">${d.total_score||0}</div><div class="score-big-label">/ 100</div></div>
+      <div style="flex:1">
+        <div style="font-size:18px;font-weight:800;margin-bottom:4px;">CV Score: Grade ${d.grade||'—'}</div>
+        <div style="font-size:13px;color:var(--text2);">${d.summary||''}</div>
+      </div>
+    </div>
+    <div style="padding:24px 28px;">
+      <div style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:16px;">Section Breakdown</div>
+      ${sectionsHtml}
+      ${winsHtml ? `<div style="margin-top:20px;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:12px;">Quick Wins</div>${winsHtml}` : ''}
+      ${d.ats_tip ? `<div style="margin-top:16px;padding:12px 16px;background:rgba(6,182,212,.06);border:1px solid rgba(6,182,212,.18);border-radius:10px;font-size:12px;color:var(--text2);"><strong style="color:var(--accent);">ATS Tip:</strong> ${d.ats_tip}</div>` : ''}
+    </div>`;
+  requestAnimationFrame(()=>{ setTimeout(()=>{ panel.querySelectorAll('.score-fill[data-w]').forEach(el=>{ el.style.width=el.dataset.w+'%'; }); },200); });
+}
+
+// ── Interview Prep ────────────────────────────────────────────────────────────
+let selectedJobId = null;
+
+function openInterviewSelect() {
+  if (!lastMatchResults.length) return;
+  const existing = document.getElementById('interview-select-modal');
+  if (existing) existing.remove();
+  const jobs = lastMatchResults.slice(0,5);
+  const opts = jobs.map((r,i)=>`
+    <div onclick="selectJob(${r.job.id||i},this)" style="padding:12px 16px;border:1px solid var(--border);border-radius:10px;cursor:pointer;margin-bottom:8px;font-size:13px;font-weight:600;transition:all .2s;" onmouseover="this.style.borderColor='#6366f1'" onmouseout="if(!this.classList.contains('selected'))this.style.borderColor='var(--border)'">
+      #${i+1} — ${r.job.title||'Position'} <span style="color:var(--text3);font-weight:400;font-size:11px;">${r.score}% match</span>
+    </div>`).join('');
+  const modal = document.createElement('div');
+  modal.id = 'interview-select-modal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(6px);';
+  modal.innerHTML = `
+    <div style="background:#111827;border:1px solid #374151;border-radius:20px;padding:28px;max-width:460px;width:92%;box-shadow:0 32px 80px rgba(0,0,0,.6);">
+      <div style="font-size:17px;font-weight:800;margin-bottom:6px;">Choose a Job to Prepare For</div>
+      <div style="font-size:13px;color:#9ca3af;margin-bottom:20px;">Select which job you want interview questions for</div>
+      <div id="job-select-list">${opts}</div>
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button id="btn-confirm-job" onclick="confirmJobSelection()" disabled style="flex:1;padding:11px;border-radius:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border:none;font-size:14px;font-weight:700;cursor:pointer;opacity:.5;transition:opacity .2s">Generate Questions</button>
+        <button onclick="document.getElementById('interview-select-modal').remove()" style="padding:11px 18px;border-radius:10px;background:none;border:1px solid #374151;color:#9ca3af;font-size:13px;cursor:pointer;">Cancel</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
+}
+
+function selectJob(jobId, el) {
+  selectedJobId = jobId;
+  document.querySelectorAll('#job-select-list > div').forEach(d=>{ d.style.borderColor='var(--border)'; d.style.background=''; d.classList.remove('selected'); });
+  el.style.borderColor = '#6366f1';
+  el.style.background = 'rgba(99,102,241,.08)';
+  el.classList.add('selected');
+  const btn = document.getElementById('btn-confirm-job');
+  if (btn) { btn.disabled=false; btn.style.opacity='1'; }
+}
+
+async function confirmJobSelection() {
+  if (!selectedJobId || !lastUploadedFile) return;
+  document.getElementById('interview-select-modal').remove();
+  const btn = document.getElementById('btn-interview');
+  btn.disabled = true;
+  _panelLoading('interview-panel', '#6366f1');
+  try {
+    const form = new FormData();
+    form.append('file', lastUploadedFile);
+    form.append('job_id', selectedJobId);
+    const resp = await fetch('/interview-prep', { method:'POST', body:form });
+    if (!resp.ok) throw new Error((await resp.json().catch(()=>({}))).detail || 'Failed');
+    renderInterviewPrep(await resp.json());
+  } catch(e) {
+    document.getElementById('interview-panel').innerHTML = `<div class="panel-loading"><p style="color:#f87171">Error: ${e.message}</p></div>`;
+  } finally { btn.disabled=false; }
+}
+
+function renderInterviewPrep(d) {
+  const qHtml = (d.questions||[]).map(q=>{
+    const typeClass = (q.type||'').toLowerCase().includes('tech')?'q-technical':(q.type||'').toLowerCase().includes('beh')?'q-behavioral':'q-situational';
+    return `<div class="q-item">
+      <div class="q-type ${typeClass}">${q.type||'General'}</div>
+      <div class="q-text">${q.question||''}</div>
+      ${q.why_asked?`<div class="q-why">Why asked: ${q.why_asked}</div>`:''}
+      ${q.answer_tip?`<div class="q-tip">${q.answer_tip}</div>`:''}
+    </div>`;
+  }).join('');
+  const tipsHtml = (d.general_tips||[]).map(t=>`<div style="display:flex;gap:8px;margin-bottom:8px;font-size:12px;color:var(--text2);"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="2.5" style="flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>${t}</div>`).join('');
+  const panel = document.getElementById('interview-panel');
+  panel.innerHTML = `
+    <div class="interview-header">
+      <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <div><div style="font-size:17px;font-weight:800;">Interview Questions</div><div style="font-size:12px;color:var(--text2);">Tailored to this role + your profile</div></div>
+    </div>
+    <div style="padding:24px 28px;">
+      ${qHtml}
+      ${tipsHtml?`<div style="margin-top:16px;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">General Tips</div>${tipsHtml}`:''}
+      ${d.dress_code?`<div style="margin-top:12px;padding:10px 14px;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:10px;font-size:12px;color:var(--text2);"><strong>Dress Code:</strong> ${d.dress_code}</div>`:''}
+      ${d.salary_negotiation?`<div style="margin-top:8px;padding:10px 14px;background:rgba(16,185,129,.04);border:1px solid rgba(16,185,129,.15);border-radius:10px;font-size:12px;color:var(--text2);"><strong style="color:#34d399;">Salary Tip:</strong> ${d.salary_negotiation}</div>`:''}
+    </div>`;
+}
+
+// ── Salary Estimator ──────────────────────────────────────────────────────────
+async function openSalary() {
+  if (!lastUploadedFile) return;
+  const btn = document.getElementById('btn-salary');
+  btn.disabled = true;
+  _panelLoading('salary-panel', '#f59e0b');
+  try {
+    const form = new FormData(); form.append('file', lastUploadedFile);
+    const resp = await fetch('/salary-estimate', { method:'POST', body:form });
+    if (!resp.ok) throw new Error((await resp.json().catch(()=>({}))).detail || 'Failed');
+    renderSalary(await resp.json());
+  } catch(e) {
+    document.getElementById('salary-panel').innerHTML = `<div class="panel-loading"><p style="color:#f87171">Error: ${e.message}</p></div>`;
+  } finally { btn.disabled=false; }
+}
+
+function renderSalary(d) {
+  const s = d.salary_aed || {};
+  const mn = s.min||0, md = s.mid||0, mx = s.max||0;
+  const fmt = n => 'AED '+(n||0).toLocaleString();
+  const factorsHtml = (d.factors||[]).map(f=>{
+    const cls = (f.impact||'').toLowerCase()==='positive'?'f-positive':(f.impact||'').toLowerCase()==='negative'?'f-negative':'f-neutral';
+    return `<div class="factor-item"><div class="factor-dot ${cls}"></div><div><strong>${f.factor}</strong> — ${f.detail||''}</div></div>`;
+  }).join('');
+  const companiesHtml = (d.top_paying_companies||[]).map(c=>`<span style="padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:#fbbf24;">${c}</span>`).join(' ');
+  const panel = document.getElementById('salary-panel');
+  panel.innerHTML = `
+    <div class="salary-header">
+      <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#d97706,#f59e0b);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:17px;font-weight:800;">Salary Estimate — UAE</div>
+        <div style="font-size:12px;color:var(--text2);">${d.role_detected||''} · ${d.level||''}</div>
+      </div>
+      ${d.field?`<div style="padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:#fbbf24;">${d.field}</div>`:''}
+    </div>
+    <div style="padding:24px 28px;">
+      <!-- Range display -->
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+        <span style="color:var(--text3);">Min</span>
+        <span style="font-size:18px;font-weight:800;color:#fbbf24;">${fmt(md)} / month</span>
+        <span style="color:var(--text3);">Max</span>
+      </div>
+      <div class="salary-range-bar" id="sbar">
+        <div class="salary-range-fill" id="sfill" style="width:0%;left:0;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:20px;">
+        <span>${fmt(mn)}</span><span>${fmt(mx)}</span>
+      </div>
+      ${d.negotiation_range?`<div style="text-align:center;margin-bottom:20px;padding:10px 16px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.18);border-radius:10px;font-size:13px;color:var(--text2);">Negotiation range: <strong style="color:#fbbf24;">${d.negotiation_range}</strong></div>`:''}
+      ${factorsHtml?`<div style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">Key Factors</div>${factorsHtml}`:''}
+      ${companiesHtml?`<div style="margin-top:16px;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">Top Paying Companies</div><div style="display:flex;flex-wrap:wrap;gap:8px;">${companiesHtml}</div>`:''}
+      ${d.market_note?`<div style="margin-top:16px;padding:10px 14px;background:rgba(6,182,212,.04);border:1px solid rgba(6,182,212,.15);border-radius:10px;font-size:12px;color:var(--text2);">${d.market_note}</div>`:''}
+    </div>`;
+  // Animate bar
+  setTimeout(()=>{
+    const fill = document.getElementById('sfill');
+    if(fill && mx>0) fill.style.width = Math.round(((md-mn)/(mx-mn||1))*60+20)+'%';
+    panel.scrollIntoView({behavior:'smooth',block:'start'});
+  },200);
 }
 
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}

@@ -354,6 +354,240 @@ def _fallback_career_coach(
     }
 
 
+# ── CV Score ───────────────────────────────────────────────────────────────────
+
+def cv_score_analysis(
+    name: str,
+    skills: List[str],
+    exp: float,
+    edu: Optional[str],
+    edu_field: Optional[str],
+    raw_text: str,
+) -> Dict[str, Any]:
+    """Score a CV out of 100 and return section breakdown + improvement tips."""
+
+    prompt = f"""You are a senior HR recruiter in the UAE. Evaluate this CV and return a detailed quality score.
+
+Candidate: {name}
+Experience: {exp} years
+Education: {edu or 'not specified'} in {edu_field or 'not specified'}
+Skills: {', '.join(skills[:30]) if skills else 'none detected'}
+CV Text (first 800 chars): {raw_text[:800]}
+
+Return ONLY valid JSON:
+{{
+  "total_score": <integer 0-100>,
+  "grade": <"A" | "B" | "C" | "D">,
+  "summary": "<one sentence overall verdict>",
+  "sections": [
+    {{"name": "Contact & Profile", "score": <0-10>, "max": 10, "feedback": "<specific feedback>"}},
+    {{"name": "Work Experience", "score": <0-25>, "max": 25, "feedback": "<specific feedback>"}},
+    {{"name": "Skills", "score": <0-25>, "max": 25, "feedback": "<specific feedback>"}},
+    {{"name": "Education", "score": <0-20>, "max": 20, "feedback": "<specific feedback>"}},
+    {{"name": "CV Structure & Clarity", "score": <0-20>, "max": 20, "feedback": "<specific feedback>"}}
+  ],
+  "quick_wins": [
+    "<actionable tip 1 — specific change to make right now>",
+    "<actionable tip 2>",
+    "<actionable tip 3>"
+  ],
+  "ats_tip": "<one tip about ATS/keyword optimization for UAE job boards>"
+}}
+
+Be honest and specific. Base feedback on the actual CV content provided."""
+
+    raw = _generate(prompt, max_tokens=900)
+    if not raw:
+        return _fallback_cv_score(skills, exp, edu)
+    try:
+        m = re.search(r'\{.*\}', raw, re.DOTALL)
+        if not m:
+            return _fallback_cv_score(skills, exp, edu)
+        data = json.loads(m.group())
+        return data
+    except Exception as e:
+        logger.warning("CV score JSON error: %s", e)
+        return _fallback_cv_score(skills, exp, edu)
+
+
+def _fallback_cv_score(skills: List[str], exp: float, edu: Optional[str]) -> Dict[str, Any]:
+    skill_score = min(25, len(skills) * 2)
+    exp_score = min(25, int(exp * 3))
+    edu_score = 15 if edu and any(x in (edu or '').lower() for x in ['bachelor', 'master', 'phd']) else 10
+    total = 10 + exp_score + skill_score + edu_score + 12
+    grade = 'A' if total >= 80 else 'B' if total >= 65 else 'C' if total >= 50 else 'D'
+    return {
+        "total_score": total,
+        "grade": grade,
+        "summary": f"CV shows {len(skills)} skills and {exp:.0f} years of experience.",
+        "sections": [
+            {"name": "Contact & Profile", "score": 8, "max": 10, "feedback": "Ensure email and phone are clearly visible."},
+            {"name": "Work Experience", "score": exp_score, "max": 25, "feedback": "Add quantified achievements to each role."},
+            {"name": "Skills", "score": skill_score, "max": 25, "feedback": "List technical and soft skills clearly."},
+            {"name": "Education", "score": edu_score, "max": 20, "feedback": "Include graduation year and GPA if strong."},
+            {"name": "CV Structure & Clarity", "score": 12, "max": 20, "feedback": "Use clear headings and consistent formatting."},
+        ],
+        "quick_wins": [
+            "Add a 2–3 line professional summary at the top",
+            "Quantify achievements: use numbers and percentages",
+            "Add relevant keywords from job descriptions",
+        ],
+        "ats_tip": "Use standard section headings (Experience, Education, Skills) so ATS systems can parse your CV correctly.",
+    }
+
+
+# ── Interview Prep ─────────────────────────────────────────────────────────────
+
+def interview_prep(
+    job_title: str,
+    job_description: str,
+    required_skills: List[str],
+    candidate_skills: List[str],
+    exp: float,
+) -> Dict[str, Any]:
+    """Generate tailored interview Q&A for a specific job."""
+
+    missing = [s for s in required_skills if s not in candidate_skills][:5]
+
+    prompt = f"""You are an expert interview coach. Generate realistic interview questions for this job application.
+
+Job Title: {job_title}
+Key Required Skills: {', '.join(required_skills[:10])}
+Candidate Experience: {exp} years
+Candidate's Missing Skills: {', '.join(missing) if missing else 'none'}
+
+Return ONLY valid JSON:
+{{
+  "questions": [
+    {{
+      "question": "<interview question>",
+      "type": "<Technical | Behavioral | Situational>",
+      "why_asked": "<one sentence — why interviewers ask this>",
+      "answer_tip": "<how to structure a strong answer, 1-2 sentences>"
+    }}
+  ],
+  "general_tips": [
+    "<interview tip 1 specific to this role>",
+    "<interview tip 2>",
+    "<interview tip 3>"
+  ],
+  "dress_code": "<appropriate dress code for this role in UAE>",
+  "salary_negotiation": "<one tip for salary negotiation for this role in UAE>"
+}}
+
+Generate 8 questions: 3 technical, 3 behavioral, 2 situational. Make them realistic and role-specific."""
+
+    raw = _generate(prompt, max_tokens=1200)
+    if not raw:
+        return _fallback_interview_prep(job_title, required_skills)
+    try:
+        m = re.search(r'\{.*\}', raw, re.DOTALL)
+        if not m:
+            return _fallback_interview_prep(job_title, required_skills)
+        data = json.loads(m.group())
+        return data
+    except Exception as e:
+        logger.warning("Interview prep JSON error: %s", e)
+        return _fallback_interview_prep(job_title, required_skills)
+
+
+def _fallback_interview_prep(job_title: str, required_skills: List[str]) -> Dict[str, Any]:
+    skills_str = ', '.join(required_skills[:3]) if required_skills else 'relevant skills'
+    return {
+        "questions": [
+            {"question": f"Tell me about your experience with {skills_str}.", "type": "Technical",
+             "why_asked": "To assess technical depth.", "answer_tip": "Give a specific example with measurable results."},
+            {"question": "Walk me through a challenging project you led.", "type": "Behavioral",
+             "why_asked": "To assess problem-solving and leadership.", "answer_tip": "Use the STAR method: Situation, Task, Action, Result."},
+            {"question": f"Why are you interested in the {job_title} role?", "type": "Behavioral",
+             "why_asked": "To assess motivation and cultural fit.", "answer_tip": "Connect your background to the role's requirements."},
+            {"question": "How do you handle tight deadlines and multiple priorities?", "type": "Situational",
+             "why_asked": "To assess time management.", "answer_tip": "Describe your prioritization system with a real example."},
+            {"question": "What are your salary expectations?", "type": "Situational",
+             "why_asked": "To assess fit within budget.", "answer_tip": "Research market rates and give a range based on your experience."},
+        ],
+        "general_tips": [
+            "Research the company thoroughly before the interview",
+            "Prepare 2–3 questions to ask the interviewer",
+            "Bring multiple printed copies of your CV",
+        ],
+        "dress_code": "Business professional or smart casual depending on the company culture.",
+        "salary_negotiation": "Research market rates on LinkedIn Salary and Bayt.com before negotiating.",
+    }
+
+
+# ── Salary Estimator ───────────────────────────────────────────────────────────
+
+def salary_estimate(
+    skills: List[str],
+    exp: float,
+    edu: Optional[str],
+    edu_field: Optional[str],
+    location: str = "UAE",
+) -> Dict[str, Any]:
+    """Estimate monthly salary range in AED for the UAE/Gulf market."""
+
+    prompt = f"""You are a UAE compensation specialist with deep knowledge of Gulf market salaries.
+
+Profile:
+- Experience: {exp} years
+- Education: {edu or 'not specified'} in {edu_field or 'not specified'}
+- Skills: {', '.join(skills[:25]) if skills else 'not specified'}
+- Location: {location}
+
+Return ONLY valid JSON:
+{{
+  "role_detected": "<most likely job title based on profile>",
+  "field": "<industry field>",
+  "salary_aed": {{
+    "min": <integer, monthly AED>,
+    "mid": <integer, monthly AED>,
+    "max": <integer, monthly AED>
+  }},
+  "level": "<Junior | Mid-Level | Senior | Manager>",
+  "factors": [
+    {{"factor": "<factor name>", "impact": "<Positive | Negative | Neutral>", "detail": "<one sentence>"}}
+  ],
+  "negotiation_range": "<e.g. AED 12,000 – 16,000>",
+  "top_paying_companies": ["<company 1 in UAE for this role>", "<company 2>", "<company 3>"],
+  "market_note": "<one sentence about demand for this profile in UAE 2025>"
+}}
+
+Base salaries on realistic 2024-2025 UAE market data. Be specific and accurate."""
+
+    raw = _generate(prompt, max_tokens=800)
+    if not raw:
+        return _fallback_salary(skills, exp, edu)
+    try:
+        m = re.search(r'\{.*\}', raw, re.DOTALL)
+        if not m:
+            return _fallback_salary(skills, exp, edu)
+        data = json.loads(m.group())
+        return data
+    except Exception as e:
+        logger.warning("Salary estimate JSON error: %s", e)
+        return _fallback_salary(skills, exp, edu)
+
+
+def _fallback_salary(skills: List[str], exp: float, edu: Optional[str]) -> Dict[str, Any]:
+    base = 8000 + int(exp * 1200)
+    edu_bonus = 3000 if edu and 'master' in (edu or '').lower() else 1500 if edu and 'bachelor' in (edu or '').lower() else 0
+    mid = base + edu_bonus
+    return {
+        "role_detected": "Professional",
+        "field": "General",
+        "salary_aed": {"min": mid - 2000, "mid": mid, "max": mid + 4000},
+        "level": "Senior" if exp >= 8 else "Mid-Level" if exp >= 3 else "Junior",
+        "factors": [
+            {"factor": "Years of Experience", "impact": "Positive", "detail": f"{exp:.0f} years adds significant value."},
+            {"factor": "Education", "impact": "Positive", "detail": "Higher education generally commands premium salaries."},
+        ],
+        "negotiation_range": f"AED {mid - 1000:,} – {mid + 3000:,}",
+        "top_paying_companies": ["ADNOC", "Emirates Group", "Dubai Government entities"],
+        "market_note": "UAE job market remains strong with high demand for experienced professionals.",
+    }
+
+
 # ── Profile Summary ────────────────────────────────────────────────────────────
 
 def summarise_profile(

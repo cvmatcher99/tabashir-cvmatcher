@@ -507,6 +507,87 @@ async def career_coach(
     return report
 
 
+# ── CV Score ──────────────────────────────────────────────────────────────────
+@app.post("/cv-score", tags=["Premium"])
+async def cv_score(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    """Score a CV out of 100 with section breakdown and improvement tips."""
+    ext = Path(file.filename).suffix.lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=422, detail=f"Unsupported file type: {ext}")
+    content = await file.read()
+    if len(content) > MAX_FILE_SIZE_MB * 1024 * 1024:
+        raise HTTPException(status_code=413, detail=f"File exceeds {MAX_FILE_SIZE_MB} MB.")
+    parsed = parse_cv(content, file.filename)
+    from ai_service import cv_score_analysis
+    report = cv_score_analysis(
+        name=parsed.get("full_name") or "Candidate",
+        skills=parsed.get("skills") or [],
+        exp=parsed.get("years_experience") or 0.0,
+        edu=parsed.get("education_level"),
+        edu_field=parsed.get("education_field"),
+        raw_text=parsed.get("raw_text") or "",
+    )
+    logger.info("CV score generated for '%s': %s", parsed.get("full_name"), report.get("total_score"))
+    return report
+
+
+# ── Interview Prep ─────────────────────────────────────────────────────────────
+@app.post("/interview-prep", tags=["Premium"])
+async def interview_prep_endpoint(
+    file: UploadFile = File(...),
+    job_id: int = Form(...),
+    db: Session = Depends(get_db),
+):
+    """Generate tailored interview questions for a specific job match."""
+    ext = Path(file.filename).suffix.lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=422, detail=f"Unsupported file type: {ext}")
+    content = await file.read()
+    if len(content) > MAX_FILE_SIZE_MB * 1024 * 1024:
+        raise HTTPException(status_code=413, detail=f"File exceeds {MAX_FILE_SIZE_MB} MB.")
+
+    job = db.query(JobDescription).filter(JobDescription.id == job_id).first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found.")
+
+    parsed = parse_cv(content, file.filename)
+    candidate_skills = [s.lower() for s in (parsed.get("skills") or [])]
+    required_skills = [s.name for s in job.required_skills] if job.required_skills else []
+
+    from ai_service import interview_prep
+    report = interview_prep(
+        job_title=job.title,
+        job_description=job.description or "",
+        required_skills=required_skills,
+        candidate_skills=candidate_skills,
+        exp=parsed.get("years_experience") or 0.0,
+    )
+    logger.info("Interview prep generated for job '%s'", job.title)
+    return report
+
+
+# ── Salary Estimator ───────────────────────────────────────────────────────────
+@app.post("/salary-estimate", tags=["Premium"])
+async def salary_estimate_endpoint(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    """Estimate monthly salary range in AED based on CV profile."""
+    ext = Path(file.filename).suffix.lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=422, detail=f"Unsupported file type: {ext}")
+    content = await file.read()
+    if len(content) > MAX_FILE_SIZE_MB * 1024 * 1024:
+        raise HTTPException(status_code=413, detail=f"File exceeds {MAX_FILE_SIZE_MB} MB.")
+    parsed = parse_cv(content, file.filename)
+    from ai_service import salary_estimate
+    report = salary_estimate(
+        skills=parsed.get("skills") or [],
+        exp=parsed.get("years_experience") or 0.0,
+        edu=parsed.get("education_level"),
+        edu_field=parsed.get("education_field"),
+    )
+    logger.info("Salary estimate generated for '%s'", parsed.get("full_name"))
+    return report
+
+
 # ── Health ─────────────────────────────────────────────────────────────────────
 @app.get("/health", tags=["System"])
 def health():
