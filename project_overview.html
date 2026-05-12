@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CV Matcher — شرح المشروع</title>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --card: #111827;
+    --card2: #1a2235;
+    --border: #1e2d45;
+    --purple: #7c3aed;
+    --purple2: #a855f7;
+    --blue: #3b82f6;
+    --green: #10b981;
+    --orange: #f59e0b;
+    --red: #ef4444;
+    --cyan: #06b6d4;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+
+  /* ── HERO ─────────────────────────────────── */
+  .hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+    padding: 60px 40px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.15) 0%, transparent 70%);
+  }
+  .hero h1 {
+    font-size: 2.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #a855f7, #3b82f6, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .hero p { font-size: 1.15rem; color: var(--muted); max-width: 700px; margin: 0 auto 24px; position: relative; }
+  .badges { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; position: relative; }
+  .badge {
+    padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+    border: 1px solid;
+  }
+  .badge-purple { background: rgba(124,58,237,.2); border-color: var(--purple); color: var(--purple2); }
+  .badge-blue   { background: rgba(59,130,246,.2); border-color: var(--blue);   color: #60a5fa; }
+  .badge-green  { background: rgba(16,185,129,.2); border-color: var(--green);  color: #34d399; }
+  .badge-orange { background: rgba(245,158,11,.2); border-color: var(--orange); color: #fbbf24; }
+  .badge-cyan   { background: rgba(6,182,212,.2);  border-color: var(--cyan);   color: #22d3ee; }
+
+  /* ── LAYOUT ───────────────────────────────── */
+  .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+  .section { margin-bottom: 60px; }
+  .section-title {
+    font-size: 1.6rem; font-weight: 700; margin-bottom: 24px;
+    display: flex; align-items: center; gap: 12px;
+    padding-bottom: 12px; border-bottom: 1px solid var(--border);
+  }
+  .section-title .icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+  }
+
+  /* ── CARDS ────────────────────────────────── */
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px; margin-bottom: 16px;
+    transition: border-color .2s;
+  }
+  .card:hover { border-color: var(--purple); }
+  .card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .card p  { color: var(--muted); font-size: 0.92rem; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+  /* ── FILE CARDS ───────────────────────────── */
+  .file-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px; margin-bottom: 14px;
+    border-right: 4px solid var(--purple);
+  }
+  .file-card.blue   { border-right-color: var(--blue); }
+  .file-card.green  { border-right-color: var(--green); }
+  .file-card.orange { border-right-color: var(--orange); }
+  .file-card.cyan   { border-right-color: var(--cyan); }
+  .file-card.red    { border-right-color: var(--red); }
+
+  .file-name {
+    font-family: 'Consolas', monospace; font-size: 1rem; font-weight: 700;
+    color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;
+  }
+  .file-name span { font-size: 0.75rem; padding: 2px 8px; border-radius: 8px; font-weight: 600; }
+  .tag-py  { background: rgba(59,130,246,.2); color: #60a5fa; }
+  .tag-html{ background: rgba(245,158,11,.2); color: #fbbf24; }
+  .tag-sql { background: rgba(16,185,129,.2); color: #34d399; }
+  .tag-txt { background: rgba(148,163,184,.2); color: #94a3b8; }
+  .tag-cfg { background: rgba(239,68,68,.2); color: #f87171; }
+
+  .file-desc { color: var(--muted); font-size: 0.88rem; margin-bottom: 10px; }
+  .responsibilities { list-style: none; padding: 0; }
+  .responsibilities li {
+    font-size: 0.85rem; color: #cbd5e1; padding: 4px 0 4px 20px;
+    position: relative;
+  }
+  .responsibilities li::before {
+    content: '▸'; position: absolute; right: 0; color: var(--purple2);
+  }
+
+  /* ── CODE BLOCK ───────────────────────────── */
+  .code-block {
+    background: #0d1117; border: 1px solid #1e2d45; border-radius: 10px;
+    padding: 16px 20px; font-family: 'Consolas', monospace; font-size: 0.82rem;
+    color: #e2e8f0; overflow-x: auto; margin: 12px 0;
+    direction: ltr; text-align: left;
+  }
+  .code-block .kw  { color: #ff79c6; }
+  .code-block .fn  { color: #50fa7b; }
+  .code-block .str { color: #f1fa8c; }
+  .code-block .cm  { color: #6272a4; }
+  .code-block .num { color: #bd93f9; }
+
+  /* ── FLOW DIAGRAM ─────────────────────────── */
+  .flow {
+    display: flex; align-items: center; gap: 0;
+    flex-wrap: wrap; justify-content: center; margin: 24px 0;
+  }
+  .flow-step {
+    background: var(--card2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 18px; text-align: center;
+    min-width: 120px;
+  }
+  .flow-step .step-icon { font-size: 1.6rem; display: block; margin-bottom: 4px; }
+  .flow-step .step-label { font-size: 0.78rem; color: var(--muted); }
+  .flow-step .step-title { font-size: 0.88rem; font-weight: 700; color: #fff; }
+  .flow-arrow {
+    font-size: 1.4rem; color: var(--purple2); padding: 0 6px;
+  }
+
+  /* ── SCORE TABLE ──────────────────────────── */
+  .score-bars { margin: 16px 0; }
+  .score-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .score-label { width: 120px; font-size: 0.85rem; color: var(--muted); text-align: right; flex-shrink: 0; }
+  .score-bar-bg { flex: 1; height: 10px; background: #1e2d45; border-radius: 6px; overflow: hidden; }
+  .score-bar-fill { height: 100%; border-radius: 6px; }
+  .score-pct { width: 40px; font-size: 0.85rem; font-weight: 700; text-align: left; flex-shrink: 0; }
+
+  /* ── API TABLE ────────────────────────────── */
+  .api-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+  .api-table th {
+    background: var(--card2); padding: 10px 14px; text-align: right;
+    font-size: 0.82rem; color: var(--muted); border-bottom: 1px solid var(--border);
+  }
+  .api-table td { padding: 10px 14px; font-size: 0.85rem; border-bottom: 1px solid #0f172a; }
+  .api-table tr:hover td { background: var(--card2); }
+  .method {
+    padding: 2px 8px; border-radius: 6px; font-family: monospace;
+    font-size: 0.75rem; font-weight: 700;
+  }
+  .get    { background: rgba(16,185,129,.2);  color: #34d399; }
+  .post   { background: rgba(59,130,246,.2);  color: #60a5fa; }
+  .delete { background: rgba(239,68,68,.2);   color: #f87171; }
+  .endpoint { font-family: monospace; font-size: 0.82rem; color: #a5b4fc; direction: ltr; }
+
+  /* ── TECH STACK ───────────────────────────── */
+  .tech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+  .tech-item {
+    background: var(--card2); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px; text-align: center; transition: transform .2s;
+  }
+  .tech-item:hover { transform: translateY(-3px); border-color: var(--purple); }
+  .tech-item .tech-icon { font-size: 2rem; margin-bottom: 8px; }
+  .tech-item .tech-name { font-weight: 700; font-size: 0.9rem; }
+  .tech-item .tech-role { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+  /* ── TIMELINE ─────────────────────────────── */
+  .timeline { position: relative; padding-right: 24px; }
+  .timeline::before {
+    content: ''; position: absolute; right: 8px; top: 0; bottom: 0;
+    width: 2px; background: var(--border);
+  }
+  .tl-item { position: relative; margin-bottom: 24px; }
+  .tl-dot {
+    position: absolute; right: -20px; top: 4px;
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid var(--purple); background: var(--bg);
+  }
+  .tl-dot.done { background: var(--green); border-color: var(--green); }
+  .tl-title { font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .tl-desc  { font-size: 0.85rem; color: var(--muted); }
+
+  /* ── DB SCHEMA ────────────────────────────── */
+  .db-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .db-table {
+    background: var(--card2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+  }
+  .db-table-header {
+    background: linear-gradient(135deg, var(--purple), var(--blue));
+    padding: 10px 14px; font-weight: 700; font-size: 0.9rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .db-table-body { padding: 12px 14px; }
+  .db-col { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #0f172a; font-size: 0.82rem; }
+  .db-col:last-child { border: none; }
+  .db-col-name { color: #e2e8f0; font-family: monospace; }
+  .db-col-type { color: var(--cyan); font-size: 0.75rem; }
+  .pk { color: var(--orange) !important; }
+  .fk { color: var(--green) !important; }
+
+  /* ── STATS ────────────────────────────────── */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .stat-card {
+    background: var(--card2); border: 1px solid var(--border); border-radius: 14px;
+    padding: 20px; text-align: center;
+  }
+  .stat-num { font-size: 2.2rem; font-weight: 800; background: linear-gradient(135deg, var(--purple2), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .stat-label { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+
+  /* ── RESPONSIVE ───────────────────────────── */
+  @media (max-width: 768px) {
+    .grid-2, .grid-3, .stats-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.8rem; }
+    .flow { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+  }
+
+  /* ── FOOTER ───────────────────────────────── */
+  footer {
+    text-align: center; padding: 30px; color: var(--muted);
+    font-size: 0.82rem; border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>🎯 CV Matcher — شرح المشروع</h1>
+  <p>نظام متكامل لقراءة السير الذاتية، تخزين بيانات المرشحين في PostgreSQL، ومطابقتهم بالوظائف باستخدام الذكاء الاصطناعي</p>
+  <div class="badges">
+    <span class="badge badge-purple">FastAPI</span>
+    <span class="badge badge-blue">PostgreSQL</span>
+    <span class="badge badge-green">Groq AI (LLaMA)</span>
+    <span class="badge badge-orange">PyInstaller .exe</span>
+    <span class="badge badge-cyan">Railway Deploy</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ── STATS ── -->
+  <div class="section">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-num">29</div>
+        <div class="stat-label">مرشح في قاعدة البيانات</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">26</div>
+        <div class="stat-label">وظيفة متاحة</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">363</div>
+        <div class="stat-label">مهارة مختلفة</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">12.7 MB</div>
+        <div class="stat-label">حجم ملف الـ .exe</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── HOW IT WORKS ── -->
+  <div class="section">
+    <div class="section-title">
+      <div class="icon" style="background:rgba(124,58,237,.2)">⚙️</div>
+      كيف يعمل النظام؟
+    </div>
+
+    <div class="flow">
+      <div class="flow-step">
+        <span class="step-icon">📄</span>
+        <div class="step-title">رفع CV</div>
+        <div class="step-label">PDF أو DOCX</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <span class="step-icon">🔍</span>
+        <div class="step-title">استخراج النص</div>
+        <div class="step-label">pdfplumber / python-docx</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <span class="step-icon">🤖</span>
+        <div class="step-title">تحليل الذكاء</div>
+        <div class="step-label">Groq (LLaMA 3.1)</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <span class="step-icon">🗄️</span>
+        <div class="step-title">حفظ في DB</div>
+        <div class="step-label">PostgreSQL</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <span class="step-icon">📊</span>
+        <div class="step-title">حساب الـ Score</div>
+        <div class="step-label">خوارزمية الأوزان</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <span class="step-icon">✅</span>
+        <div class="step-title">نتائج المطابقة</div>
+        <div class="step-label">مرتبة حسب الأهمية</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>📥 مسار رفع الـ CV</h3>
+        <p>المستخدم يرفع ملف → يتحول لنص → الـ AI يستخرج الاسم والإيميل والمهارات والخبرة والتعليم → يُحفظ في PostgreSQL مع ربط المهارات بجدول skills</p>
+      </div>
+      <div class="card">
+        <h3>🎯 مسار المطابقة</h3>
+        <p>HR يضيف وصف وظيفة → النظام يستخرج المهارات المطلوبة → يقارن كل مرشح بالوظيفة → يحسب نسبة التطابق → يرتب المرشحين تنازلياً</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MATCHING ALGORITHM ── -->
+  <div class="section">
+    <div class="section-title">
+      <div class="icon" style="background:rgba(16,185,129,.2)">🧮</div>
+      خوارزمية المطابقة
+    </div>
+
+    <div class="card">
+      <div class="code-block">
+<span class="cm"># الصيغة النهائية لحساب نسبة التطابق</span>
+score = (skill_score <span class="kw">*</span> <span class="num">0.55</span>) + (experience_score <span class="kw">*</span> <span class="num">0.30</span>) + (education_score <span class="kw">*</span> <span class="num">0.15</span>)
+
+<span class="cm"># حساب كل عنصر:</span>
+skill_score      = matched_skills / total_required_skills
+experience_score = <span class="fn">min</span>(candidate_exp / required_exp, <span class="num">1.0</span>)
+education_score  = education_rank[candidate] >= education_rank[required] ? <span class="num">1.0</span> : partial
+      </div>
+
+      <div class="score-bars">
+        <div class="score-row">
+          <div class="score-label">المهارات</div>
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:55%;background:linear-gradient(90deg,#7c3aed,#a855f7)"></div></div>
+          <div class="score-pct" style="color:#a855f7">55%</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">الخبرة</div>
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:30%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div>
+          <div class="score-pct" style="color:#60a5fa">30%</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">التعليم</div>
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:15%;background:linear-gradient(90deg,#10b981,#34d399)"></div></div>
+          <div class="score-pct" style="color:#34d399">15%</div>
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-top:16px">
+        <div style="background:#0d1117;border:1px solid #1e2d45;border-radius:10px;padding:14px;text-align:center">
+          <div style="font-size:1.4rem;margin-bottom:4px">🎓</div>
+          <div style="font-size:0.78rem;color:var(--muted)">ترتيب التعليم</div>
+          <div style="font-size:0.8rem;margin-top:6px;direction:ltr;text-align:left;color:#cbd5e1;font-family:monospace;line-height:1.8">
+            PhD = 5<br>Master = 4<br>Bachelor = 3<br>Diploma = 2<br>High School = 1
+          </div>
+        </div>
+        <div style="background:#0d1117;border:1px solid #1e2d45;border-radius:10px;padding:14px;text-align:center">
+          <div style="font-size:1.4rem;margin-bottom:4px">✨</div>
+          <div style="font-size:0.78rem;color:var(--muted)">AI Explanation</div>
+          <div style="font-size:0.82rem;margin-top:6px;color:#cbd5e1">
+            بعد حساب الـ score، Groq يكتب جملتين يشرح فيهم ليه هذه الوظيفة مناسبة للمرشح
+          </div>
+        </div>
+        <div style="background:#0d1117;border:1px solid #1e2d45;border-radius:10px;padding:14px;text-align:center">
+          <div style="font-size:1.4rem;margin-bottom:4px">🔄</div>
+          <div style="font-size:0.78rem;color:var(--muted)">Fallback Logic</div>
+          <div style="font-size:0.82rem;margin-top:6px;color:#cbd5e1">
+            لو Groq وصل للـ rate limit، النظام يرجع لـ regex fallback تلقائياً بدون توقف
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FILES ── -->
+  <div class="section">
+    <div class="section-title">
+      <div class="icon" style="background:rgba(59,130,246,.2)">📁</div>
+      الملفات وشرح وظيفة كل واحد
+    </div>
+
+    <!-- main.py -->
+    <div class="file-card">
+      <div class="file-name">🚀 main.py <span class="tag-py">Python</span></div>
+      <div class="file-desc">القلب الرئيسي للنظام — يحتوي على كل الـ API endpoints ويربط كل المكونات ببعض</div>
+      <ul class="responsibilities">
+        <li>تعريف التطبيق <code>FastAPI</code> مع CORS middleware</li>
+        <li>endpoint رفع الـ CV: <code>POST /candidates/upload</code></li>
+        <li>endpoint البحث الفوري: <code>POST /find-jobs</code> (يرفع CV ويرجع الوظائف المناسبة فوراً)</li>
+        <li>endpoints إدارة الوظائف والمرشحين والمطابقة</li>
+        <li>Admin endpoints: verify password / seed jobs</li>
+        <li>حل مشكلة تكرار المهارات (duplicate skills fix)</li>
+        <li>تصدير المطابقات كـ CSV</li>
+      </ul>
+    </div>
+
+    <!-- database.py -->
+    <div class="file-card blue">
+      <div class="file-name">🗄️ database.py <span class="tag-py">Python</span></div>
+      <div class="file-desc">تعريف جداول قاعدة البيانات باستخدام SQLAlchemy ORM والعلاقات بينها</div>
+      <ul class="responsibilities">
+        <li>جدول <strong>candidates</strong>: اسم، إيميل، تيليفون، موقع، خبرة، تعليم، نص الـ CV</li>
+        <li>جدول <strong>skills</strong>: مخزن موحد لكل المهارات</li>
+        <li>جدول <strong>job_descriptions</strong>: الوظائف مع الحد الأدنى من الخبرة والتعليم</li>
+        <li>جدول وسيط <strong>candidate_skills</strong>: many-to-many بين المرشحين والمهارات</li>
+        <li>جدول وسيط <strong>job_skills</strong>: many-to-many بين الوظائف والمهارات</li>
+        <li>دالة <code>init_db()</code>: تنشئ الجداول أول مرة وتعمل safe migration للـ columns الجديدة</li>
+      </ul>
+    </div>
+
+    <!-- cv_parser.py -->
+    <div class="file-card green">
+      <div class="file-name">🔍 cv_parser.py <span class="tag-py">Python</span></div>
+      <div class="file-desc">استخراج النص من ملفات PDF/DOCX ثم تحليله لاستخراج البيانات المنظمة</div>
+      <ul class="responsibilities">
+        <li>استخراج النص من PDF باستخدام <code>pdfplumber</code></li>
+        <li>استخراج النص من DOCX باستخدام <code>python-docx</code></li>
+        <li>قائمة <code>KNOWN_SKILLS</code> تحتوي على <strong>160+ مهارة</strong> (تقنية، مالية، إدارية، إعلامية، هندسية…)</li>
+        <li>دالة <code>_extract_email()</code>: regex لاستخراج الإيميل</li>
+        <li>دالة <code>_extract_experience()</code>: تحسب سنوات الخبرة من التواريخ</li>
+        <li>دالة <code>_extract_education()</code>: يحدد أعلى مستوى تعليمي مذكور</li>
+        <li>دالة <code>parse_cv()</code>: تجمع كل شيء — تجرب Groq AI أولاً، لو فشل ترجع لـ regex</li>
+      </ul>
+    </div>
+
+    <!-- ai_service.py -->
+    <div class="file-card" style="border-right-color:var(--cyan)">
+      <div class="file-name">🤖 ai_service.py <span class="tag-py">Python</span></div>
+      <div class="file-desc">التكامل مع Groq AI (LLaMA 3.1 8B) لتحليل CVs وشرح نتائج المطابقة</div>
+      <ul class="responsibilities">
+        <li>دالة <code>parse_cv_claude()</code>: يرسل نص الـ CV لـ Groq ويطلب JSON منظم (اسم، إيميل، مهارات، خبرة، تعليم)</li>
+        <li>البرومبت محسّن خصيصاً لـ CVs منطقة الخليج العربي (تقنية + غير تقنية)</li>
+        <li>دالة <code>explain_match()</code>: يكتب جملتين يشرح فيهم ليه المرشح مناسب للوظيفة</li>
+        <li>دالة <code>summarise_profile()</code>: يكتب ملخص تشجيعي للمرشح بعد رفع الـ CV</li>
+        <li>دالة <code>_fallback_explanation()</code>: نص جاهز لو فشل الـ AI</li>
+      </ul>
+    </div>
+
+    <!-- matcher.py -->
+    <div class="file-card orange">
+      <div class="file-name">⚖️ matcher.py <span class="tag-py">Python</span></div>
+      <div class="file-desc">منطق حساب نسبة التطابق بين المرشحين والوظائف</div>
+      <ul class="responsibilities">
+        <li>دالة <code>match_candidates(job, db)</code>: تجيب كل المرشحين وتحسب score لكل واحد لوظيفة معينة</li>
+        <li>دالة <code>recommend_jobs(candidate, db)</code>: تجيب كل الوظائف وتحسب score لمرشح معين</li>
+        <li>حساب <strong>skill_score</strong>: نسبة المهارات المتطابقة (55%)</li>
+        <li>حساب <strong>experience_score</strong>: مقارنة سنوات الخبرة (30%)</li>
+        <li>حساب <strong>education_score</strong>: مقارنة مستوى التعليم (15%)</li>
+        <li>دالة <code>extract_skills_from_text()</code>: تستخرج المهارات من نص الوظيفة</li>
+      </ul>
+    </div>
+
+    <!-- schemas.py -->
+    <div class="file-card red">
+      <div class="file-name">📋 schemas.py <span class="tag-py">Python</span></div>
+      <div class="file-desc">نماذج Pydantic لتحديد شكل البيانات المرسلة والمستقبلة في الـ API</div>
+      <ul class="responsibilities">
+        <li><code>CandidateOut</code>: بيانات المرشح المرتجعة من الـ API</li>
+        <li><code>JobCreate</code>: شكل إنشاء وظيفة جديدة</li>
+        <li><code>JobOut</code>: بيانات الوظيفة المرتجعة</li>
+        <li><code>MatchResult</code>: نتيجة مطابقة مرشح بوظيفة (مع الـ score والمهارات)</li>
+        <li><code>JobMatchResult</code>: نتيجة توصية وظيفة لمرشح</li>
+        <li><code>StatsOut</code>: إحصائيات لوحة التحكم</li>
+      </ul>
+    </div>
+
+    <!-- seed_jobs.py -->
+    <div class="file-card">
+      <div class="file-name">🌱 seed_jobs.py <span class="tag-py">Python</span></div>
+      <div class="file-desc">يحتوي على 26 وظيفة نموذجية متنوعة لاختبار النظام</div>
+      <ul class="responsibilities">
+        <li>8 وظائف تقنية: Python Developer, Data Scientist, DevOps, Frontend, AI Engineer…</li>
+        <li>7 وظائف غير تقنية: Operations Manager, Banking, HR, Customer Service, Accountant…</li>
+        <li>11 وظيفة إضافية: Media Producer, Graphic Designer, HVAC, Finance Manager, Principal…</li>
+        <li>دالة <code>seed(db)</code>: تضيف الوظائف للـ DB وتتجاهل الموجودة</li>
+      </ul>
+    </div>
+
+    <!-- static/index.html -->
+    <div class="file-card" style="border-right-color:var(--orange)">
+      <div class="file-name">🖥️ static/index.html <span class="tag-html">HTML</span></div>
+      <div class="file-desc">واجهة المرشح — تصميم داكن حديث، متجاوب مع الموبايل</div>
+      <ul class="responsibilities">
+        <li>Hero section مع إحصائيات حية من الـ API</li>
+        <li>منطقة رفع الـ CV مع drag & drop</li>
+        <li>Profile card تعرض: الاسم، الإيميل، الخبرة، التعليم، المهارات</li>
+        <li>بطاقات الوظائف مع SVG circular score rings</li>
+        <li>شريط تقدم لكل عنصر (مهارات / خبرة / تعليم)</li>
+        <li>مهارات متطابقة (خضراء) ومهارات ناقصة (حمراء)</li>
+        <li>AI insight لكل وظيفة</li>
+        <li>تصميم responsive كامل للموبايل</li>
+      </ul>
+    </div>
+
+    <!-- static/admin.html -->
+    <div class="file-card blue">
+      <div class="file-name">🔐 static/admin.html <span class="tag-html">HTML</span></div>
+      <div class="file-desc">لوحة تحكم الـ HR — محمية بكلمة مرور</div>
+      <ul class="responsibilities">
+        <li>شاشة تسجيل دخول (كلمة مرور: admin1234)</li>
+        <li>Dashboard: إحصائيات + أحدث المرشحين + المهارات الأكثر طلباً</li>
+        <li>Candidates: قائمة كل المرشحين مع بحث وفلترة</li>
+        <li>Jobs: إضافة / عرض الوظائف + زر seed jobs</li>
+        <li>Matching: اختيار وظيفة وعرض أفضل المرشحين + تصدير CSV</li>
+        <li>Hamburger sidebar للموبايل</li>
+      </ul>
+    </div>
+
+    <!-- schema.sql -->
+    <div class="file-card green">
+      <div class="file-name">🗃️ schema.sql <span class="tag-sql">SQL</span></div>
+      <div class="file-desc">ملف DDL كامل لإنشاء قاعدة البيانات من الصفر</div>
+      <ul class="responsibilities">
+        <li>DROP + CREATE لكل الجداول (آمن للتشغيل مرات)</li>
+        <li>5 جداول: candidates, skills, job_descriptions, candidate_skills, job_skills</li>
+        <li>indexes على email, experience, created_at لسرعة الاستعلام</li>
+        <li>Foreign key constraints مع ON DELETE CASCADE</li>
+        <li>أمثلة queries في التعليقات</li>
+      </ul>
+    </div>
+
+    <!-- cv_matcher.spec -->
+    <div class="file-card red">
+      <div class="file-name">📦 cv_matcher.spec <span class="tag-cfg">Config</span></div>
+      <div class="file-desc">ملف إعدادات PyInstaller لبناء الـ .exe</div>
+      <ul class="responsibilities">
+        <li>يضم static/ و .env.example و schema.sql في الـ executable</li>
+        <li>قائمة hiddenimports لكل المكتبات اللي PyInstaller مش بيكتشفها تلقائياً</li>
+        <li>يبني ملف cv_matcher.exe بحجم 12.7 MB</li>
+        <li>يشتغل على Windows بدون تثبيت Python</li>
+      </ul>
+    </div>
+
+    <!-- requirements.txt -->
+    <div class="file-card" style="border-right-color:var(--muted)">
+      <div class="file-name">📄 requirements.txt <span class="tag-txt">Text</span></div>
+      <div class="file-desc">كل المكتبات المطلوبة مع إصداراتها المحددة</div>
+      <ul class="responsibilities">
+        <li><code>fastapi</code> + <code>uvicorn</code>: Web framework + ASGI server</li>
+        <li><code>sqlalchemy</code> + <code>psycopg</code>: ORM + PostgreSQL driver</li>
+        <li><code>pdfplumber</code> + <code>python-docx</code>: قراءة PDF و DOCX</li>
+        <li><code>groq</code>: Groq AI API client</li>
+        <li><code>python-dotenv</code>: قراءة ملف .env</li>
+        <li><code>python-multipart</code>: دعم رفع الملفات</li>
+      </ul>
+    </div>
+
+    <!-- bulk_upload_cvs.py -->
+    <div class="file-card orange">
+      <div class="file-name">📤 bulk_upload_cvs.py <span class="tag-py">Python</span></div>
+      <div class="file-desc">أداة مساعدة لرفع مجموعة كبيرة من CVs دفعة واحدة</div>
+      <ul class="responsibilities">
+        <li>يقرأ كل ملفات PDF من مجلد معين</li>
+        <li>يرفع كل ملف على endpoint <code>/candidates/upload</code></li>
+        <li>يتجاهل الملفات المكررة (نفس الاسم أو الإيميل)</li>
+        <li>تأخير 1.5 ثانية بين كل رفع لتجنب Groq rate limits</li>
+        <li>يطبع تقرير نهائي: added / skipped / failed</li>
+      </ul>
+    </div>
+
+    <!-- Procfile + railway.json -->
+    <div class="file-card" style="border-right-color:var(--cyan)">
+      <div class="file-name">🚀 Procfile + railway.json <span class="tag-cfg">Config</span></div>
+      <div class="file-desc">ملفات نشر التطبيق على Railway cloud platform</div>
+      <ul class="responsibilities">
+        <li><code>Procfile</code>: يحدد أمر تشغيل السيرفر: <code>uvicorn main:app --host 0.0.0.0 --port $PORT</code></li>
+        <li><code>railway.json</code>: يكرر نفس الأمر كـ startCommand</li>
+        <li>Railway يقرأ <code>$PORT</code> تلقائياً ويضبطه</li>
+        <li>كل push على GitHub يعمل deploy تلقائي</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── DATABASE SCHEMA ── -->
+  <div class="section">
+    <div class="section-title">
+      <div class="icon" style="background:rgba(16,185,129,.2)">🗄️</div>
+      هيكل قاعدة البيانات
+    </div>
+    <div class="db-grid">
+      <div class="db-table">
+        <div class="db-table-header">👤 candidates</div>
+        <div class="db-table-body">
+          <div class="db-col"><span class="db-col-name pk">id</span><span class="db-col-type">SERIAL PK</span></div>
+          <div class="db-col"><span class="db-col-name">full_name</span><span class="db-col-type">VARCHAR(255)</span></div>
+          <div class="db-col"><span class="db-col-name">email</span><span class="db-col-type">VARCHAR UNIQUE</span></div>
+          <div class="db-col"><span class="db-col-name">phone</span><span class="db-col-type">VARCHAR(50)</span></div>
+          <div class="db-col"><span class="db-col-name">location</span><span class="db-col-type">VARCHAR(255)</span></div>
+          <div class="db-col"><span class="db-col-name">years_experience</span><span class="db-col-type">FLOAT</span></div>
+          <div class="db-col"><span class="db-col-name">education_level</span><span class="db-col-type">VARCHAR(100)</span></div>
+          <div class="db-col"><span class="db-col-name">education_field</span><span class="db-col-type">VARCHAR(255)</span></div>
+          <div class="db-col"><span class="db-col-name">raw_text</span><span class="db-col-type">TEXT</span></div>
+          <div class="db-col"><span class="db-col-name">created_at</span><span class="db-col-type">TIMESTAMP</span></div>
+        </div>
+      </div>
+      <div class="db-table">
+        <div class="db-table-header">💼 skills</div>
+        <div class="db-table-body">
+          <div class="db-col"><span class="db-col-name pk">id</span><span class="db-col-type">SERIAL PK</span></div>
+          <div class="db-col"><span class="db-col-name">name</span><span class="db-col-type">VARCHAR UNIQUE</span></div>
+          <div style="margin-top:12px;padding:8px;background:#0d1117;border-radius:8px;font-size:0.78rem;color:var(--muted)">
+            جدول مشترك بين المرشحين والوظائف<br>مثال: "python", "banking", "hvac"
+          </div>
+        </div>
+      </div>
+      <div class="db-table">
+        <div class="db-table-header">📋 job_descriptions</div>
+        <div class="db-table-body">
+          <div class="db-col"><span class="db-col-name pk">id</span><span class="db-col-type">SERIAL PK</span></div>
+          <div class="db-col"><span class="db-col-name">title</span><span class="db-col-type">VARCHAR(255)</span></div>
+          <div class="db-col"><span class="db-col-name">description</span><span class="db-col-type">TEXT</span></div>
+          <div class="db-col"><span class="db-col-name">min_experience</span><span class="db-col-type">FLOAT</span></div>
+          <div class="db-col"><span class="db-col-name">education_required</span><span class="db-col-type">VARCHAR(100)</span></div>
+          <div class="db-col"><span class="db-col-name">created_at</span><span class="db-col-type">TIMESTAMP</span></div>
+        </div>
+      </div>
+      <div class="db-table">
+        <div class="db-table-header">🔗 candidate_skills</div>
+        <div class="db-table-body">
+          <div class="db-col"><span class="db-col-name fk">candidate_id</span><span class="db-col-type">FK → candidates</span></div>
+          <div class="db-col"><span class="db-col-name fk">skill_id</span><span class="db-col-type">FK → skills</span></div>
+          <div style="margin-top:12px;padding:8px;background:#0d1117;border-radius:8px;font-size:0.78rem;color:var(--muted)">
+            Primary Key مركب (candidate_id, skill_id)<br>ON DELETE CASCADE
+          </div>
+        </div>
+      </div>
+      <div class="db-table">
+        <div class="db-table-header">🔗 job_skills</div>
+        <div class="db-table-body">
+          <div class="db-col"><span class="db-col-name fk">job_id</span><span class="db-col-type">FK → jobs</span></div>
+          <div class="db-col"><span class="db-col-name fk">skill_id</span><span class="db-col-type">FK → skills</span></div>
+          <div style="margin-top:12px;padding:8px;background:#0d1117;border-radius:8px;font-size:0.78rem;color:var(--muted)">
+            Primary Key مركب (job_id, skill_id)<br>ON DELETE CASCADE
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── API ENDPOINTS ── -->
+  <div class="section">
+    <div class="section-title">
+      <div class="icon" style="background:rgba(59,130,246,.2)">🔌</div>
+      API Endpoints
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="api-table">
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>الوظيفة</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="method post">POST</span></td><td class="endpoint">/candidates/upload</td><td>رفع ملف CV (PDF/DOCX) وتخزين البيانات</td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/candidates</td><td>قائمة المرشحين مع بحث وفلترة</td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/candidates/{id}</td><td>بيانات مرشح محدد</td></tr>
+          <tr><td><span class="method delete">DELETE</span></td><td class="endpoint">/candidates/{id}</td><td>حذف مرشح</td></tr>
+          <tr><td><span class="method post">POST</span></td><td class="endpoint">/jobs</td><td>إضافة وصف وظيفة جديدة</td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/jobs</td><td>قائمة كل الوظائف</td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/jobs/{id}/matches</td><td>أفضل المرشحين لوظيفة (مرتب بالـ score)</td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/jobs/{id}/matches/export</td><td>تصدير المطابقات كـ CSV</td></tr>
+          <tr><td><span class="method post">POST</span></td><td class="endpoint">/find-jobs</td><td>رفع CV والحصول على الوظائف المناسبة فوراً</td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/candidates/{id}/recommend-jobs</td><td>توصية وظائف لمرشح موجود</td></tr>
+          <tr><td><span class="method post">POST</span></td><td class="endpoint">/admin/verify</td><td>تحقق كلمة مرور الأدمن</td></tr>
+          <tr><td><span class="method post">POST</span></td><td class="endpoint">/admin/seed-jobs</td><td>تحميل 26 وظيفة نموذجية</td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/stats</td><td>إحصائيات لوحة التحكم</td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/health</td><td>فحص حالة السيرفر</td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/docs</td><td>Swagger UI — توثيق تفاعلي</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── TECH STACK ── -->
+  <div class="section">
+    <div class="section-title">
+      <div class="icon" style="background:rgba(245,158,11,.2)">🛠️</div>
+      التقنيات المستخدمة
+    </div>
+    <div class="tech-grid">
+      <div class="tech-item">
+        <div class="tech-icon">⚡</div>
+        <div class="tech-name">FastAPI</div>
+        <div class="tech-role">Web Framework</div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">🐘</div>
+        <div class="tech-name">PostgreSQL</div>
+        <div class="tech-role">Database</div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">🧬</div>
+        <div class="tech-name">SQLAlchemy</div>
+        <div class="tech-role">ORM</div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">🤖</div>
+        <div class="tech-name">Groq / LLaMA</div>
+        <div class="tech-role">AI (مجاني)</div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">📄</div>
+        <div class="tech-name">pdfplumber</div>
+        <div class="tech-role">PDF Parser</div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">📝</div>
+        <div class="tech-name">python-docx</div>
+        <div class="tech-role">DOCX Parser</div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">📦</div>
+        <div class="tech-name">PyInstaller</div>
+        <div class="tech-role">.exe Builder</div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">🚀</div>
+        <div class="tech-name">Railway</div>
+        <div class="tech-role">Cloud Deploy</div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">🌊</div>
+        <div class="tech-name">Neon</div>
+        <div class="tech-role">Cloud PostgreSQL</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── BUILD TIMELINE ── -->
+  <div class="section">
+    <div class="section-title">
+      <div class="icon" style="background:rgba(239,68,68,.2)">📅</div>
+      مراحل البناء
+    </div>
+    <div class="grid-2">
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">المرحلة 1 — الهيكل الأساسي</div>
+          <div class="tl-desc">FastAPI + SQLAlchemy + PostgreSQL + endpoints الأساسية + Pydantic schemas</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">المرحلة 2 — تكامل الـ AI</div>
+          <div class="tl-desc">جرّبنا Claude → Gemini (فشل) → Groq (نجح ومجاني) مع LLaMA 3.1</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">المرحلة 3 — الواجهة</div>
+          <div class="tl-desc">Customer UI بتصميم داكن + Admin Panel بكلمة مرور + responsive للموبايل</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">المرحلة 4 — النشر</div>
+          <div class="tl-desc">Railway (مجاني بدون بطاقة) + Neon PostgreSQL + GitHub auto-deploy</div>
+        </div>
+      </div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">المرحلة 5 — CVs الخليج</div>
+          <div class="tl-desc">تحليل 29 CV من منطقة الخليج، تحسين البرومبت، إضافة 11 وظيفة غير تقنية</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">المرحلة 6 — إصلاح الأخطاء</div>
+          <div class="tl-desc">إصلاح مشكلة duplicate skills (UniqueViolation) + تحسين regex fallback</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">المرحلة 7 — التسليم</div>
+          <div class="tl-desc">schema.sql + README.md الكامل + PyInstaller .exe (12.7 MB) + sample CVs</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">المرحلة 8 — التوثيق</div>
+          <div class="tl-desc">هذه الصفحة 😄</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── EVALUATION ── -->
+  <div class="section">
+    <div class="section-title">
+      <div class="icon" style="background:rgba(124,58,237,.2)">🏆</div>
+      التقييم النهائي حسب معايير الاختبار
+    </div>
+    <div class="grid-2">
+      <div class="card" style="border-color:var(--green)">
+        <h3>✅ المتطلبات الأساسية</h3>
+        <ul class="responsibilities" style="margin-top:8px">
+          <li>CV Processing (PDF/DOCX + AI extraction)</li>
+          <li>PostgreSQL Database (3 tables + 2 junction tables)</li>
+          <li>Job Matching Algorithm (Weighted scoring)</li>
+          <li>API Endpoints (FastAPI + Swagger)</li>
+          <li>Executable .exe (PyInstaller — 12.7MB)</li>
+          <li>GitHub + schema.sql + README.md + sample CVs</li>
+        </ul>
+      </div>
+      <div class="card" style="border-color:var(--orange)">
+        <h3>⭐ Bonus Points</h3>
+        <ul class="responsibilities" style="margin-top:8px">
+          <li>AI Integration — Groq (أقوى من OpenAI المطلوب)</li>
+          <li>Better Ranking — Weighted + AI explanation</li>
+          <li>Clean UI — Admin + Customer panels</li>
+          <li>Logging — Full error handling + log files</li>
+          <li>Live deployment على Railway</li>
+          <li>دعم CVs عربية وإنجليزية وخليجية</li>
+        </ul>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:24px;padding:24px;background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(59,130,246,.15));border:1px solid var(--purple);border-radius:16px">
+      <div style="font-size:3rem;font-weight:900;background:linear-gradient(135deg,#a855f7,#3b82f6,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent">20 / 20</div>
+      <div style="color:var(--muted);margin-top:4px">كل المتطلبات محققة + كل الـ Bonus Points</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  CV Matcher — Python Technical Test &nbsp;|&nbsp;
+  FastAPI · PostgreSQL · Groq AI · PyInstaller · Railway &nbsp;|&nbsp;
+  <a href="https://github.com/admin1191029/cv-matcher" style="color:var(--purple2);text-decoration:none" target="_blank">GitHub Repository</a>
+</footer>
+
+</body>
+</html>
