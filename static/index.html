@@ -1,375 +1,573 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>CV Matcher — Find Your Dream Job</title>
-<script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CV Matcher — Find Your Perfect Job</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',system-ui,sans-serif;background:#f8fafc;color:#0f172a;min-height:100vh}
+:root {
+  --bg: #060818; --surface: #0d1117; --card: #111827;
+  --border: #1f2937; --border2: #374151;
+  --primary: #6366f1; --primary2: #8b5cf6; --accent: #06b6d4;
+  --green: #10b981; --yellow: #f59e0b; --red: #ef4444;
+  --text: #f9fafb; --text2: #9ca3af; --text3: #6b7280;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
 
-.hero-gradient{background:linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#4c1d95 100%)}
+.bg-glow {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 10%, rgba(99,102,241,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(139,92,246,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 30% at 50% 50%, rgba(6,182,212,0.05) 0%, transparent 60%);
+}
 
-.step-card{background:#fff;border-radius:16px;border:1px solid #e8ecf0;padding:24px;text-align:center;box-shadow:0 1px 4px rgba(15,23,42,.04);transition:box-shadow .2s}
-.step-card:hover{box-shadow:0 6px 20px rgba(15,23,42,.08)}
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 16px 40px; background: rgba(6,8,24,0.85);
+  backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-brand { display: flex; align-items: center; gap: 10px; }
+.nav-logo {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--primary), var(--primary2));
+  display: flex; align-items: center; justify-content: center;
+}
+.nav-brand h1 { font-size: 18px; font-weight: 700; }
+.nav-brand span { color: var(--primary); }
+.nav-link {
+  font-size: 13px; color: var(--text2); text-decoration: none;
+  padding: 7px 16px; border-radius: 8px; border: 1px solid var(--border2);
+  transition: all 0.2s; font-weight: 500;
+}
+.nav-link:hover { border-color: var(--primary); color: var(--text); }
 
-.drop-zone{border:2px dashed #c7d2fe;border-radius:20px;padding:52px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;transition:all .25s;background:#fafbff}
-.drop-zone:hover,.drop-zone.over{border-color:#4f46e5;background:#eef2ff;transform:scale(1.005)}
+.hero {
+  position: relative; z-index: 1;
+  padding: 140px 40px 60px; text-align: center;
+  max-width: 860px; margin: 0 auto;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3);
+  color: #a5b4fc; font-size: 12px; font-weight: 600; letter-spacing: 1px;
+  padding: 6px 16px; border-radius: 20px; margin-bottom: 28px; text-transform: uppercase;
+}
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+.hero h1 { font-size: clamp(36px,6vw,64px); font-weight: 800; line-height: 1.1; letter-spacing: -1px; margin-bottom: 20px; }
+.grad { background: linear-gradient(135deg, #a5b4fc, #c4b5fd, #93c5fd); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero p { font-size: 18px; color: var(--text2); line-height: 1.7; max-width: 560px; margin: 0 auto 36px; }
+.hero-stats { display: flex; justify-content: center; gap: 40px; margin-bottom: 48px; flex-wrap: wrap; }
+.hero-stat .num { font-size: 28px; font-weight: 800; }
+.hero-stat .lbl { font-size: 12px; color: var(--text3); margin-top: 4px; }
 
-.btn{padding:12px 28px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;border:none;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
-.btn-main{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;box-shadow:0 4px 18px rgba(79,70,229,.35)}
-.btn-main:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(79,70,229,.45)}
-.btn-main:active{transform:none}
-.btn-main:disabled{background:#a5b4fc;box-shadow:none;cursor:not-allowed;transform:none}
+.upload-section { position: relative; z-index: 1; max-width: 720px; margin: 0 auto 80px; padding: 0 24px; }
+.upload-card {
+  background: var(--card); border: 2px dashed var(--border2);
+  border-radius: 20px; padding: 48px 40px; text-align: center;
+  transition: all 0.3s; cursor: pointer; position: relative; overflow: hidden;
+}
+.upload-card:hover, .upload-card.dragover { border-color: var(--primary); background: rgba(99,102,241,0.04); }
+.upload-icon {
+  width: 72px; height: 72px; border-radius: 18px; margin: 0 auto 20px;
+  background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.15));
+  border: 1px solid rgba(99,102,241,0.2);
+  display: flex; align-items: center; justify-content: center; transition: transform 0.3s;
+}
+.upload-card:hover .upload-icon { transform: translateY(-4px); }
+.upload-card h2 { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+.upload-card p { color: var(--text2); font-size: 14px; margin-bottom: 24px; }
+.upload-formats { display: flex; justify-content: center; gap: 8px; margin-bottom: 24px; }
+.fmt-badge {
+  padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700;
+  background: rgba(255,255,255,0.06); border: 1px solid var(--border2); color: var(--text2); letter-spacing: .5px;
+}
+.btn-upload {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 14px 32px; border-radius: 12px; font-size: 15px; font-weight: 700;
+  background: linear-gradient(135deg, var(--primary), var(--primary2));
+  color: white; border: none; cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 4px 24px rgba(99,102,241,0.3);
+}
+.btn-upload:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(99,102,241,0.4); }
+#file-input { display: none; }
 
-.card{background:#fff;border-radius:20px;border:1px solid #e8ecf0;box-shadow:0 2px 8px rgba(15,23,42,.05);padding:24px;margin-bottom:16px}
+.progress-wrap { display: none; padding: 24px 0; }
+.progress-steps { display: flex; align-items: flex-start; justify-content: center; gap: 0; margin-bottom: 28px; }
+.step { display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; }
+.step:not(:last-child)::after {
+  content: ''; position: absolute; left: calc(50% + 20px); top: 19px;
+  width: calc(100% - 8px); min-width: 60px; height: 2px; background: var(--border2);
+}
+.step.done:not(:last-child)::after { background: var(--primary); transition: background 0.4s; }
+.step-circle {
+  width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--border2);
+  background: var(--card); display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: var(--text3); transition: all 0.4s; z-index: 1;
+}
+.step.active .step-circle { border-color: var(--primary); color: var(--primary); background: rgba(99,102,241,0.1); animation: spulse 1.5s infinite; }
+@keyframes spulse { 0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,.4)} 50%{box-shadow:0 0 0 8px rgba(99,102,241,0)} }
+.step.done .step-circle { border-color: var(--green); background: rgba(16,185,129,0.1); color: var(--green); }
+.step-label { font-size: 11px; color: var(--text3); font-weight: 500; white-space: nowrap; }
+.step.active .step-label { color: var(--primary); }
+.step.done .step-label { color: var(--green); }
+.progress-bar-wrap { background: var(--border); border-radius: 99px; height: 6px; overflow: hidden; margin-bottom: 14px; }
+.progress-bar-fill {
+  height: 100%; border-radius: 99px; width: 0%; transition: width 0.6s ease;
+  background: linear-gradient(90deg, var(--primary), var(--primary2), var(--accent));
+  background-size: 200% 100%; animation: shimmer 2s infinite;
+}
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.progress-status { font-size: 14px; color: var(--text2); }
 
-.tag{display:inline-flex;align-items:center;background:#eef2ff;color:#4338ca;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;margin:2px 3px}
-.tag-green{background:#ecfdf5;color:#065f46}
-.tag-red{background:#fef2f2;color:#b91c1c}
+#results { display: none; position: relative; z-index: 1; max-width: 860px; margin: 0 auto 80px; padding: 0 24px; }
 
-.score-track{background:#f1f5f9;border-radius:99px;height:7px;overflow:hidden}
-.score-fill{height:100%;border-radius:99px;transition:width 1s cubic-bezier(.4,0,.2,1);width:0}
+.profile-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 28px 32px; margin-bottom: 32px;
+  display: flex; gap: 24px; align-items: flex-start;
+  animation: fadeUp 0.5s ease;
+}
+.profile-avatar {
+  width: 64px; height: 64px; border-radius: 16px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--primary), var(--primary2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; font-weight: 800; color: white;
+}
+.profile-info { flex: 1; min-width: 0; }
+.profile-name { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.profile-meta { font-size: 13px; color: var(--text2); display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 14px; }
+.profile-meta span { display: flex; align-items: center; gap: 5px; }
+.profile-skills { display: flex; flex-wrap: wrap; gap: 6px; }
+.skill-pill {
+  padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2); color: #a5b4fc;
+}
 
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-@keyframes progress{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
-.fade-up{animation:fadeUp .35s ease both}
+.results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.results-header h2 { font-size: 20px; font-weight: 700; }
+.results-header p { font-size: 13px; color: var(--text2); margin-top: 4px; }
+.results-count {
+  background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2);
+  color: #a5b4fc; font-size: 13px; font-weight: 700; padding: 6px 16px; border-radius: 20px;
+}
 
-::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:99px}
+.job-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+  padding: 28px; margin-bottom: 16px; animation: fadeUp 0.5s ease both;
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  position: relative; overflow: hidden;
+}
+.job-card:hover { border-color: rgba(99,102,241,0.4); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+.job-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--accent-color, var(--primary)); border-radius: 3px 0 0 3px;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
 
-.medal-1{background:linear-gradient(135deg,#fbbf24,#f59e0b)}
-.medal-2{background:linear-gradient(135deg,#94a3b8,#64748b)}
-.medal-3{background:linear-gradient(135deg,#b45309,#92400e)}
+.job-card-top { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 20px; }
+.job-rank {
+  width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 800; border: 2px solid;
+}
+.rank-1 { background: rgba(251,191,36,0.1); border-color: rgba(251,191,36,0.3); color: #fbbf24; }
+.rank-2 { background: rgba(148,163,184,0.1); border-color: rgba(148,163,184,0.3); color: #94a3b8; }
+.rank-3 { background: rgba(180,83,9,0.12); border-color: rgba(217,119,6,0.3); color: #d97706; }
+.rank-n { background: rgba(99,102,241,0.1); border-color: rgba(99,102,241,0.2); color: #818cf8; }
+
+.job-main { flex: 1; min-width: 0; }
+.job-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+.job-meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--text2); margin-bottom: 4px; }
+.job-meta span { display: flex; align-items: center; gap: 4px; }
+
+.score-ring-col { flex-shrink: 0; text-align: center; }
+.score-ring { position: relative; width: 72px; height: 72px; }
+.score-ring svg { transform: rotate(-90deg); }
+.score-ring .track { fill: none; stroke: var(--border); stroke-width: 5; }
+.score-ring .fill { fill: none; stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 1.2s ease; }
+.score-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.score-num { font-size: 16px; font-weight: 800; }
+.score-pct { font-size: 9px; color: var(--text3); font-weight: 600; }
+
+.score-bars { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+.score-bar-label { font-size: 10px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 5px; display: flex; justify-content: space-between; }
+.score-bar-label span { color: var(--text2); font-weight: 700; }
+.bar-track { height: 5px; background: var(--border); border-radius: 99px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 99px; width: 0; transition: width 1.2s ease; }
+.bar-skill { background: linear-gradient(90deg, var(--primary), var(--primary2)); }
+.bar-exp { background: linear-gradient(90deg, var(--green), #059669); }
+.bar-edu { background: linear-gradient(90deg, var(--yellow), #d97706); }
+
+.skills-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.s-match { padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); color: #34d399; }
+.s-miss { padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.15); color: #f87171; text-decoration: line-through; opacity: .7; }
+
+.ai-insight {
+  background: rgba(99,102,241,0.06); border: 1px solid rgba(99,102,241,0.15);
+  border-radius: 10px; padding: 12px 16px; font-size: 13px; color: var(--text2);
+  line-height: 1.6; display: flex; gap: 10px; align-items: flex-start; margin-bottom: 16px;
+}
+.ai-icon { flex-shrink: 0; color: var(--primary); margin-top: 1px; }
+
+.desc-toggle {
+  background: none; border: none; cursor: pointer; color: var(--text3);
+  font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 5px;
+  transition: color 0.2s; padding: 0;
+}
+.desc-toggle:hover { color: var(--primary); }
+.desc-body {
+  display: none; margin-top: 12px; padding: 16px;
+  background: rgba(255,255,255,0.02); border-radius: 10px;
+  font-size: 13px; color: var(--text2); line-height: 1.8;
+  white-space: pre-line; border: 1px solid var(--border); max-height: 220px; overflow-y: auto;
+}
+
+.how-section { position: relative; z-index: 1; max-width: 860px; margin: 0 auto 100px; padding: 0 24px; text-align: center; }
+.how-section h2 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+.how-section > p { font-size: 15px; color: var(--text2); margin-bottom: 40px; }
+.steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.step-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+  padding: 28px 24px; text-align: left; transition: border-color 0.2s, transform 0.2s;
+}
+.step-card:hover { border-color: rgba(99,102,241,0.3); transform: translateY(-3px); }
+.step-num { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: var(--primary); text-transform: uppercase; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.step-num::before { content: ''; display: block; width: 24px; height: 2px; background: var(--primary); }
+.step-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
+.step-card p { font-size: 13px; color: var(--text2); line-height: 1.6; }
+.step-card-icon {
+  width: 44px; height: 44px; border-radius: 12px; margin-bottom: 16px;
+  background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1));
+  border: 1px solid rgba(99,102,241,0.2); display: flex; align-items: center; justify-content: center;
+}
+
+footer {
+  position: relative; z-index: 1; border-top: 1px solid var(--border);
+  padding: 28px 40px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+}
+footer p { font-size: 13px; color: var(--text3); }
+footer a { color: var(--text2); text-decoration: none; font-size: 13px; transition: color 0.2s; }
+footer a:hover { color: var(--primary); }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+@media (max-width: 700px) {
+  nav { padding: 14px 20px; }
+  .hero { padding: 120px 20px 60px; }
+  .steps-grid { grid-template-columns: 1fr; }
+  .score-bars { grid-template-columns: 1fr; }
+  .profile-card { flex-direction: column; }
+  .job-card-top { flex-wrap: wrap; }
+}
 </style>
 </head>
 <body>
+<div class="bg-glow"></div>
 
-<!-- ── Navbar ─────────────────────────────────────────────────────────────────── -->
-<nav style="background:rgba(255,255,255,.85);backdrop-filter:blur(12px);border-bottom:1px solid #e8ecf0;position:sticky;top:0;z-index:50;padding:0 6vw">
-  <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:60px">
-    <div style="display:flex;align-items:center;gap:10px">
-      <div style="width:34px;height:34px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:9px;display:flex;align-items:center;justify-content:center">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      </div>
-      <span style="font-weight:800;font-size:17px;color:#0f172a">CV Matcher</span>
+<nav>
+  <div class="nav-brand">
+    <div class="nav-logo">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
     </div>
-    <a href="/admin" style="font-size:13px;color:#64748b;text-decoration:none;padding:7px 16px;border:1.5px solid #e2e8f0;border-radius:9px;font-weight:500;transition:all .18s" onmouseover="this.style.borderColor='#818cf8';this.style.color='#4f46e5'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">HR Admin</a>
+    <h1>CV<span>Matcher</span></h1>
   </div>
+  <a href="/admin" class="nav-link">HR Admin</a>
 </nav>
 
-<!-- ── Hero ────────────────────────────────────────────────────────────────────── -->
-<section class="hero-gradient" style="padding:72px 6vw 80px">
-  <div style="max-width:680px;margin:0 auto;text-align:center">
-    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);color:#c7d2fe;font-size:12px;font-weight:600;padding:6px 14px;border-radius:20px;margin-bottom:24px;letter-spacing:.5px">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-      POWERED BY AI
-    </div>
-    <h1 style="font-size:clamp(32px,5vw,52px);font-weight:900;color:#fff;line-height:1.15;letter-spacing:-.5px;margin-bottom:20px">
-      Find Your Perfect Job<br/>
-      <span style="background:linear-gradient(90deg,#a5b4fc,#c4b5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent">in seconds</span>
-    </h1>
-    <p style="font-size:17px;color:#a5b4fc;line-height:1.7;margin-bottom:36px">
-      Upload your CV and our AI instantly analyses your skills, experience, and education — then ranks every available job by how well you match.
-    </p>
-    <a href="#upload-section" style="display:inline-flex;align-items:center;gap:9px;background:#fff;color:#4f46e5;font-weight:700;font-size:15px;padding:14px 30px;border-radius:14px;text-decoration:none;box-shadow:0 4px 20px rgba(0,0,0,.2);transition:all .2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 28px rgba(0,0,0,.25)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(0,0,0,.2)'">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      Upload Your CV Now
-    </a>
+<div class="hero">
+  <div class="hero-badge"><div class="dot"></div>AI-Powered Job Matching</div>
+  <h1>Find Your <span class="grad">Perfect Job</span><br>In Seconds</h1>
+  <p>Upload your CV and our AI instantly matches you with the best opportunities based on your skills, experience, and education.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="num" id="hs-c">—</div><div class="lbl">CVs Analyzed</div></div>
+    <div class="hero-stat"><div class="num" id="hs-j">—</div><div class="lbl">Job Positions</div></div>
+    <div class="hero-stat"><div class="num" id="hs-s">—</div><div class="lbl">Skills Tracked</div></div>
   </div>
-</section>
+</div>
 
-<!-- ── How it works ─────────────────────────────────────────────────────────────── -->
-<section style="padding:60px 6vw;background:#fff;border-bottom:1px solid #f1f5f9">
-  <div style="max-width:900px;margin:0 auto">
-    <h2 style="text-align:center;font-size:26px;font-weight:800;color:#0f172a;margin-bottom:8px">How It Works</h2>
-    <p style="text-align:center;color:#64748b;font-size:14px;margin-bottom:40px">Three steps to your next job</p>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
-      <div class="step-card">
-        <div style="width:52px;height:52px;background:linear-gradient(135deg,#eef2ff,#e0e7ff);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        </div>
-        <div style="font-weight:700;font-size:15px;color:#0f172a;margin-bottom:8px">1. Upload Your CV</div>
-        <div style="font-size:13px;color:#64748b;line-height:1.6">Drop your PDF or DOCX file. Our AI reads every detail automatically.</div>
+<div class="upload-section">
+  <div class="upload-card" id="drop-zone"
+    ondragover="onDrag(event,true)" ondragleave="onDrag(event,false)" ondrop="onDrop(event)"
+    onclick="document.getElementById('file-input').click()">
+    <div id="upload-content">
+      <div class="upload-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
       </div>
-      <div class="step-card">
-        <div style="width:52px;height:52px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-        </div>
-        <div style="font-weight:700;font-size:15px;color:#0f172a;margin-bottom:8px">2. AI Analysis</div>
-        <div style="font-size:13px;color:#64748b;line-height:1.6">Claude AI extracts your skills, experience, and qualifications in seconds.</div>
+      <h2>Drop your CV here</h2>
+      <p>or click to browse files from your computer</p>
+      <div class="upload-formats">
+        <span class="fmt-badge">PDF</span>
+        <span class="fmt-badge">DOCX</span>
+        <span class="fmt-badge">DOC</span>
       </div>
-      <div class="step-card">
-        <div style="width:52px;height:52px;background:linear-gradient(135deg,#fffbeb,#fef3c7);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        </div>
-        <div style="font-weight:700;font-size:15px;color:#0f172a;margin-bottom:8px">3. See Your Matches</div>
-        <div style="font-size:13px;color:#64748b;line-height:1.6">Jobs ranked by match score with a personal AI explanation for each.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ── Upload ───────────────────────────────────────────────────────────────────── -->
-<section id="upload-section" style="padding:64px 6vw">
-  <div style="max-width:680px;margin:0 auto">
-    <div style="text-align:center;margin-bottom:32px">
-      <h2 style="font-size:28px;font-weight:800;color:#0f172a;margin-bottom:8px">Upload Your CV</h2>
-      <p style="color:#64748b;font-size:14px">PDF or DOCX — your data is processed securely</p>
-    </div>
-
-    <div class="card" style="padding:32px">
-      <div class="drop-zone" id="drop-zone"
-           ondragover="event.preventDefault();this.classList.add('over')"
-           ondragleave="this.classList.remove('over')"
-           ondrop="handleDrop(event)"
-           onclick="document.getElementById('cv-input').click()">
-        <div style="width:64px;height:64px;background:linear-gradient(135deg,#eef2ff,#e0e7ff);border-radius:18px;display:flex;align-items:center;justify-content:center;margin-bottom:16px">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        </div>
-        <p style="font-size:16px;font-weight:600;color:#374151;margin-bottom:6px">Drag your CV here, or <span style="color:#4f46e5">browse</span></p>
-        <p style="font-size:13px;color:#94a3b8">Supports PDF, DOCX — max 10 MB</p>
-        <div id="file-chip" style="display:none;margin-top:14px;background:#eef2ff;color:#4338ca;font-size:13px;font-weight:600;padding:6px 16px;border-radius:20px;display:none"></div>
-      </div>
-      <input id="cv-input" type="file" accept=".pdf,.docx,.doc" style="display:none" onchange="selectFile(event)"/>
-
-      <div id="progress-bar" style="display:none;margin-top:20px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-          <div style="width:18px;height:18px;border:2.5px solid #4f46e5;border-top-color:transparent;border-radius:50%;animation:spin .65s linear infinite"></div>
-          <span style="font-size:13px;color:#4f46e5;font-weight:600" id="progress-text">Uploading your CV…</span>
-        </div>
-        <div style="background:#e8ecf0;border-radius:99px;height:4px;overflow:hidden">
-          <div style="height:100%;background:linear-gradient(90deg,#4f46e5,#7c3aed,#4f46e5);background-size:200%;animation:progress 1.4s linear infinite"></div>
-        </div>
-      </div>
-
-      <button id="find-btn" class="btn btn-main" disabled onclick="findJobs()" style="width:100%;justify-content:center;margin-top:20px;padding:14px">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        Find My Matching Jobs
+      <button class="btn-upload" onclick="event.stopPropagation();document.getElementById('file-input').click()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        Choose File
       </button>
-      <div id="find-msg" style="margin-top:10px;font-size:13px;text-align:center"></div>
     </div>
-
-    <!-- Profile summary after analysis -->
-    <div id="profile-card" style="display:none" class="card fade-up">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-        <div id="profile-avatar" style="width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:16px;flex-shrink:0"></div>
-        <div>
-          <div id="profile-name" style="font-size:17px;font-weight:800;color:#0f172a"></div>
-          <div id="profile-meta" style="font-size:12px;color:#64748b;margin-top:2px"></div>
-        </div>
+    <div class="progress-wrap" id="prog-wrap">
+      <div class="progress-steps" id="steps-row">
+        <div class="step active" id="s1"><div class="step-circle">1</div><div class="step-label">Uploading</div></div>
+        <div class="step" id="s2"><div class="step-circle">2</div><div class="step-label">Parsing CV</div></div>
+        <div class="step" id="s3"><div class="step-circle">3</div><div class="step-label">AI Analysis</div></div>
+        <div class="step" id="s4"><div class="step-circle">4</div><div class="step-label">Matching</div></div>
       </div>
-      <div id="profile-summary" style="font-size:13.5px;color:#374151;line-height:1.7;background:#f8fafc;border-radius:12px;padding:14px;margin-bottom:14px;border-left:3px solid #4f46e5"></div>
-      <div id="profile-skills"></div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="pbar"></div></div>
+      <div class="progress-status" id="pstatus">Uploading your CV...</div>
     </div>
   </div>
+  <input type="file" id="file-input" accept=".pdf,.docx,.doc" onchange="handleFile(this.files[0])">
+</div>
 
-  <!-- Results -->
-  <div id="results-section" style="max-width:800px;margin:32px auto 0;display:none">
-    <h3 id="results-heading" style="font-size:20px;font-weight:800;color:#0f172a;margin-bottom:6px;text-align:center"></h3>
-    <p style="text-align:center;font-size:13px;color:#94a3b8;margin-bottom:28px">Jobs are ranked by how well your profile matches each position</p>
-    <div id="results-list"></div>
+<div id="results">
+  <div class="results-header">
+    <div><h2 id="r-title">Your Job Matches</h2><p id="r-sub"></p></div>
+    <div class="results-count" id="r-count"></div>
   </div>
-</section>
+  <div id="jobs-container"></div>
+  <div style="text-align:center;margin-top:24px;">
+    <button onclick="resetUpload()"
+      style="background:none;border:1px solid var(--border2);color:var(--text2);padding:10px 24px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s"
+      onmouseover="this.style.borderColor='#6366f1';this.style.color='#a5b4fc'"
+      onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text2)'">
+      Upload Another CV
+    </button>
+  </div>
+</div>
 
-<!-- ── Footer ──────────────────────────────────────────────────────────────────── -->
-<footer style="background:#1e1b4b;color:#a5b4fc;text-align:center;padding:28px 20px;font-size:13px">
-  CV Matcher &mdash; Powered by Claude AI &nbsp;·&nbsp;
-  <a href="/admin" style="color:#c7d2fe;text-decoration:none">HR Admin Panel</a>
-  &nbsp;·&nbsp;
-  <a href="/docs" style="color:#c7d2fe;text-decoration:none">API Docs</a>
+<div class="how-section">
+  <h2>How It Works</h2>
+  <p>Three simple steps to find your perfect match</p>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-card-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <div class="step-num">Step 01</div>
+      <h3>Upload Your CV</h3>
+      <p>Drag and drop your CV in PDF or DOCX format. We support all standard resume formats.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-card-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </div>
+      <div class="step-num">Step 02</div>
+      <h3>AI Parses Your Profile</h3>
+      <p>Our AI extracts your skills, experience, education, and contact info automatically with high accuracy.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-card-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+      </div>
+      <div class="step-num">Step 03</div>
+      <h3>Get Ranked Matches</h3>
+      <p>Receive a personalized ranked list of jobs scored by skill match, experience, and education fit.</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>CV Matcher &copy; 2025 — AI-powered recruitment platform</p>
+  <div style="display:flex;gap:20px;">
+    <a href="/docs">API Docs</a>
+    <a href="/admin">HR Admin Panel</a>
+  </div>
 </footer>
 
-<!-- Toast -->
-<div id="toast" style="position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(15,23,42,.18);transform:translateY(10px);opacity:0;transition:all .25s;z-index:100;pointer-events:none;max-width:300px"></div>
-
 <script>
-const API = '';
-const COLORS = ['#4f46e5','#7c3aed','#059669','#dc2626','#d97706','#0284c7','#db2777'];
-const colorFor = n => COLORS[(n||'').charCodeAt(0) % COLORS.length];
-const initials = n => (n||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-let selFile = null;
+fetch('/stats').then(r=>r.json()).then(d=>{
+  document.getElementById('hs-c').textContent = d.total_candidates;
+  document.getElementById('hs-j').textContent = d.total_jobs;
+  document.getElementById('hs-s').textContent = d.total_skills;
+}).catch(()=>{});
 
-function toast(msg, ok=true) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.style.background = ok ? '#1e1b4b' : '#dc2626';
-  el.style.color = '#fff';
-  el.style.transform = 'translateY(0)';
-  el.style.opacity = '1';
-  clearTimeout(el._t);
-  el._t = setTimeout(() => { el.style.transform='translateY(10px)'; el.style.opacity='0'; }, 3500);
-}
+function onDrag(e, over) { e.preventDefault(); document.getElementById('drop-zone').classList.toggle('dragover', over); }
+function onDrop(e) { e.preventDefault(); document.getElementById('drop-zone').classList.remove('dragover'); const f=e.dataTransfer.files[0]; if(f) handleFile(f); }
 
-function selectFile(e) { setFile(e.target.files[0]); }
-function handleDrop(e) {
-  e.preventDefault();
-  document.getElementById('drop-zone').classList.remove('over');
-  setFile(e.dataTransfer.files[0]);
-}
-function setFile(f) {
-  if (!f) return;
-  selFile = f;
-  const chip = document.getElementById('file-chip');
-  chip.textContent = '  ' + f.name;
-  chip.style.display = 'inline-flex';
-  document.getElementById('find-btn').disabled = false;
-}
-
-async function findJobs() {
-  if (!selFile) return;
-  const btn = document.getElementById('find-btn');
-  const msg = document.getElementById('find-msg');
-  btn.disabled = true;
-  msg.innerHTML = '';
-  document.getElementById('results-section').style.display = 'none';
-  document.getElementById('profile-card').style.display = 'none';
-  document.getElementById('progress-bar').style.display = '';
-
-  const steps = ['Uploading your CV…','Reading your profile…','Matching against jobs…','Ranking results with AI…'];
-  let si = 0;
-  const stepTimer = setInterval(() => {
-    if (si < steps.length) document.getElementById('progress-text').textContent = steps[si++];
-  }, 1200);
-
-  const fd = new FormData();
-  fd.append('file', selFile);
-
-  try {
-    const res  = await fetch(`${API}/find-jobs`, { method:'POST', body:fd });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Processing failed');
-    clearInterval(stepTimer);
-    document.getElementById('progress-bar').style.display = 'none';
-
-    if (!data.length) {
-      msg.innerHTML = '<span style="color:#d97706">No jobs found in the database yet. Please ask the HR team to add job listings.</span>';
-      return;
-    }
-
-    showProfile(data);
-    showResults(data);
-    toast(`Found ${data.length} matching jobs!`);
-    document.getElementById('results-section').scrollIntoView({behavior:'smooth', block:'start'});
-
-  } catch(e) {
-    clearInterval(stepTimer);
-    document.getElementById('progress-bar').style.display = 'none';
-    msg.innerHTML = `<span style="color:#dc2626">${e.message}</span>`;
-    toast(e.message, false);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Find My Matching Jobs';
+function setStep(n, pct, msg) {
+  for (let i=1;i<=4;i++) {
+    const el=document.getElementById('s'+i);
+    el.className='step'+(i<n?' done':i===n?' active':'');
+    el.querySelector('.step-circle').textContent = i<n ? '✓' : String(i);
   }
+  document.getElementById('pbar').style.width = pct+'%';
+  document.getElementById('pstatus').textContent = msg;
 }
 
-function showProfile(data) {
-  // We don't have candidate info directly — use /candidates to get the last added
-  const allMatched = [...new Set(data.flatMap(r => r.matched_skills))];
-  const bestScore  = data[0]?.score || 0;
-
-  // Try to get candidate info from the first job's context
-  const card = document.getElementById('profile-card');
-  card.style.display = '';
-  card.classList.add('fade-up');
-
-  // Stats summary
-  document.getElementById('profile-summary').innerHTML = `
-    <svg width="14" height="14" style="stroke:#4f46e5;vertical-align:middle;margin-right:6px" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-    <strong>CV analysed successfully.</strong> We matched your profile against ${data.length} job${data.length!==1?'s':''} and found <strong>${data.filter(r=>r.score>=50).length} strong match${data.filter(r=>r.score>=50).length!==1?'es':''}</strong> (50%+) with a top score of <strong style="color:#4f46e5">${bestScore.toFixed(0)}%</strong>.
-  `;
-
-  document.getElementById('profile-avatar').style.background = '#4f46e5';
-  document.getElementById('profile-avatar').textContent = 'CV';
-  document.getElementById('profile-name').textContent = 'Your Profile';
-  document.getElementById('profile-meta').textContent = `${allMatched.length} skills detected · ${data.length} jobs matched`;
-
-  const skillsEl = document.getElementById('profile-skills');
-  skillsEl.innerHTML = '<div style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Your Matched Skills</div>';
-  skillsEl.innerHTML += allMatched.map(s=>`<span class="tag tag-green">${s}</span>`).join('') || '<span style="color:#94a3b8;font-size:12px">No skills matched</span>';
+async function handleFile(file) {
+  if (!file) return;
+  const ext = '.'+file.name.split('.').pop().toLowerCase();
+  if (!['.pdf','.docx','.doc'].includes(ext)) { alert('Please upload a PDF, DOCX, or DOC file.'); return; }
+  document.getElementById('upload-content').style.display = 'none';
+  document.getElementById('prog-wrap').style.display = 'block';
+  document.getElementById('drop-zone').style.cursor = 'default';
+  setStep(1, 15, 'Uploading "'+file.name+'"...');
+  await sleep(400);
+  setStep(2, 40, 'Extracting text and parsing your CV...');
+  const form = new FormData();
+  form.append('file', file);
+  let results;
+  try {
+    setStep(3, 65, 'AI is analyzing your profile...');
+    const resp = await fetch('/find-jobs', {method:'POST', body:form});
+    if (!resp.ok) { const e=await resp.json().catch(()=>({})); throw new Error(e.detail||'Upload failed'); }
+    setStep(4, 85, 'Ranking best matching jobs...');
+    await sleep(500);
+    results = await resp.json();
+    setStep(4, 100, 'Done! Showing your matches.');
+    await sleep(600);
+  } catch(e) {
+    document.getElementById('pstatus').textContent = 'Error: '+e.message;
+    document.getElementById('pstatus').style.color = '#f87171';
+    setTimeout(resetUpload, 3500);
+    return;
+  }
+  showResults(results);
 }
 
-function showResults(data) {
-  const sec = document.getElementById('results-section');
-  const list = document.getElementById('results-list');
-  document.getElementById('results-heading').textContent = `${data.length} Job Match${data.length!==1?'es':''}`;
-  sec.style.display = '';
+function showResults(results) {
+  document.querySelector('.upload-section').style.display = 'none';
+  const el = document.getElementById('results');
+  el.style.display = 'block';
 
-  const medals = ['medal-1','medal-2','medal-3'];
-  list.innerHTML = data.map((r, i) => {
-    const job = r.job;
-    const col = r.score>=75?'#059669':r.score>=50?'#d97706':'#dc2626';
-    const barCol = r.score>=75?'#059669':r.score>=50?'#f59e0b':'#ef4444';
-    const medal = i < 3;
+  // Profile card
+  el.querySelectorAll('.profile-card').forEach(e=>e.remove());
+  if (results.length) {
+    const c = results[0].candidate || {};
+    const init = (c.full_name||'U').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const skills = (c.skills||[]).slice(0,8);
+    el.insertAdjacentHTML('afterbegin', `
+      <div class="profile-card">
+        <div class="profile-avatar">${init}</div>
+        <div class="profile-info">
+          <div class="profile-name">${c.full_name||'Candidate'}</div>
+          <div class="profile-meta">
+            ${c.email?`<span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> ${c.email}</span>`:''}
+            ${c.years_experience?`<span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${c.years_experience} yrs exp</span>`:''}
+            ${c.education_level?`<span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/></svg> ${c.education_level}</span>`:''}
+            ${c.location?`<span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ${c.location}</span>`:''}
+          </div>
+          ${skills.length?`<div class="profile-skills">${skills.map(s=>`<span class="skill-pill">${s.name||s}</span>`).join('')}</div>`:''}
+        </div>
+      </div>`);
+  }
 
-    return `
-    <div class="card fade-up" style="animation-delay:${i*60}ms;border-top:3px solid ${col}">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px">
-        <div style="display:flex;align-items:flex-start;gap:12px;flex:1;min-width:0">
-          ${medal ? `<div class="${medals[i]}" style="width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:16px;flex-shrink:0">${['🥇','🥈','🥉'][i]}</div>` : `<div style="width:36px;height:36px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-weight:700;font-size:13px;flex-shrink:0">#${i+1}</div>`}
-          <div style="min-width:0">
-            <h3 style="font-size:17px;font-weight:800;color:#0f172a;margin-bottom:4px">${job.title}</h3>
-            <p style="font-size:12px;color:#94a3b8">${job.min_experience?job.min_experience+' yrs required':'No experience requirement'} ${job.education_required?'· '+job.education_required:''}</p>
+  document.getElementById('r-title').textContent = results.length ? 'Your Top Job Matches' : 'No Matches Found';
+  document.getElementById('r-sub').textContent = results.length
+    ? `We found ${results.length} matching position${results.length>1?'s':''} for you`
+    : 'Try uploading a more detailed CV with more skills listed';
+  document.getElementById('r-count').textContent = results.length+' matches';
+
+  const container = document.getElementById('jobs-container');
+  container.innerHTML = '';
+  if (!results.length) {
+    container.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text3)"><p style="font-size:16px;">No job openings match your profile yet.</p></div>';
+    return;
+  }
+
+  const C = 2*Math.PI*28;
+  results.forEach((r,i) => {
+    const score = r.score||0;
+    const col = score>=70?'#10b981':score>=40?'#f59e0b':'#ef4444';
+    const rk = i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n';
+    const rl = i===0?'#1':i===1?'#2':i===2?'#3':'#'+(i+1);
+    const job = r.job||{};
+    const matched = (r.matched_skills||[]).slice(0,6);
+    const missing = (r.missing_skills||[]).slice(0,4);
+    const did = 'desc'+i;
+    const card = document.createElement('div');
+    card.className = 'job-card';
+    card.style.setProperty('--accent-color', col);
+    card.style.animationDelay = (i*80)+'ms';
+    card.innerHTML = `
+      <div class="job-card-top">
+        <div class="job-rank ${rk}">${rl}</div>
+        <div class="job-main">
+          <div class="job-title">${job.title||'Position'}</div>
+          <div class="job-meta">
+            ${job.min_experience?`<span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${job.min_experience}+ yrs</span>`:''}
+            ${job.education_required?`<span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/></svg> ${job.education_required}</span>`:''}
+            <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> ${(job.required_skills||[]).length} skills required</span>
           </div>
         </div>
-        <div style="text-align:right;flex-shrink:0">
-          <div style="font-size:36px;font-weight:900;color:${col};line-height:1">${r.score.toFixed(0)}<span style="font-size:18px">%</span></div>
-          <div style="font-size:10px;color:#94a3b8;margin-top:2px;letter-spacing:.3px">MATCH SCORE</div>
+        <div class="score-ring-col">
+          <div class="score-ring">
+            <svg width="72" height="72" viewBox="0 0 72 72">
+              <circle class="track" cx="36" cy="36" r="28"/>
+              <circle class="fill" cx="36" cy="36" r="28" stroke="${col}"
+                stroke-dasharray="${C}" stroke-dashoffset="${C}"
+                data-offset="${C-(score/100)*C}" id="ring${i}"/>
+            </svg>
+            <div class="score-center">
+              <div class="score-num" style="color:${col}">${score}%</div>
+              <div class="score-pct">match</div>
+            </div>
+          </div>
         </div>
       </div>
-
-      <div class="score-track" style="margin-bottom:16px">
-        <div class="score-fill" style="background:${barCol}" data-w="${r.score}%"></div>
+      <div class="score-bars">
+        <div><div class="score-bar-label">Skills <span>${r.skill_score||0}%</span></div><div class="bar-track"><div class="bar-fill bar-skill" data-w="${r.skill_score||0}"></div></div></div>
+        <div><div class="score-bar-label">Experience <span>${r.experience_score||0}%</span></div><div class="bar-track"><div class="bar-fill bar-exp" data-w="${r.experience_score||0}"></div></div></div>
+        <div><div class="score-bar-label">Education <span>${r.education_score||0}%</span></div><div class="bar-track"><div class="bar-fill bar-edu" data-w="${r.education_score||0}"></div></div></div>
       </div>
+      ${matched.length||missing.length?`<div class="skills-row">${matched.map(s=>`<span class="s-match">${s}</span>`).join('')}${missing.map(s=>`<span class="s-miss">${s}</span>`).join('')}</div>`:''}
+      ${r.why?`<div class="ai-insight"><div class="ai-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><span>${r.why}</span></div>`:''}
+      ${job.description?`<button class="desc-toggle" onclick="toggleDesc('${did}',this)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" id="arr${i}"><polyline points="6 9 12 15 18 9"/></svg> View description</button><div class="desc-body" id="${did}">${job.description}</div>`:''}
+    `;
+    container.appendChild(card);
+  });
 
-      <!-- AI explanation -->
-      <div style="background:linear-gradient(135deg,#f5f3ff,#eef2ff);border-radius:12px;padding:13px 16px;margin-bottom:14px;border-left:3px solid #4f46e5">
-        <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-          <span style="font-size:11px;font-weight:700;color:#4f46e5;letter-spacing:.4px">AI INSIGHT</span>
-        </div>
-        <p style="font-size:13px;color:#374151;line-height:1.65">${r.why}</p>
-      </div>
-
-      <!-- Mini scores -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
-        ${miniScore('Skills', r.skill_score)}
-        ${miniScore('Experience', r.experience_score)}
-        ${miniScore('Education', r.education_score)}
-      </div>
-
-      <!-- Skills -->
-      <div>
-        ${r.matched_skills.map(s=>`<span class="tag tag-green">${s}</span>`).join('')}
-        ${r.missing_skills.slice(0,5).map(s=>`<span class="tag tag-red">missing: ${s}</span>`).join('')}
-        ${r.missing_skills.length>5?`<span class="tag" style="background:#f1f5f9;color:#64748b">+${r.missing_skills.length-5} more</span>`:''}
-      </div>
-
-      <!-- Job snippet -->
-      <details style="margin-top:12px;cursor:pointer">
-        <summary style="font-size:12px;color:#4f46e5;font-weight:600;list-style:none;user-select:none">Show job description ▾</summary>
-        <p style="font-size:12.5px;color:#64748b;line-height:1.7;margin-top:10px;padding:12px;background:#f8fafc;border-radius:10px">${job.description.substring(0,500)}…</p>
-      </details>
-    </div>`;
-  }).join('');
-
-  requestAnimationFrame(() => setTimeout(() => {
-    document.querySelectorAll('.score-fill[data-w]').forEach(b => { b.style.width = b.dataset.w; });
-  }, 80));
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.bar-fill[data-w]').forEach(el => setTimeout(()=>{ el.style.width=el.dataset.w+'%'; }, 200));
+    document.querySelectorAll('[id^="ring"]').forEach(el => setTimeout(()=>{ el.style.strokeDashoffset=el.dataset.offset; }, 200));
+  });
 }
 
-function miniScore(label, val) {
-  const col = val>=75?'#059669':val>=50?'#f59e0b':'#ef4444';
-  return `<div style="background:#f8fafc;border-radius:10px;padding:10px">
-    <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px">
-      <span style="color:#64748b">${label}</span>
-      <span style="font-weight:700;color:#0f172a">${val.toFixed(0)}%</span>
-    </div>
-    <div class="score-track"><div style="height:100%;border-radius:99px;background:${col};width:${val}%"></div></div>
-  </div>`;
+function toggleDesc(id, btn) {
+  const el=document.getElementById(id), open=el.style.display==='block';
+  el.style.display=open?'none':'block';
+  btn.querySelector('svg').style.transform=open?'':'rotate(180deg)';
+  btn.lastChild.textContent=open?' View description':' Hide description';
 }
+
+function resetUpload() {
+  document.querySelector('.upload-section').style.display='block';
+  const r=document.getElementById('results');
+  r.style.display='none';
+  r.querySelectorAll('.profile-card').forEach(e=>e.remove());
+  document.getElementById('upload-content').style.display='block';
+  document.getElementById('prog-wrap').style.display='none';
+  document.getElementById('drop-zone').style.cursor='pointer';
+  document.getElementById('pstatus').style.color='';
+  document.getElementById('file-input').value='';
+  document.getElementById('jobs-container').innerHTML='';
+}
+
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 </script>
 </body>
 </html>
