@@ -213,9 +213,16 @@ async def upload_cv(file: UploadFile = File(...), db: Session = Depends(get_db))
     db.add(candidate)
     db.flush()
 
+    seen_skills: set = set()
     for skill_name in parsed.get("skills", []):
         if skill_name:
-            candidate.skills.append(_get_or_create_skill(db, skill_name))
+            key = skill_name.lower().strip()
+            if key in seen_skills:
+                continue
+            seen_skills.add(key)
+            skill = _get_or_create_skill(db, key)
+            if skill not in candidate.skills:
+                candidate.skills.append(skill)
 
     db.commit()
     db.refresh(candidate)
@@ -428,14 +435,20 @@ async def find_jobs_for_cv(file: UploadFile = File(...), db: Session = Depends(g
         )
         db.add(cand)
         db.flush()
+        seen_skills: set = set()
         for skill_name in parsed.get("skills", []):
             if skill_name:
-                skill = db.query(Skill).filter(Skill.name == skill_name.lower().strip()).first()
+                key = skill_name.lower().strip()
+                if key in seen_skills:
+                    continue
+                seen_skills.add(key)
+                skill = db.query(Skill).filter(Skill.name == key).first()
                 if not skill:
-                    skill = Skill(name=skill_name.lower().strip())
+                    skill = Skill(name=key)
                     db.add(skill)
                     db.flush()
-                cand.skills.append(skill)
+                if skill not in cand.skills:
+                    cand.skills.append(skill)
         db.commit()
         db.refresh(cand)
 
