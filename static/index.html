@@ -6,6 +6,7 @@
 <title>CV Matcher — Find Your Perfect Job</title>
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="shortcut icon" href="/static/favicon.svg">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root {
   --bg: #060818; --surface: #0d1117; --card: #111827;
@@ -46,6 +47,29 @@ nav {
   transition: all 0.2s; font-weight: 500;
 }
 .nav-link:hover { border-color: var(--primary); color: var(--text); }
+.nav-link-btn {
+  font-size: 13px; color: var(--text2); background: none;
+  padding: 7px 16px; border-radius: 8px; border: 1px solid var(--border2);
+  transition: all 0.2s; font-weight: 500; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.nav-link-btn:hover { border-color: var(--primary); color: var(--text); }
+.nav-right { display: flex; align-items: center; gap: 10px; }
+.user-badge { display: none; align-items: center; gap: 8px; }
+.user-avatar {
+  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--primary), var(--primary2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: white; overflow: hidden;
+}
+.user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.user-name { font-size: 13px; color: var(--text2); font-weight: 500; max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.btn-signout {
+  font-size: 11px; color: var(--text3); background: none;
+  padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border);
+  cursor: pointer; transition: all 0.2s; font-weight: 500;
+}
+.btn-signout:hover { border-color: var(--red); color: #f87171; }
 
 .hero {
   position: relative; z-index: 1;
@@ -419,6 +443,9 @@ footer a:hover { color: var(--primary); }
 @media (max-width: 768px) {
   nav { padding: 12px 16px; }
   .nav-brand h1 { font-size: 16px; }
+  .user-name { display: none; }
+  .nav-link-btn { padding: 7px 10px; font-size: 12px; }
+  .nav-link-btn span { display: none; }
 
   .hero { padding: 100px 16px 40px; }
   .hero h1 { font-size: 30px; letter-spacing: -0.5px; }
@@ -475,8 +502,34 @@ footer a:hover { color: var(--primary); }
     </div>
     <h1>CV<span>Matcher</span></h1>
   </div>
-  <a href="/admin" class="nav-link">HR Admin</a>
+  <div class="nav-right">
+    <!-- Google sign-in button (shown when logged out) -->
+    <button id="btn-signin" class="nav-link-btn" onclick="triggerGoogleSignIn()">
+      <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      Sign in
+    </button>
+    <!-- User badge (shown when logged in) -->
+    <div class="user-badge" id="user-badge">
+      <div class="user-avatar" id="user-avatar"></div>
+      <span class="user-name" id="user-name"></span>
+      <button class="btn-signout" onclick="signOut()">Sign out</button>
+    </div>
+    <a href="/admin" class="nav-link">HR Admin</a>
+  </div>
 </nav>
+<!-- Hidden Google One-Tap anchor -->
+<div id="g_id_onload"
+  data-client_id=""
+  data-callback="onGoogleCredential"
+  data-auto_select="false"
+  data-cancel_on_tap_outside="true"
+  style="display:none;">
+</div>
 
 <div class="hero">
   <div class="hero-badge"><div class="dot"></div>AI-Powered Job Matching</div>
@@ -547,16 +600,24 @@ footer a:hover { color: var(--primary); }
   <div class="premium-cta-wrap" id="premium-cta" style="display:none;">
     <div class="premium-label">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="#fbbf24" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-      Premium Feature — Free Today
+      Premium Feature
     </div>
     <br>
-    <button class="btn-premium" id="btn-coach" onclick="openCareerCoach()">
+    <!-- Shown when signed in -->
+    <button class="btn-premium" id="btn-coach" onclick="openCareerCoach()" style="display:none;">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
       </svg>
       Get My Full Career Coaching Report
     </button>
-    <p class="premium-hint">AI identifies your skill gaps and recommends real courses to advance your career</p>
+    <!-- Shown when signed out -->
+    <button class="btn-premium" id="btn-coach-lock" onclick="triggerGoogleSignIn()" style="background:linear-gradient(135deg,#374151,#1f2937);box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+      Sign in with Google to Unlock
+    </button>
+    <p class="premium-hint" id="coach-hint">Sign in to get your AI-powered career gap analysis and course recommendations</p>
   </div>
 
   <!-- Career Coach Results Panel -->
@@ -611,6 +672,135 @@ footer a:hover { color: var(--primary); }
 
 <script>
 let lastUploadedFile = null;
+let currentUser = null;
+let googleClientId = '';
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+async function initAuth() {
+  try {
+    const cfg = await fetch('/config').then(r => r.json());
+    googleClientId = cfg.google_client_id || '';
+  } catch(e) { googleClientId = ''; }
+
+  // Restore session from localStorage
+  const saved = localStorage.getItem('cv_matcher_user');
+  if (saved) {
+    try { setUser(JSON.parse(saved)); } catch(e) { localStorage.removeItem('cv_matcher_user'); }
+  }
+
+  // Init Google One-Tap if client ID available
+  if (googleClientId && window.google) {
+    document.getElementById('g_id_onload').setAttribute('data-client_id', googleClientId);
+    google.accounts.id.initialize({
+      client_id: googleClientId,
+      callback: onGoogleCredential,
+      auto_select: false,
+    });
+  }
+}
+
+function decodeJWT(token) {
+  try {
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(base64));
+  } catch(e) { return null; }
+}
+
+function onGoogleCredential(response) {
+  const payload = decodeJWT(response.credential);
+  if (!payload) return;
+  const user = {
+    name: payload.name || payload.email,
+    email: payload.email,
+    picture: payload.picture || '',
+    initials: (payload.name || payload.email).split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(),
+  };
+  localStorage.setItem('cv_matcher_user', JSON.stringify(user));
+  setUser(user);
+}
+
+function setUser(user) {
+  currentUser = user;
+
+  // Update nav
+  document.getElementById('btn-signin').style.display = 'none';
+  const badge = document.getElementById('user-badge');
+  badge.style.display = 'flex';
+
+  const avatar = document.getElementById('user-avatar');
+  if (user.picture) {
+    avatar.innerHTML = `<img src="${user.picture}" alt="${user.initials}">`;
+  } else {
+    avatar.textContent = user.initials;
+  }
+  document.getElementById('user-name').textContent = user.name;
+
+  // Update Career Coach CTA
+  updateCoachCTA();
+}
+
+function signOut() {
+  currentUser = null;
+  localStorage.removeItem('cv_matcher_user');
+  document.getElementById('btn-signin').style.display = '';
+  document.getElementById('user-badge').style.display = 'none';
+  document.getElementById('user-avatar').innerHTML = '';
+  document.getElementById('user-name').textContent = '';
+  if (googleClientId && window.google) {
+    google.accounts.id.disableAutoSelect();
+  }
+  // Reset coach panel
+  const cp = document.getElementById('coach-panel');
+  if (cp) { cp.style.display = 'none'; cp.innerHTML = ''; }
+  updateCoachCTA();
+}
+
+function triggerGoogleSignIn() {
+  if (!googleClientId || !window.google) {
+    // Fallback: no client ID configured
+    alert('Google Sign-In is not configured yet.\nPlease add GOOGLE_CLIENT_ID to the environment variables.');
+    return;
+  }
+  google.accounts.id.prompt(notification => {
+    if (notification.isSkippedMoment() || notification.isDismissedMoment()) {
+      // Render button as fallback
+      const el = document.createElement('div');
+      el.id = 'g_signin_popup';
+      el.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:9999;';
+      el.innerHTML = `<div style="background:#111827;border:1px solid #374151;border-radius:16px;padding:32px 28px;text-align:center;max-width:360px;width:90%">
+        <div style="font-size:17px;font-weight:700;margin-bottom:8px;">Sign in to CV Matcher</div>
+        <div style="font-size:13px;color:#9ca3af;margin-bottom:24px;">Unlock AI Career Coaching and premium features</div>
+        <div id="g_btn_target"></div>
+        <button onclick="document.getElementById('g_signin_popup').remove()" style="margin-top:16px;background:none;border:none;color:#6b7280;font-size:12px;cursor:pointer;">Cancel</button>
+      </div>`;
+      document.body.appendChild(el);
+      google.accounts.id.renderButton(document.getElementById('g_btn_target'), {
+        theme: 'filled_black', size: 'large', width: 300, text: 'signin_with',
+      });
+    }
+  });
+}
+
+function updateCoachCTA() {
+  const btnCoach = document.getElementById('btn-coach');
+  const btnLock = document.getElementById('btn-coach-lock');
+  const hint = document.getElementById('coach-hint');
+  if (!btnCoach || !btnLock) return;
+  if (currentUser) {
+    btnCoach.style.display = '';
+    btnLock.style.display = 'none';
+    if (hint) hint.textContent = 'AI identifies your skill gaps and recommends real courses to advance your career';
+  } else {
+    btnCoach.style.display = 'none';
+    btnLock.style.display = '';
+    if (hint) hint.textContent = 'Sign in to get your AI-powered career gap analysis and course recommendations';
+  }
+}
+
+// Init on load
+initAuth();
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 fetch('/stats').then(r=>r.json()).then(d=>{
   document.getElementById('hs-c').textContent = d.total_candidates;
@@ -703,6 +893,7 @@ function showResults(results) {
   coachPanel.innerHTML = '';
   const btnCoach = document.getElementById('btn-coach');
   if (btnCoach) { btnCoach.disabled = false; btnCoach.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Get My Full Career Coaching Report'; }
+  updateCoachCTA();
 
   document.getElementById('r-title').textContent = results.length ? 'Your Top Job Matches' : 'No Matches Found';
   document.getElementById('r-sub').textContent = results.length
@@ -965,8 +1156,10 @@ function renderCoachReport(d) {
 
   // Swap button to "Regenerate"
   const btn = document.getElementById('btn-coach');
-  btn.disabled = false;
-  btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Regenerate Report';
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Regenerate Report';
+  }
 }
 
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}

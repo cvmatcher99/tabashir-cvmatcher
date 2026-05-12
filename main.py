@@ -42,6 +42,7 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 ALLOWED_EXTENSIONS = {".pdf", ".docx", ".doc"}
 MAX_FILE_SIZE_MB = 10
 STATIC_DIR = Path(__file__).parent / "static"
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
 
 
 # ── Lifespan ──────────────────────────────────────────────────────────────────
@@ -81,6 +82,13 @@ def admin_panel():
     if html_path.exists():
         return HTMLResponse(content=html_path.read_text(encoding="utf-8"))
     return HTMLResponse("<h1>Admin panel not found.</h1>", status_code=404)
+
+
+# ── Public Config ─────────────────────────────────────────────────────────────
+@app.get("/config", tags=["Config"])
+def get_config():
+    """Return public client-side configuration (non-sensitive)."""
+    return {"google_client_id": GOOGLE_CLIENT_ID}
 
 
 # ── Admin Auth & Seed ─────────────────────────────────────────────────────────
