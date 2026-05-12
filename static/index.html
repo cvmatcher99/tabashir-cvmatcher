@@ -781,16 +781,55 @@ function triggerGoogleSignIn() {
   // Build modal
   const modal = document.createElement('div');
   modal.id = 'g_signin_popup';
-  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(4px);';
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(6px);animation:fadeIn .2s ease;';
   modal.innerHTML = `
-    <div style="background:#111827;border:1px solid #374151;border-radius:20px;padding:36px 32px;text-align:center;max-width:380px;width:92%;box-shadow:0 24px 64px rgba(0,0,0,.6);">
-      <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <div style="
+      background:linear-gradient(160deg,#13172b 0%,#0d1117 100%);
+      border:1px solid rgba(99,102,241,0.25);
+      border-radius:24px;padding:0;text-align:center;
+      max-width:400px;width:92%;
+      box-shadow:0 32px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.04);
+      overflow:hidden;
+    ">
+      <!-- top gradient bar -->
+      <div style="height:4px;background:linear-gradient(90deg,#6366f1,#8b5cf6,#06b6d4);"></div>
+
+      <div style="padding:36px 32px 32px;">
+        <!-- logo -->
+        <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 8px 24px rgba(99,102,241,.4);">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+
+        <div style="font-size:20px;font-weight:800;margin-bottom:8px;color:#f9fafb;letter-spacing:-.3px;">Welcome to CV Matcher</div>
+        <div style="font-size:13px;color:#6b7280;margin-bottom:8px;line-height:1.6;">Sign in to unlock your personalized</div>
+
+        <!-- features row -->
+        <div style="display:flex;justify-content:center;gap:20px;margin-bottom:28px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#a5b4fc;font-weight:600;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>AI Career Coaching
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#a5b4fc;font-weight:600;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Course Recommendations
+          </div>
+        </div>
+
+        <!-- divider -->
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+          <div style="flex:1;height:1px;background:#1f2937;"></div>
+          <div style="font-size:11px;color:#4b5563;font-weight:500;">Continue with</div>
+          <div style="flex:1;height:1px;background:#1f2937;"></div>
+        </div>
+
+        <!-- Google button wrapper -->
+        <div id="g_btn_target" style="display:flex;justify-content:center;margin-bottom:18px;"></div>
+
+        <button onclick="document.getElementById('g_signin_popup').remove()"
+          style="background:none;border:none;color:#4b5563;font-size:12px;cursor:pointer;padding:6px 16px;border-radius:8px;transition:all .2s;"
+          onmouseover="this.style.color='#9ca3af';this.style.background='rgba(255,255,255,.04)'"
+          onmouseout="this.style.color='#4b5563';this.style.background='none'">
+          Cancel
+        </button>
       </div>
-      <div style="font-size:18px;font-weight:800;margin-bottom:6px;">Sign in to CV Matcher</div>
-      <div style="font-size:13px;color:#9ca3af;margin-bottom:28px;line-height:1.5;">Unlock AI Career Coaching and<br>personalized course recommendations</div>
-      <div id="g_btn_target" style="display:flex;justify-content:center;"></div>
-      <button onclick="document.getElementById('g_signin_popup').remove()" style="margin-top:18px;background:none;border:none;color:#6b7280;font-size:12px;cursor:pointer;transition:color .2s;" onmouseover="this.style.color='#9ca3af'" onmouseout="this.style.color='#6b7280'">Cancel</button>
     </div>`;
   document.body.appendChild(modal);
 
