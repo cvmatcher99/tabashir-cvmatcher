@@ -69,6 +69,8 @@ class JobDescription(Base):
     description        = Column(Text, nullable=False)
     min_experience     = Column(Float, default=0.0)
     education_required = Column(String(100))
+    contact_whatsapp   = Column(String(50))
+    contact_email      = Column(String(255))
     created_at         = Column(DateTime, default=datetime.utcnow)
 
     required_skills = relationship("Skill", secondary=job_skills, back_populates="job_descriptions")
@@ -107,11 +109,24 @@ def init_db():
         ("linkedin", "VARCHAR(255)"),
         ("github",   "VARCHAR(255)"),
     ]
+    job_cols = [
+        ("contact_whatsapp", "VARCHAR(50)"),
+        ("contact_email",    "VARCHAR(255)"),
+    ]
     with engine.connect() as conn:
         for col, col_type in new_cols:
             try:
                 conn.execute(text(
                     f"ALTER TABLE candidates ADD COLUMN IF NOT EXISTS {col} {col_type}"
+                ))
+                conn.commit()
+            except Exception:
+                pass
+    with engine.connect() as conn:
+        for col, col_type in job_cols:
+            try:
+                conn.execute(text(
+                    f"ALTER TABLE job_descriptions ADD COLUMN IF NOT EXISTS {col} {col_type}"
                 ))
                 conn.commit()
             except Exception:

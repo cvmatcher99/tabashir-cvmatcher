@@ -38,6 +38,8 @@ class JobCreate(BaseModel):
     description: str
     min_experience: float = 0.0
     education_required: Optional[str] = None
+    contact_whatsapp: Optional[str] = None
+    contact_email: Optional[str] = None
 
 class JobOut(JobCreate):
     id: int

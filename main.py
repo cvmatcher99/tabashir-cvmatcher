@@ -292,6 +292,8 @@ def create_job(payload: JobCreate, db: Session = Depends(get_db)):
         description=payload.description,
         min_experience=payload.min_experience,
         education_required=payload.education_required,
+        contact_whatsapp=payload.contact_whatsapp,
+        contact_email=payload.contact_email,
     )
     db.add(job)
     db.flush()
@@ -559,6 +561,8 @@ async def apply_for_job(
         "application_id": app_record.id,
         "job_title": job.title,
         "candidate_name": app_record.full_name,
+        "contact_whatsapp": job.contact_whatsapp or "",
+        "contact_email": job.contact_email or "",
         "message": f"Application submitted successfully for {job.title}",
     }
 
