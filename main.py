@@ -284,6 +284,14 @@ def delete_candidate(candidate_id: int, db: Session = Depends(get_db)):
     db.commit()
 
 
+# ── Extract Skills ────────────────────────────────────────────────────────────
+@app.post("/extract-skills", tags=["Jobs"], summary="Extract skills from job description text")
+def extract_skills_endpoint(payload: dict, db: Session = Depends(get_db)):
+    description = payload.get("description", "")
+    skills = extract_skills_from_text(description)
+    return {"skills": skills}
+
+
 # ── Jobs ──────────────────────────────────────────────────────────────────────
 @app.post("/jobs", response_model=JobOut, status_code=201, tags=["Jobs"], summary="Submit a job description")
 def create_job(payload: JobCreate, db: Session = Depends(get_db)):
@@ -298,12 +306,13 @@ def create_job(payload: JobCreate, db: Session = Depends(get_db)):
     db.add(job)
     db.flush()
 
-    auto_skills = extract_skills_from_text(payload.description)
     if payload.min_experience == 0:
         job.min_experience = extract_experience_from_text(payload.description)
 
-    for skill_name in auto_skills:
-        job.required_skills.append(_get_or_create_skill(db, skill_name))
+    skill_names = payload.skills if payload.skills else extract_skills_from_text(payload.description)
+    for skill_name in skill_names:
+        if skill_name:
+            job.required_skills.append(_get_or_create_skill(db, skill_name.lower().strip()))
 
     db.commit()
     db.refresh(job)

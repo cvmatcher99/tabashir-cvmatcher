@@ -762,6 +762,28 @@
         </select>
       </div>
     </div>
+    <!-- Skills Section -->
+    <div class="form-row" style="margin-top:16px;margin-bottom:0">
+      <label style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Required Skills</span>
+        <button type="button" onclick="extractSkillsAI()" id="btn-extract-skills"
+          style="font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid rgba(139,92,246,.4);background:rgba(139,92,246,.1);color:#a78bfa;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .2s;">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Extract with AI
+        </button>
+      </label>
+      <!-- Tags display -->
+      <div id="skills-tags" style="display:flex;flex-wrap:wrap;gap:6px;min-height:36px;padding:8px;background:#0f172a;border:1px solid #334155;border-radius:8px;margin-bottom:8px;"></div>
+      <!-- Manual input -->
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="skill-manual-input" placeholder="Type a skill and press Enter or click Add"
+          style="flex:1;" onkeydown="if(event.key==='Enter'){event.preventDefault();addSkillManual();}">
+        <button type="button" onclick="addSkillManual()"
+          style="padding:10px 14px;border-radius:8px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);color:#818cf8;cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap;">
+          + Add
+        </button>
+      </div>
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
       <div class="form-row" style="margin-bottom:0">
         <label>
@@ -1085,7 +1107,65 @@ async function deleteJob(id, title) {
   }
 }
 
+// ── Skills tags management ───────────────────────────────────────────────
+let jobSkills = [];
+
+function renderSkillTags() {
+  const container = document.getElementById('skills-tags');
+  container.innerHTML = jobSkills.length === 0
+    ? '<span style="font-size:12px;color:#475569;padding:4px;">No skills added yet</span>'
+    : jobSkills.map((s, i) => `
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;
+          background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);color:#a5b4fc;font-size:12px;font-weight:500;">
+          ${s}
+          <button onclick="removeSkill(${i})" style="background:none;border:none;color:#6366f1;cursor:pointer;font-size:14px;line-height:1;padding:0;">&times;</button>
+        </span>`).join('');
+}
+
+function removeSkill(i) {
+  jobSkills.splice(i, 1);
+  renderSkillTags();
+}
+
+function addSkillManual() {
+  const input = document.getElementById('skill-manual-input');
+  const val = input.value.trim().toLowerCase();
+  if (!val) return;
+  if (!jobSkills.includes(val)) {
+    jobSkills.push(val);
+    renderSkillTags();
+  }
+  input.value = '';
+}
+
+async function extractSkillsAI() {
+  const desc = document.getElementById('job-desc-input').value.trim();
+  if (!desc) { toast('Add a job description first', 'error'); return; }
+  const btn = document.getElementById('btn-extract-skills');
+  btn.disabled = true;
+  btn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 1s linear infinite"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-5.49"/></svg> Extracting...';
+  try {
+    const r = await fetch('/extract-skills', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({description: desc}),
+    });
+    const data = await r.json();
+    const newSkills = (data.skills || []).filter(s => !jobSkills.includes(s));
+    jobSkills = [...jobSkills, ...newSkills];
+    renderSkillTags();
+    toast(`${newSkills.length} skills extracted!`);
+  } catch {
+    toast('Extraction failed', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Extract with AI';
+  }
+}
+
 function openAddJobModal() {
+  jobSkills = [];
+  renderSkillTags();
   document.getElementById('add-job-modal').classList.add('open');
 }
 function closeAddJobModal() {
@@ -1109,11 +1189,13 @@ async function submitJob() {
         education_required: edu || null,
         contact_whatsapp: whatsapp || null,
         contact_email: email || null,
+        skills: jobSkills.length > 0 ? jobSkills : null,
       }),
     });
     if (!r.ok) throw new Error();
     toast('Job created successfully!');
     closeAddJobModal();
+    jobSkills = [];
     document.getElementById('job-title-input').value = '';
     document.getElementById('job-desc-input').value = '';
     document.getElementById('job-exp-input').value = '';

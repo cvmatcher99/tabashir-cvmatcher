@@ -40,6 +40,7 @@ class JobCreate(BaseModel):
     education_required: Optional[str] = None
     contact_whatsapp: Optional[str] = None
     contact_email: Optional[str] = None
+    skills: Optional[List[str]] = None
 
 class JobOut(JobCreate):
     id: int
