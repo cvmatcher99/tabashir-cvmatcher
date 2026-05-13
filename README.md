@@ -14,11 +14,16 @@ Built with **FastAPI · SQLAlchemy · Groq AI (LLaMA) · pdfplumber · python-do
 | AI Extraction | Groq (free LLaMA model) — accurate parsing for tech and non-tech CVs |
 | Job Matching | Weighted score: Skills 55% · Experience 30% · Education 15% |
 | REST API | FastAPI with auto-generated `/docs` (Swagger UI) |
-| Admin Panel | Password-protected HR dashboard — manage candidates, jobs, matches |
+| Admin Panel | Password-protected HR dashboard — manage candidates, jobs, matches, applications |
 | Customer UI | Candidates upload CV and instantly see matching jobs |
+| Google Sign-In | OAuth 2.0 — premium features require authentication |
+| Apply for Job | Candidates apply directly; opens WhatsApp/email with pre-filled message |
+| Career Coach | AI-generated career development report with skill gaps and action plan |
+| CV Score | Rates a CV out of 100 with section-by-section breakdown and improvement tips |
+| Interview Prep | Generates tailored interview questions matched to a specific job |
+| Salary Estimator | Estimates monthly salary range in AED based on UAE 2025–2026 market benchmarks |
 | Export | Download matched candidates as CSV |
 | Logging | Rotating log files in `logs/cv_matcher.log` |
-| Executable | Standalone `.exe` — runs on Windows without Python |
 
 ---
 
@@ -130,7 +135,15 @@ pyinstaller cv_matcher.spec --clean --noconfirm
 | `GET`  | `/jobs/{id}/matches` | Get matched candidates sorted by score |
 | `GET`  | `/jobs/{id}/matches/export` | Export matches as CSV |
 | `POST` | `/find-jobs` | Upload CV → instantly get matching jobs |
-| `POST` | `/admin/seed-jobs` | Load 26 sample job descriptions |
+| `POST` | `/apply` | Submit a job application |
+| `GET`  | `/applications` | List all applications (admin) |
+| `PATCH`| `/applications/{id}/status` | Update application status |
+| `POST` | `/career-coach` | Generate AI career coaching report |
+| `POST` | `/cv-score` | Score a CV out of 100 |
+| `POST` | `/interview-prep` | Generate tailored interview questions |
+| `POST` | `/salary-estimate` | Estimate salary range in AED |
+| `GET`  | `/config` | Get public client-side config |
+| `POST` | `/admin/seed-jobs` | Load sample job descriptions |
 | `POST` | `/admin/verify` | Verify admin password |
 | `GET`  | `/stats` | Dashboard statistics |
 | `GET`  | `/health` | Health check |
