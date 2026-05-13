@@ -463,6 +463,14 @@
           </span>
           Matching
         </button>
+        <button class="nav-item" onclick="showPage('applications')">
+          <span class="icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/>
+            </svg>
+          </span>
+          Applications
+        </button>
       </div>
     </div>
     <div class="sidebar-footer">
@@ -660,6 +668,28 @@
         </div>
       </div>
 
+      <!-- ===== APPLICATIONS PAGE ===== -->
+      <div class="page" id="page-applications">
+        <div class="section-header">
+          <div><h2>Applications</h2><p>Job applications submitted by candidates</p></div>
+          <button class="btn btn-outline" onclick="loadApplications()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Refresh
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>#</th><th>Candidate</th><th>Email</th><th>Job Position</th>
+              <th>Match Score</th><th>Status</th><th>Applied At</th><th>Action</th>
+            </tr></thead>
+            <tbody id="applications-tbody">
+              <tr><td colspan="8" style="text-align:center;padding:40px;color:#64748b;">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- ===== MATCHING PAGE ===== -->
       <div class="page" id="page-matching">
         <div class="section-header">
@@ -793,10 +823,11 @@ function closeSidebar() {
 
 // ── Page navigation ───────────────────────────────────────────────────────────
 const pageTitles = {
-  dashboard: ['Dashboard', 'System overview and recent activity'],
-  candidates: ['Candidates', 'All uploaded CVs and candidate profiles'],
-  jobs: ['Job Positions', 'Manage job descriptions and required skills'],
-  matching: ['Candidate Matching', 'Find the best candidates for any job position'],
+  dashboard:    ['Dashboard',           'System overview and recent activity'],
+  candidates:   ['Candidates',          'All uploaded CVs and candidate profiles'],
+  jobs:         ['Job Positions',       'Manage job descriptions and required skills'],
+  matching:     ['Candidate Matching',  'Find the best candidates for any job position'],
+  applications: ['Applications',        'Job applications submitted by candidates'],
 };
 
 function showPage(name) {
@@ -809,9 +840,10 @@ function showPage(name) {
   document.getElementById('page-title').textContent = title;
   document.getElementById('page-sub').textContent = sub;
 
-  if (name === 'candidates') loadCandidates();
-  if (name === 'jobs') loadJobs();
-  if (name === 'matching') loadMatchingSelects();
+  if (name === 'candidates')   loadCandidates();
+  if (name === 'jobs')         loadJobs();
+  if (name === 'matching')     loadMatchingSelects();
+  if (name === 'applications') loadApplications();
 }
 
 // ── Init ─────────────────────────────────────────────────────────────────────
@@ -1156,6 +1188,59 @@ async function runMatching() {
 async function exportMatchCSV() {
   if (!currentMatchJobId) return;
   window.open(`/jobs/${currentMatchJobId}/matches/export`, '_blank');
+}
+
+// ── Applications ─────────────────────────────────────────────────────────────
+const STATUS_COLORS = {
+  'Pending':   'background:#1e3a5f;color:#60a5fa;border:1px solid #2563eb',
+  'Reviewing': 'background:#3b2a00;color:#fbbf24;border:1px solid #d97706',
+  'Accepted':  'background:#052e16;color:#34d399;border:1px solid #059669',
+  'Rejected':  'background:#3b0a0a;color:#f87171;border:1px solid #dc2626',
+};
+
+async function loadApplications() {
+  const tbody = document.getElementById('applications-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#64748b;">Loading...</td></tr>';
+  try {
+    const r = await fetch('/applications');
+    const apps = await r.json();
+    if (!apps.length) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:48px;color:#64748b;">No applications yet</td></tr>';
+      return;
+    }
+    tbody.innerHTML = apps.map(a => {
+      const scoreCol = a.match_score >= 70 ? '#34d399' : a.match_score >= 40 ? '#fbbf24' : '#f87171';
+      const style = STATUS_COLORS[a.status] || STATUS_COLORS['Pending'];
+      const date = a.applied_at ? new Date(a.applied_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
+      return `<tr>
+        <td style="color:#475569;font-size:12px;">#${a.id}</td>
+        <td style="font-weight:600;">${a.full_name}</td>
+        <td style="color:#94a3b8;font-size:13px;">${a.email||'—'}</td>
+        <td style="font-weight:600;color:#a5b4fc;">${a.job_title}</td>
+        <td><span style="font-weight:700;color:${scoreCol};">${a.match_score}%</span></td>
+        <td><span style="padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700;${style}">${a.status}</span></td>
+        <td style="font-size:12px;color:#64748b;">${date}</td>
+        <td>
+          <select onchange="updateAppStatus(${a.id},this.value)" style="background:#1e293b;border:1px solid #334155;color:#e2e8f0;padding:4px 8px;border-radius:6px;font-size:12px;cursor:pointer;">
+            <option value="Pending"   ${a.status==='Pending'  ?'selected':''}>Pending</option>
+            <option value="Reviewing" ${a.status==='Reviewing'?'selected':''}>Reviewing</option>
+            <option value="Accepted"  ${a.status==='Accepted' ?'selected':''}>Accepted</option>
+            <option value="Rejected"  ${a.status==='Rejected' ?'selected':''}>Rejected</option>
+          </select>
+        </td>
+      </tr>`;
+    }).join('');
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:#f87171;">Error: ${e.message}</td></tr>`;
+  }
+}
+
+async function updateAppStatus(appId, status) {
+  const form = new FormData();
+  form.append('status', status);
+  await fetch(`/applications/${appId}/status`, { method: 'PATCH', body: form });
+  loadApplications();
 }
 
 // ── Auth check on load ────────────────────────────────────────────────────────

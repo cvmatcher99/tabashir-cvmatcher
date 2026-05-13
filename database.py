@@ -72,6 +72,23 @@ class JobDescription(Base):
     created_at         = Column(DateTime, default=datetime.utcnow)
 
     required_skills = relationship("Skill", secondary=job_skills, back_populates="job_descriptions")
+    applications    = relationship("Application", back_populates="job", cascade="all, delete-orphan")
+
+
+class Application(Base):
+    __tablename__ = "applications"
+
+    id           = Column(Integer, primary_key=True, index=True)
+    job_id       = Column(Integer, ForeignKey("job_descriptions.id", ondelete="CASCADE"), nullable=False)
+    full_name    = Column(String(255), nullable=False)
+    email        = Column(String(255))
+    phone        = Column(String(50))
+    google_email = Column(String(255))
+    match_score  = Column(Float, default=0.0)
+    status       = Column(String(50), default="Pending")
+    applied_at   = Column(DateTime, default=datetime.utcnow)
+
+    job = relationship("JobDescription", back_populates="applications")
 
 
 def get_db():

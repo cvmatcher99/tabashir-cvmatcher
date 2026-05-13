@@ -19,7 +19,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from database import Candidate, JobDescription, Skill, candidate_skills as cs_table, get_db, init_db
+from database import Application, Candidate, JobDescription, Skill, candidate_skills as cs_table, get_db, init_db
 from matcher import extract_experience_from_text, extract_skills_from_text, match_candidates, recommend_jobs
 from schemas import CandidateOut, JobCreate, JobMatchResult, JobOut, MatchResult, StatsOut
 from cv_parser import parse_cv
@@ -505,6 +505,93 @@ async def career_coach(
 
     logger.info("Career coach report generated for '%s'", parsed.get("full_name"))
     return report
+
+
+# ── Apply for Job ─────────────────────────────────────────────────────────────
+@app.post("/apply", tags=["Premium"])
+async def apply_for_job(
+    file: UploadFile = File(...),
+    job_id: int = Form(...),
+    google_email: str = Form(default=""),
+    match_score: float = Form(default=0.0),
+    db: Session = Depends(get_db),
+):
+    """Submit a job application — stores candidate info + job + match score."""
+    ext = Path(file.filename).suffix.lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=422, detail=f"Unsupported file type: {ext}")
+    content = await file.read()
+    if len(content) > MAX_FILE_SIZE_MB * 1024 * 1024:
+        raise HTTPException(status_code=413, detail=f"File exceeds {MAX_FILE_SIZE_MB} MB.")
+
+    job = db.query(JobDescription).filter(JobDescription.id == job_id).first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found.")
+
+    parsed = parse_cv(content, file.filename)
+
+    # Prevent duplicate application (same email + job)
+    email = parsed.get("email") or google_email
+    if email:
+        existing = db.query(Application).filter(
+            Application.job_id == job_id,
+            Application.email == email
+        ).first()
+        if existing:
+            return {"status": "already_applied", "message": "You already applied for this job."}
+
+    app_record = Application(
+        job_id=job_id,
+        full_name=parsed.get("full_name") or "Unknown",
+        email=email,
+        phone=parsed.get("phone"),
+        google_email=google_email,
+        match_score=match_score,
+        status="Pending",
+    )
+    db.add(app_record)
+    db.commit()
+    db.refresh(app_record)
+
+    logger.info("Application submitted: '%s' → '%s'", parsed.get("full_name"), job.title)
+    return {
+        "status": "success",
+        "application_id": app_record.id,
+        "job_title": job.title,
+        "candidate_name": app_record.full_name,
+        "message": f"Application submitted successfully for {job.title}",
+    }
+
+
+@app.get("/applications", tags=["Admin"])
+def list_applications(db: Session = Depends(get_db)):
+    """List all job applications (admin use)."""
+    apps = db.query(Application).order_by(Application.applied_at.desc()).all()
+    return [
+        {
+            "id": a.id,
+            "job_id": a.job_id,
+            "job_title": a.job.title if a.job else "—",
+            "full_name": a.full_name,
+            "email": a.email,
+            "phone": a.phone,
+            "match_score": a.match_score,
+            "status": a.status,
+            "applied_at": a.applied_at.isoformat() if a.applied_at else None,
+        }
+        for a in apps
+    ]
+
+
+@app.patch("/applications/{app_id}/status", tags=["Admin"])
+def update_application_status(app_id: int, status: str = Form(...), db: Session = Depends(get_db)):
+    """Update application status: Pending / Reviewing / Accepted / Rejected."""
+    record = db.query(Application).filter(Application.id == app_id).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="Application not found.")
+    record.status = status
+    db.commit()
+    return {"status": "updated"}
 
 
 # ── CV Score ──────────────────────────────────────────────────────────────────
